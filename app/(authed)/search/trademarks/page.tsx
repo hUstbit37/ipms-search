@@ -40,7 +40,7 @@ interface Trademark {
   certificateNumber2?: string;
   certificateDate2?: string;
   niceGroup: string;
-  trademarkStatus: string;
+  status: string;
 }
 
 const mockData: Trademark[] = [
@@ -67,7 +67,7 @@ const mockData: Trademark[] = [
     tradenmarkName: "HARI HARI",
     tradenmarkLogo: "HH",
     niceGroup: "29, 30, 32",
-    trademarkStatus: "Đang giải quyết",
+    status: "Đang giải quyết",
   },
   {
     id: "2",
@@ -91,7 +91,7 @@ const mockData: Trademark[] = [
     validityPeriod: "",
     tradenmarkName: "HARI HARI",
     niceGroup: "29, 30, 32",
-    trademarkStatus: "Đang giải quyết",
+    status: "Đang giải quyết",
   },
   {
     id: "3",
@@ -115,7 +115,7 @@ const mockData: Trademark[] = [
     validityPeriod: "",
     tradenmarkName: "WinStore",
     niceGroup: "9, 35",
-    trademarkStatus: "Đang giải quyết",
+    status: "Đang giải quyết",
   },
   {
     id: "4",
@@ -139,7 +139,7 @@ const mockData: Trademark[] = [
     validityPeriod: "",
     tradenmarkName: "WinCare",
     niceGroup: "35",
-    trademarkStatus: "Đang giải quyết",
+    status: "Đang giải quyết",
   },
   {
     id: "5",
@@ -163,7 +163,7 @@ const mockData: Trademark[] = [
     validityPeriod: "",
     tradenmarkName: "WiN all",
     niceGroup: "9, 35",
-    trademarkStatus: "Cấp bằng",
+    status: "Cấp bằng",
   },
   {
     id: "6",
@@ -187,7 +187,7 @@ const mockData: Trademark[] = [
     validityPeriod: "",
     tradenmarkName: "WINtel keep you on",
     niceGroup: "9, 35, 36, 38",
-    trademarkStatus: "Đang giải quyết",
+    status: "Đang giải quyết",
   },
 ];
 
@@ -410,15 +410,10 @@ export default function TrademarksSearchPage() {
       {/* Search Section */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-6">
         <div className="container mx-auto">
-          <div className="flex items-center gap-4">
-            {/* Toggle */}
-            <button className="text-white hover:bg-blue-600 dark:hover:bg-blue-700 rounded-full p-2 transition-colors">
-              <div className="w-6 h-6 rounded-full border-2 border-white bg-white/30"></div>
-            </button>
-
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
             {/* Search Input */}
             <div className="flex-1 flex items-center bg-white rounded-full px-4 py-2 gap-2">
-              <Search className="w-5 h-5 text-gray-400" />
+              <Search className="w-5 h-5 text-gray-400 shrink-0" />
               <input
                 type="text"
                 placeholder="Enter Keyword(s)"
@@ -429,7 +424,7 @@ export default function TrademarksSearchPage() {
             </div>
 
             {/* Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -453,15 +448,16 @@ export default function TrademarksSearchPage() {
       {/* Filters and Controls */}
       <div className="bg-gray-50 dark:bg-zinc-900 border-b px-4 py-4">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {/* Filters */}
             <div className="flex items-center gap-2 flex-wrap">
               {Object.entries(activeFilters).map(([key, value]) => (
-                <Badge key={key} variant="secondary" className="rounded-full">
-                  {key}: {value}
+                <Badge key={key} variant="secondary" className="rounded-full text-xs sm:text-sm">
+                  <span className="truncate">{key}:</span>
+                  <span className="ml-1 truncate">{value}</span>
                   <button
                     onClick={() => removeFilter(key)}
-                    className="ml-2 hover:text-red-600"
+                    className="ml-2 hover:text-red-600 flex-shrink-0"
                   >
                     ×
                   </button>
@@ -475,7 +471,7 @@ export default function TrademarksSearchPage() {
                     setActiveFilters({});
                     setFilteredData(mockData);
                   }}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 text-xs sm:text-sm"
                 >
                   Clear
                 </Button>
@@ -483,64 +479,66 @@ export default function TrademarksSearchPage() {
             </div>
 
             {/* Results Count and Controls */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                 Showing 1 to 30 of {filteredData.length}
               </span>
 
               {/* Pagination */}
-              <div className="flex items-center gap-1 text-sm">
-                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+              <div className="flex items-center gap-1 text-xs sm:text-sm overflow-x-auto">
+                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0">
                   ⏮
                 </button>
-                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0">
                   1
                 </button>
-                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0">
                   2
                 </button>
-                <button className="px-2 py-1 border rounded bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
+                <button className="px-2 py-1 border rounded bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex-shrink-0">
                   3
                 </button>
-                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0">
                   4
                 </button>
-                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0">
                   5
                 </button>
-                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+                <button className="px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0">
                   ⏭
                 </button>
               </div>
 
               {/* View Toggle and Sort */}
-              <div className="flex items-center gap-2 border-l pl-4">
-                <select className="text-sm bg-transparent border rounded px-2 py-1">
+              <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
+                <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày nộp đơn</option>
                   <option>Ngày cấp bằng</option>
                   <option>Tên nhãn hiệu</option>
                 </select>
                 <button
                   onClick={() => setViewType("table")}
-                  className={`p-2 rounded ${
+                  className={`p-2 rounded flex-shrink-0 ${
                     viewType === "table"
                       ? "bg-blue-100 dark:bg-blue-900 text-blue-600"
                       : "hover:bg-gray-100 dark:hover:bg-zinc-800"
                   }`}
+                  title="Table view"
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewType("grid")}
-                  className={`p-2 rounded ${
+                  className={`p-2 rounded flex-shrink-0 ${
                     viewType === "grid"
                       ? "bg-blue-100 dark:bg-blue-900 text-blue-600"
                       : "hover:bg-gray-100 dark:hover:bg-zinc-800"
                   }`}
+                  title="Grid view"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
-                <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+                <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0" title="Delete">
                   <Trash2 className="w-4 h-4 text-red-600" />
                 </button>
               </div>
@@ -603,7 +601,7 @@ export default function TrademarksSearchPage() {
                       </TableCell>
                       <TableCell>
                         <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                          {item.trademarkStatus}
+                          {item.status}
                         </span>
                       </TableCell>
                     </TableRow>
@@ -639,7 +637,7 @@ export default function TrademarksSearchPage() {
                     <p>
                       <span className="font-medium">Status:</span>{" "}
                       <Badge variant="default" className="bg-green-600 text-xs">
-                        {item.trademarkStatus}
+                        {item.status}
                       </Badge>
                     </p>
                   </div>

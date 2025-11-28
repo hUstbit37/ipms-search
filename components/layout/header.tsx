@@ -19,7 +19,7 @@ export function Header() {
               I
             </div>
             <span className="font-bold text-xl tracking-tight text-foreground">
-              IMPS Search
+              IPMS Search
             </span>
           </Link>
 
