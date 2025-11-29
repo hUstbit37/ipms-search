@@ -8,10 +8,10 @@ export function Navbar() {
   const pathname = usePathname();
 
   const navItems = [
-    { label: "SÁNG CHẾ", href: "/search/inventions" },
-    { label: "KIỂU DÁNG", href: "/search/designs" },
+    { label: "SÁNG CHẾ", href: "/search/patents" },
+    { label: "KIỂU DÁNG", href: "/search/industrial-designs" },
     { label: "NHÃN HIỆU", href: "/search/trademarks" },
-    { label: "GEOGRAPHICAL INDICATIONS", href: "/search/indications" },
+    // { label: "GEOGRAPHICAL INDICATIONS", href: "/search/indications" },
   ];
 
   return (

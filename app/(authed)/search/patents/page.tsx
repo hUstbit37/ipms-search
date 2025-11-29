@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Settings, Trash2, LayoutGrid, List, X } from "lucide-react";
+import { Search, Trash2, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import AdvancedSearchModal from "@/components/trademarks/search/advanced-search-modal";
+import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 
-interface Trademark {
+interface Patent {
   id: string;
+  name: string;
+  logo?: string;
   applicationNumber: string;
   certificateNumber: string;
   applicationDate: string;
@@ -25,207 +27,134 @@ interface Trademark {
   publicationDate: string;
   applicant: string;
   agency: string;
-  niceClass: string[];
-  niceClassText: string;
-  goodsServices: string;
-  viennaNo: string[];
-  colorClaim: string;
-  internationalRegNo: string;
-  basicApplicationNumber: string;
+  ipcClassification: string;
   originCountryCode: string;
   countryCode: string;
-  validityPeriod: string;
-  tradenmarkName: string;
-  tradenmarkLogo?: string;
-  niceGroup: string;
-  status: string;
+  status: "CẤP BẰNG" | "ĐANG XỬ LÝ" | "BỊ TỪ CHỐI" | "HẾT HẠN";
 }
 
-const mockData: Trademark[] = [
+const mockData: Patent[] = [
   {
     id: "1",
-    applicationNumber: "VN-4-2025-40761",
-    certificateNumber: "",
-    applicationDate: "12.08.2025",
-    certificateDate: null,
-    expiryDate: null,
-    publicationDate: "27.10.2025",
-    applicant: "CÔNG TY CỔ PHẦN MASAN",
-    agency: "",
-    niceClass: ["29", "30", "32"],
-    niceClassText: "29, 30, 32",
-    goodsServices: "Công ty cổ phần hàng tiêu dùng MASAN",
-    viennaNo: [],
-    colorClaim: "",
-    internationalRegNo: "",
-    basicApplicationNumber: "",
+    name: "Hệ thống xử lý dữ liệu thông minh",
+    logo: "HT",
+    applicationNumber: "VN-2024-00001",
+    certificateNumber: "VN108822",
+    applicationDate: "15.01.2024",
+    certificateDate: "20.10.2024",
+    expiryDate: "14.01.2044",
+    publicationDate: "15.04.2024",
+    applicant: "Công ty TNHH Công nghệ ABC",
+    agency: "NOIP",
+    ipcClassification: "G06F",
     originCountryCode: "VN",
     countryCode: "VN",
-    validityPeriod: "",
-    tradenmarkName: "HARI HARI",
-    tradenmarkLogo: "HH",
-    niceGroup: "29, 30, 32",
-    status: "Đang giải quyết",
+    status: "CẤP BẰNG",
   },
   {
     id: "2",
-    applicationNumber: "VN-4-2025-40760",
+    name: "Thiết bị điều khiển từ xa thế hệ mới",
+    logo: "TD",
+    applicationNumber: "VN-2024-00002",
     certificateNumber: "",
-    applicationDate: "12.08.2025",
+    applicationDate: "20.02.2024",
     certificateDate: null,
     expiryDate: null,
-    publicationDate: "27.10.2025",
-    applicant: "CÔNG TY CỔ PHẦN MASAN",
-    agency: "",
-    niceClass: ["29", "30", "32"],
-    niceClassText: "29, 30, 32",
-    goodsServices: "Công ty cổ phần hàng tiêu dùng MASAN",
-    viennaNo: [],
-    colorClaim: "",
-    internationalRegNo: "",
-    basicApplicationNumber: "",
+    publicationDate: "22.05.2024",
+    applicant: "Công ty Cổ phần Công nghệ XYZ",
+    agency: "NOIP",
+    ipcClassification: "H04L",
     originCountryCode: "VN",
     countryCode: "VN",
-    validityPeriod: "",
-    tradenmarkName: "HARI HARI",
-    niceGroup: "29, 30, 32",
-    status: "Đang giải quyết",
+    status: "ĐANG XỬ LÝ",
   },
   {
     id: "3",
-    applicationNumber: "VN-4-2025-28813",
-    certificateNumber: "",
-    applicationDate: "21.06.2022",
-    certificateDate: null,
-    expiryDate: null,
-    publicationDate: "27.10.2025",
-    applicant: "CÔNG TY CỔ PHẦN TẬP ĐOÀN MASAN",
-    agency: "",
-    niceClass: ["9", "35"],
-    niceClassText: "9, 35",
-    goodsServices: "Công ty cổ phần tập đoàn MASAN",
-    viennaNo: [],
-    colorClaim: "",
-    internationalRegNo: "",
-    basicApplicationNumber: "",
+    name: "Pin năng lượng mặt trời cải tiến",
+    logo: "PN",
+    applicationNumber: "VN-2024-00003",
+    certificateNumber: "VN108824",
+    applicationDate: "10.03.2024",
+    certificateDate: "25.09.2024",
+    expiryDate: "09.03.2044",
+    publicationDate: "10.06.2024",
+    applicant: "Công ty Cổ phần Điện tử Việt",
+    agency: "NOIP",
+    ipcClassification: "H01M",
     originCountryCode: "VN",
     countryCode: "VN",
-    validityPeriod: "",
-    tradenmarkName: "WinStore",
-    niceGroup: "9, 35",
-    status: "Đang giải quyết",
+    status: "CẤP BẰNG",
   },
   {
     id: "4",
-    applicationNumber: "VN-4-2025-28811",
+    name: "Vật liệu sinh học tái tạo",
+    logo: "VL",
+    applicationNumber: "VN-2024-00004",
     certificateNumber: "",
-    applicationDate: "22.06.2022",
+    applicationDate: "05.04.2024",
     certificateDate: null,
     expiryDate: null,
-    publicationDate: "27.10.2025",
-    applicant: "CÔNG TY CỔ PHẦN TẬP ĐOÀN MASAN",
-    agency: "",
-    niceClass: ["35"],
-    niceClassText: "35",
-    goodsServices: "Công ty cổ phần tập đoàn MASAN",
-    viennaNo: [],
-    colorClaim: "",
-    internationalRegNo: "",
-    basicApplicationNumber: "",
+    publicationDate: "05.07.2024",
+    applicant: "Đại học Bách khoa Hà Nội",
+    agency: "NOIP",
+    ipcClassification: "C08G",
     originCountryCode: "VN",
     countryCode: "VN",
-    validityPeriod: "",
-    tradenmarkName: "WinCare",
-    niceGroup: "35",
-    status: "Đang giải quyết",
+    status: "ĐANG XỬ LÝ",
   },
   {
     id: "5",
-    applicationNumber: "VN-4-2022-24271",
-    certificateNumber: "4-0567588-000",
-    applicationDate: "22.06.2022",
-    certificateDate: "03.09.2025",
-    expiryDate: null,
-    publicationDate: "27.10.2025",
-    applicant: "CÔNG TY CỔ PHẦN TẬP ĐOÀN MASAN",
-    agency: "",
-    niceClass: ["9", "35"],
-    niceClassText: "9, 35",
-    goodsServices: "Công ty cổ phần tập đoàn MASAN",
-    viennaNo: [],
-    colorClaim: "",
-    internationalRegNo: "",
-    basicApplicationNumber: "",
+    name: "Phương pháp sản xuất vaccine mới",
+    logo: "PH",
+    applicationNumber: "VN-2024-00005",
+    certificateNumber: "VN108825",
+    applicationDate: "12.05.2024",
+    certificateDate: "18.10.2024",
+    expiryDate: "11.05.2044",
+    publicationDate: "14.08.2024",
+    applicant: "Công ty Cổ phần Dược phẩm Thế kỷ",
+    agency: "NOIP",
+    ipcClassification: "A61K",
     originCountryCode: "VN",
     countryCode: "VN",
-    validityPeriod: "",
-    tradenmarkName: "WiN all",
-    niceGroup: "9, 35",
-    status: "Cấp bằng",
+    status: "CẤP BẰNG",
   },
   {
     id: "6",
-    applicationNumber: "VN-4-2025-37722",
+    name: "Hệ thống cấp nước sạch tự động",
+    logo: "HC",
+    applicationNumber: "VN-2024-00006",
     certificateNumber: "",
-    applicationDate: "29.07.2025",
+    applicationDate: "22.06.2024",
     certificateDate: null,
     expiryDate: null,
-    publicationDate: "25.09.2025",
-    applicant: "CÔNG TY CỔ PHẦN TẬP ĐOÀN MASAN",
-    agency: "",
-    niceClass: ["9", "35", "36", "38"],
-    niceClassText: "9, 35, 36, 38",
-    goodsServices: "Công ty cổ phần tập đoàn MASAN",
-    viennaNo: [],
-    colorClaim: "",
-    internationalRegNo: "",
-    basicApplicationNumber: "",
+    publicationDate: "25.09.2024",
+    applicant: "Startup Công nghệ Xanh",
+    agency: "NOIP",
+    ipcClassification: "C02F",
     originCountryCode: "VN",
     countryCode: "VN",
-    validityPeriod: "",
-    tradenmarkName: "WINtel keep you on",
-    niceGroup: "9, 35, 36, 38",
-    status: "Đang giải quyết",
+    status: "ĐANG XỬ LÝ",
   },
 ];
 
-export default function TrademarksSearchPage() {
+export default function PatentsSearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
   const [filteredData, setFilteredData] = useState(mockData);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState({
-    // Các nước
-    ownerCountry: "",
-    applicationCountry: "",
-    publicationCountry: "",
-    priorityCountry: "",
-    // Phân loại
-    niceClass: "",
-    productCategory: "",
-    viennaClass: "",
-    // Ngày (single date only)
+    applicationNumber: "",
+    applicant: "",
+    name: "",
+    ipcClassification: "",
     applicationDate: "",
     publicationDate: "",
     certificateDate: "",
     expiryDate: "",
-    priorityDate: "",
-    // Tên người
-    applicant: "",
-    representative: "",
-    // Số
-    certificateNumber: "",
-    applicationNumber: "",
-    basicApplicationNumber: "",
-    priorityNumber: "",
-    // Mục khác
-    tradeName: "",
-    colorClaim: "",
-    goodsServices: "",
+    countryCode: "",
     status: "",
-    certificateStatus: "",
-    recordType: "",
   });
 
   const handleSearch = (query: string) => {
@@ -235,7 +164,7 @@ export default function TrademarksSearchPage() {
         (item) =>
           item.applicationNumber.toLowerCase().includes(query.toLowerCase()) ||
           item.applicant.toLowerCase().includes(query.toLowerCase()) ||
-          item.goodsServices.toLowerCase().includes(query.toLowerCase())
+          item.name.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredData(filtered);
     } else {
@@ -262,45 +191,34 @@ export default function TrademarksSearchPage() {
           .toLowerCase()
           .includes(advancedFilters.applicant.toLowerCase())
       );
-      newActiveFilters["Chủ đơn"] = advancedFilters.applicant;
+      newActiveFilters["Người đơn"] = advancedFilters.applicant;
     }
 
-    if (advancedFilters.niceClass) {
+    if (advancedFilters.name) {
       filtered = filtered.filter((item) =>
-        item.niceClassText.includes(advancedFilters.niceClass)
+        item.name
+          .toLowerCase()
+          .includes(advancedFilters.name.toLowerCase())
       );
-      newActiveFilters["NICE Class"] = advancedFilters.niceClass;
+      newActiveFilters["Tên sáng chế"] = advancedFilters.name;
     }
 
-    if (advancedFilters.ownerCountry) {
+    if (advancedFilters.ipcClassification) {
+      filtered = filtered.filter((item) =>
+        item.ipcClassification.includes(advancedFilters.ipcClassification)
+      );
+      newActiveFilters["Phân loại IPC"] = advancedFilters.ipcClassification;
+    }
+
+    if (advancedFilters.countryCode) {
       filtered = filtered.filter(
-        (item) => item.countryCode === advancedFilters.ownerCountry
+        (item) => item.countryCode === advancedFilters.countryCode
       );
-      newActiveFilters["Nước"] = advancedFilters.ownerCountry;
-    }
-
-    if (advancedFilters.applicationCountry) {
-      newActiveFilters["Nước nộp đơn"] = advancedFilters.applicationCountry;
-    }
-
-    if (advancedFilters.publicationCountry) {
-      newActiveFilters["Nước công bố"] = advancedFilters.publicationCountry;
-    }
-
-    if (advancedFilters.priorityCountry) {
-      newActiveFilters["Nước ưu tiên"] = advancedFilters.priorityCountry;
-    }
-
-    if (advancedFilters.productCategory) {
-      newActiveFilters["Danh mục"] = advancedFilters.productCategory;
-    }
-
-    if (advancedFilters.viennaClass) {
-      newActiveFilters["Vienna Class"] = advancedFilters.viennaClass;
+      newActiveFilters["Quốc gia"] = advancedFilters.countryCode;
     }
 
     if (advancedFilters.applicationDate) {
-      newActiveFilters["Ngày nộp"] = advancedFilters.applicationDate;
+      newActiveFilters["Ngày đơn"] = advancedFilters.applicationDate;
     }
 
     if (advancedFilters.publicationDate) {
@@ -315,50 +233,8 @@ export default function TrademarksSearchPage() {
       newActiveFilters["Ngày hết hạn"] = advancedFilters.expiryDate;
     }
 
-    if (advancedFilters.priorityDate) {
-      newActiveFilters["Ngày ưu tiên"] = advancedFilters.priorityDate;
-    }
-
-    if (advancedFilters.representative) {
-      newActiveFilters["Đại diện"] = advancedFilters.representative;
-    }
-
-    if (advancedFilters.certificateNumber) {
-      newActiveFilters["Số bằng"] = advancedFilters.certificateNumber;
-    }
-
-    if (advancedFilters.basicApplicationNumber) {
-      newActiveFilters["Số đơn gốc"] = advancedFilters.basicApplicationNumber;
-    }
-
-    if (advancedFilters.priorityNumber) {
-      newActiveFilters["Số ưu tiên"] = advancedFilters.priorityNumber;
-    }
-
-    if (advancedFilters.tradeName) {
-      newActiveFilters["Nhãn hiệu"] = advancedFilters.tradeName;
-    }
-
-    if (advancedFilters.goodsServices) {
-      filtered = filtered.filter((item) =>
-        item.goodsServices
-          .toLowerCase()
-          .includes(advancedFilters.goodsServices.toLowerCase())
-      );
-      newActiveFilters["Hàng hóa/Dịch vụ"] = advancedFilters.goodsServices;
-    }
-
-
-    if (advancedFilters.certificateStatus) {
-      newActiveFilters["Trạng thái chứng chỉ"] = advancedFilters.certificateStatus;
-    }
-
-    if (advancedFilters.recordType) {
-      newActiveFilters["Loại bản ghi"] = advancedFilters.recordType;
-    }
-
-    if (advancedFilters.colorClaim) {
-      newActiveFilters["Màu sắc"] = advancedFilters.colorClaim;
+    if (advancedFilters.status) {
+      newActiveFilters["Trạng thái"] = advancedFilters.status;
     }
 
     setActiveFilters(newActiveFilters);
@@ -368,30 +244,16 @@ export default function TrademarksSearchPage() {
 
   const handleResetFilters = () => {
     setAdvancedFilters({
-      ownerCountry: "",
-      applicationCountry: "",
-      publicationCountry: "",
-      priorityCountry: "",
-      niceClass: "",
-      productCategory: "",
-      viennaClass: "",
+      applicationNumber: "",
+      applicant: "",
+      name: "",
+      ipcClassification: "",
       applicationDate: "",
       publicationDate: "",
       certificateDate: "",
       expiryDate: "",
-      priorityDate: "",
-      applicant: "",
-      representative: "",
-      certificateNumber: "",
-      applicationNumber: "",
-      basicApplicationNumber: "",
-      priorityNumber: "",
-      tradeName: "",
-      colorClaim: "",
-      goodsServices: "",
+      countryCode: "",
       status: "",
-      certificateStatus: "",
-      recordType: "",
     });
     setActiveFilters({});
     setFilteredData(mockData);
@@ -403,18 +265,38 @@ export default function TrademarksSearchPage() {
     setActiveFilters(updatedFilters);
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "CẤP BẰNG":
+        return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
+      case "ĐANG XỬ LÝ":
+        return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
+      case "BỊ TỪ CHỐI":
+        return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200";
+      case "HẾT HẠN":
+        return "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200";
+      default:
+        return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
+    }
+  };
+
   return (
     <div className="flex-1">
       {/* Search Section */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-6">
         <div className="container mx-auto">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
+            {/* Toggle */}
+            <button className="text-white hover:bg-blue-600 dark:hover:bg-blue-700 rounded-full p-2 transition-colors shrink-0">
+              <div className="w-6 h-6 rounded-full border-2 border-white bg-white/30"></div>
+            </button>
+
             {/* Search Input */}
             <div className="flex-1 flex items-center bg-white rounded-full px-4 py-2 gap-2">
               <Search className="w-5 h-5 text-gray-400 shrink-0" />
               <input
                 type="text"
-                placeholder="Enter Keyword(s)"
+                placeholder="Tìm kiếm sáng chế..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -428,7 +310,7 @@ export default function TrademarksSearchPage() {
                 size="sm"
                 className="bg-white text-blue-600 border-white hover:bg-blue-50 text-sm font-medium"
               >
-                Truy vấn
+                Tìm kiếm
               </Button>
               <Button
                 onClick={() => setShowAdvancedFilter(true)}
@@ -436,7 +318,7 @@ export default function TrademarksSearchPage() {
                 size="sm"
                 className="bg-white text-blue-600 border-white hover:bg-blue-50 text-sm font-medium"
               >
-                Truy vấn nâng cao
+                Tìm kiếm nâng cao
               </Button>
             </div>
           </div>
@@ -479,7 +361,7 @@ export default function TrademarksSearchPage() {
             {/* Results Count and Controls */}
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
               <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                Showing 1 to 30 of {filteredData.length}
+                Hiển thị 1 đến 30 của {filteredData.length}
               </span>
 
               {/* Pagination */}
@@ -510,9 +392,9 @@ export default function TrademarksSearchPage() {
               {/* View Toggle and Sort */}
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
-                  <option>Ngày nộp đơn</option>
+                  <option>Ngày đơn đăng ký</option>
                   <option>Ngày cấp bằng</option>
-                  <option>Tên nhãn hiệu</option>
+                  <option>Tiêu đề</option>
                 </select>
                 <button
                   onClick={() => setViewType("table")}
@@ -536,7 +418,7 @@ export default function TrademarksSearchPage() {
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
-                <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0" title="Delete">
+                <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0" title="Xóa">
                   <Trash2 className="w-4 h-4 text-red-600" />
                 </button>
               </div>
@@ -553,15 +435,15 @@ export default function TrademarksSearchPage() {
               <Table>
                 <TableHeader className="bg-blue-700 dark:bg-blue-900">
                   <TableRow>
-                    <TableHead className="text-white">MÃU NHÃN</TableHead>
-                    <TableHead className="text-white">NHÃN HIỆU</TableHead>
+                    <TableHead className="text-white">LOGO</TableHead>
+                    <TableHead className="text-white">TÊN SÁNG CHẾ</TableHead>
                     <TableHead className="text-white">SỐ ĐƠN</TableHead>
                     <TableHead className="text-white">NGÀY NỘP ĐƠN</TableHead>
                     <TableHead className="text-white">NGÀY CÔNG BỐ</TableHead>
                     <TableHead className="text-white">SỐ BẰNG</TableHead>
                     <TableHead className="text-white">NGÀY CẤP</TableHead>
-                    <TableHead className="text-white">CHỦ ĐƠN/CHỦ BẰNG</TableHead>
-                    <TableHead className="text-white">NHÓM SẢN PHẨM/DỊCH VỤ</TableHead>
+                    <TableHead className="text-white">CHỦ ĐƠN</TableHead>
+                    <TableHead className="text-white">PHÂN LOẠI IPC</TableHead>
                     <TableHead className="text-white">TRẠNG THÁI</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -570,11 +452,11 @@ export default function TrademarksSearchPage() {
                     <TableRow key={item.id}>
                       <TableCell>
                         <div className="w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white shadow-sm">
-                          {item.tradenmarkName.charAt(0)}
+                          {item.logo || item.name.charAt(0)}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="font-semibold">{item.tradenmarkName}</div>
+                      <TableCell className="text-sm">
+                        <div className="font-semibold">{item.name}</div>
                       </TableCell>
                       <TableCell className="text-sm">
                         {item.applicationNumber}
@@ -595,10 +477,10 @@ export default function TrademarksSearchPage() {
                         {item.applicant}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {item.niceGroup}
+                        {item.ipcClassification}
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                        <span className={`text-xs px-2 py-1 rounded ${getStatusColor(item.status)}`}>
                           {item.status}
                         </span>
                       </TableCell>
@@ -614,29 +496,33 @@ export default function TrademarksSearchPage() {
                   key={item.id}
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
                 >
-                  <h3 className="font-semibold mb-2">{item.applicationNumber}</h3>
-                  <div className="space-y-1 text-sm text-muted-foreground">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-sm flex-1">{item.name}</h3>
+                    <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ml-2 ${getStatusColor(item.status)}`}>
+                      {item.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">{item.applicationNumber}</p>
+                  <div className="space-y-2 text-xs text-muted-foreground">
                     <p>
-                      <span className="font-medium">Applicant:</span>{" "}
+                      <span className="font-medium">Người đơn:</span>{" "}
                       {item.applicant}
                     </p>
                     <p>
-                      <span className="font-medium">Application Date:</span>{" "}
+                      <span className="font-medium">Ngày nộp:</span>{" "}
                       {item.applicationDate}
                     </p>
                     <p>
-                      <span className="font-medium">Nice Class:</span>{" "}
-                      {item.niceClassText}
+                      <span className="font-medium">Ngày công bố:</span>{" "}
+                      {item.publicationDate}
                     </p>
                     <p>
-                      <span className="font-medium">Country:</span>{" "}
-                      {item.countryCode}
+                      <span className="font-medium">Số bằng:</span>{" "}
+                      {item.certificateNumber || "-"}
                     </p>
                     <p>
-                      <span className="font-medium">Status:</span>{" "}
-                      <Badge variant="default" className="bg-green-600 text-xs">
-                        {item.status}
-                      </Badge>
+                      <span className="font-medium">IPC:</span>{" "}
+                      {item.ipcClassification}
                     </p>
                   </div>
                 </div>
