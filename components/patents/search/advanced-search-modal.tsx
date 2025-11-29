@@ -13,6 +13,7 @@ interface AdvancedFilters {
   applicationDate: string;
   publicationDate: string;
   certificateDate: string;
+  certificateNumber: string;
   expiryDate: string;
   countryCode: string;
   status: string;
