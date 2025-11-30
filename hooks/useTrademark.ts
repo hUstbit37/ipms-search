@@ -3,17 +3,17 @@ import { trademarkService } from '@/services/trademark.service';
 import type { SearchParams, SearchResponse, IPRecord } from '@/types/ip';
 
 // Hook tìm kiếm nhãn hiệu
-export const useTrademarkSearch = (
-  params: SearchParams,
-  options?: Partial<UseQueryOptions<SearchResponse>>
-) => {
-  return useQuery({
-    queryKey: ['trademarks', 'search', params],
-    queryFn: () => trademarkService.search(params),
-    enabled: !!params.query || !!params.registrationNumber,
-    ...options,
-  });
-};
+// export const useTrademarkSearch = (
+//   params: SearchParams,
+//   options?: Partial<UseQueryOptions<SearchResponse>>
+// ) => {
+//   return useQuery({
+//     queryKey: ['trademarks', 'search', params],
+//     queryFn: () => trademarkService.search(params),
+//     enabled: !!params.query || !!params.registrationNumber,
+//     ...options,
+//   });
+// };
 
 // Hook lấy chi tiết nhãn hiệu
 export const useTrademarkDetails = (

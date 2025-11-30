@@ -1,28 +1,79 @@
 import apiClient from '@/lib/api-client';
-import type { SearchParams, SearchResponse, IPRecord } from '@/types/ip';
+import type { IPRecord } from '@/types/ip';
+import { PaginationResponse } from "@/types/api";
 
-// Service để tìm kiếm nhãn hiệu
+export interface TrademarkParams {
+  search?: string;
+  status?: string;
+  country_code?: string;
+  application_number?: string;
+  certificate_number?: string;
+  application_date_from?: string;
+  application_date_to?: string;
+  certificate_date_from?: string;
+  certificate_date_to?: string;
+  page: number;
+  page_size: number;
+  sort_by?: string;
+  sort_order?: string;
+}
+
+export interface TrademarkResponse {
+  code: string | null;
+  name: string | null;
+  description: string | null;
+  application_number: string | null;
+  application_date: string | null;
+  certificate_number: string | null;
+  certificate_date: string | null;
+  expiry_date: string | null;
+  country_code: string | null;
+  status: string | null;
+  id: string;
+  owner_id: string | null;
+  agency_id: string | null;
+  created_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 export const trademarkService = {
-  // Tìm kiếm nhãn hiệu
-  search: async (params: SearchParams): Promise<SearchResponse> => {
-    const response = await apiClient.get<SearchResponse>('/trademarks/search', {
-      params: {
-        ...params,
-        type: 'trademark', // Force type to trademark
-      },
-    });
-    return response.data;
+  search: async (params: TrademarkParams, signal?: AbortSignal) => {
+    return await apiClient<PaginationResponse<TrademarkResponse>>(
+      {
+        url: "/v1/public/trademarks",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        params: {
+          ...params,
+          type: 'trademark'
+        },
+        signal,
+      }
+    );
   },
 
   // Lấy chi tiết nhãn hiệu theo ID
-  getById: async (id: string): Promise<IPRecord> => {
-    const response = await apiClient.get<IPRecord>(`/trademarks/${id}`);
-    return response.data;
+  getById: async (id: string, signal?: AbortSignal): Promise<IPRecord> => {
+    return await apiClient<IPRecord>(
+      {
+        url: `/trademarks/${ id }`,
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        signal,
+      }
+    );
   },
 
   // Lấy nhãn hiệu theo số đơn
-  getByRegistrationNumber: async (registrationNumber: string): Promise<IPRecord> => {
-    const response = await apiClient.get<IPRecord>(`/trademarks/registration/${registrationNumber}`);
-    return response.data;
+  getByRegistrationNumber: async (registrationNumber: string, signal?: AbortSignal): Promise<IPRecord> => {
+    return await apiClient<IPRecord>(
+      {
+        url: `/trademarks/registration/${ registrationNumber }`,
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        signal,
+      }
+    );
   },
 };
