@@ -223,17 +223,31 @@ export default function TrademarksSearchPage() {
     }),
     queryKey: ["trademarks", { searchParams }],
   })
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "CẤP BẰNG":
+        return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
+      case "ĐANG XỬ LÝ":
+        return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
+      case "BỊ TỪ CHỐI":
+        return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200";
+      case "HẾT HẠN":
+        return "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200";
+      default:
+        return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
+    }
+  };
 
   return (
     <div className="flex-1">
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-6">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-3">
         <div className="container mx-auto">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
             <div className="flex-1 flex items-center bg-white rounded-full px-4 py-2 gap-2">
               <Search className="w-5 h-5 text-gray-400 shrink-0"/>
-              <Input
+              <input
                 type="text"
-                placeholder="Enter Keyword(s)"
+                placeholder="Nhập tìm kiếm"
                 value={ searchQuery }
                 onChange={ (e) => setSearchQuery(e.target.value) }
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -263,7 +277,7 @@ export default function TrademarksSearchPage() {
       </div>
 
       {/* Filters and Controls */ }
-      <div className="bg-gray-50 dark:bg-zinc-900 border-b px-4 py-4">
+      <div className="bg-gray-50 dark:bg-zinc-900 border-b px-4 py-2">
         <div className="container mx-auto">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {/* Filters */ }
@@ -295,7 +309,7 @@ export default function TrademarksSearchPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
+              <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày nộp đơn</option>
                   <option>Ngày cấp bằng</option>
@@ -323,9 +337,6 @@ export default function TrademarksSearchPage() {
                 >
                   <LayoutGrid className="w-4 h-4"/>
                 </Button>
-                <Button className="p-2 rounded bg-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0" title="Delete">
-                  <Trash2 className="w-4 h-4 text-red-600"/>
-                </Button>
               </div>
             </div>
           </div>
@@ -333,7 +344,7 @@ export default function TrademarksSearchPage() {
       </div>
 
       {/* Results Table */ }
-      <div className="px-4 py-6">
+      <div className="px-4 py-2">
         <div className="container mx-auto">
           { viewType === "table" ? (
             <div className="overflow-x-auto rounded-lg border">
@@ -353,7 +364,7 @@ export default function TrademarksSearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { trademarksData?.items.map((item) => (
+                  { trademarksData?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow key={ item.id }>
                       <TableCell>
                         <div
@@ -388,11 +399,14 @@ export default function TrademarksSearchPage() {
                       <TableCell>
                         {
                           item.status ? (
-                            <span
-                              className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                              { item.status }
-                            </span>
-                          ) : "-"
+                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.status) }` }>
+                          { item.status }
+                          </span>
+                          ) : (
+                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.certificate_number ? "CẤP BẰNG" : "ĐANG XỬ LÝ") }` }>
+                            { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
+                          </span>
+                          )
                         }
                       </TableCell>
                     </TableRow>
@@ -402,7 +416,7 @@ export default function TrademarksSearchPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { trademarksData?.items?.map((item) => (
+              { trademarksData?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"

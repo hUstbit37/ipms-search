@@ -158,21 +158,15 @@ export default function PatentsSearchPage() {
   return (
     <div className="flex-1">
       {/* Search Section */ }
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-6">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-3">
         <div className="container mx-auto">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
-            {/* Toggle */ }
-            <button
-              className="text-white hover:bg-blue-600 dark:hover:bg-blue-700 rounded-full p-2 transition-colors shrink-0">
-              <div className="w-6 h-6 rounded-full border-2 border-white bg-white/30"></div>
-            </button>
-
             {/* Search Input */ }
             <div className="flex-1 flex items-center bg-white rounded-full px-4 py-2 gap-2">
               <Search className="w-5 h-5 text-gray-400 shrink-0"/>
               <input
                 type="text"
-                placeholder="Tìm kiếm sáng chế..."
+                placeholder="Nhập tìm kiếm..."
                 value={ searchQuery }
                 onChange={ (e) => setSearchQuery(e.target.value) }
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -203,7 +197,7 @@ export default function PatentsSearchPage() {
       </div>
 
       {/* Filters and Controls */ }
-      <div className="bg-gray-50 dark:bg-zinc-900 border-b px-4 py-4">
+      <div className="bg-gray-50 dark:bg-zinc-900 border-b px-4 py-2">
         <div className="container mx-auto">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {/* Filters */ }
@@ -237,7 +231,7 @@ export default function PatentsSearchPage() {
             {/* Results Count and Controls */ }
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
               {/* View Toggle and Sort */ }
-              <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
+              <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày đơn đăng ký</option>
                   <option>Ngày cấp bằng</option>
@@ -265,9 +259,6 @@ export default function PatentsSearchPage() {
                 >
                   <LayoutGrid className="w-4 h-4"/>
                 </button>
-                <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 flex-shrink-0" title="Xóa">
-                  <Trash2 className="w-4 h-4 text-red-600"/>
-                </button>
               </div>
             </div>
           </div>
@@ -275,14 +266,14 @@ export default function PatentsSearchPage() {
       </div>
 
       {/* Results Table */ }
-      <div className="px-4 py-6">
+      <div className="px-4 py-2">
         <div className="container mx-auto">
           { viewType === "table" ? (
             <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader className="bg-blue-700 dark:bg-blue-900">
                   <TableRow>
-                    <TableHead className="text-white">LOGO</TableHead>
+                    <TableHead className="text-white">HÌNH ẢNH</TableHead>
                     <TableHead className="text-white">TÊN SÁNG CHẾ</TableHead>
                     <TableHead className="text-white">SỐ ĐƠN</TableHead>
                     <TableHead className="text-white">NGÀY NỘP ĐƠN</TableHead>
@@ -295,7 +286,7 @@ export default function PatentsSearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { patentsData?.items?.map((item) => (
+                  { patentsData?.items?.filter((item) => item.application_number).map((item) => (
                     <TableRow key={ item.id }>
                       <TableCell>
                         <div
@@ -332,10 +323,14 @@ export default function PatentsSearchPage() {
                       <TableCell>
                         {
                           item.status ? (
-                            <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.status) }` }>
-                            { item.status }
+                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.status) }` }>
+                          { item.status }
                           </span>
-                          ) : "-"
+                          ) : (
+                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.certificate_number ? "CẤP BẰNG" : "ĐANG XỬ LÝ") }` }>
+                            { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
+                          </span>
+                          )
                         }
                       </TableCell>
                     </TableRow>
@@ -345,7 +340,7 @@ export default function PatentsSearchPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { patentsData?.items?.map((item) => (
+              { patentsData?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"

@@ -52,7 +52,7 @@ export default function AdvancedSearchModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b sticky top-0 bg-white dark:bg-zinc-950 z-10">
+        <DialogHeader className="px-4 pt-4 pb-4 border-b sticky top-0 bg-white dark:bg-zinc-950 z-10">
           <DialogTitle>Truy vấn nâng cao</DialogTitle>
         </DialogHeader>
 
@@ -422,7 +422,7 @@ export default function AdvancedSearchModal({
           </div>
         </div>
 
-        <DialogFooter className="px-6 pb-6 pt-4 border-t bg-white dark:bg-zinc-950">
+        <DialogFooter className="px-4 pb-4 pt-4 border-t bg-white dark:bg-zinc-950">
           <Button
             variant="outline"
             onClick={() => {

@@ -112,7 +112,7 @@ export function LoginForm() {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="username">Mật khẩu</Label>
-        <Input {...register("password")} id="password" type="text" className={`min-w-96 ${errors?.password?.message ? "border-red-500" : ""}`} placeholder="Mật khẩu"  />
+        <Input {...register("password")} id="password" type="password" autoComplete="off" className={`min-w-96 ${errors?.password?.message ? "border-red-500" : ""}`} placeholder="Mật khẩu"  />
         {
           errors?.password?.message && (
             <ErrorMessage message={errors.password.message} />
