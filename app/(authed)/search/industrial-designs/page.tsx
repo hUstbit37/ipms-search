@@ -270,11 +270,6 @@ export default function IndustrialDesignsSearchPage() {
 
             {/* Results Count and Controls */ }
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
-              <Pagination totalItems={ industrialDesignsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
-                          currentPage={ searchParams.page } onPageChange={ (val) => {
-                setSearchParams((prev) => ({ ...prev, page: val }))
-              } }/>
-
               {/* View Toggle and Sort */ }
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
@@ -352,7 +347,7 @@ export default function IndustrialDesignsSearchPage() {
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        { "-" }
+                        { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.certificate_number || "-" }
@@ -412,7 +407,7 @@ export default function IndustrialDesignsSearchPage() {
                     </p>
                     <p>
                       <span className="font-medium">Mô tả sản phẩm:</span>{ " " }
-                      { item.summary ?? "-"}
+                      { item.description ?? "-"}
                     </p>
                     <p>
                       <span className="font-medium">Trạng thái:</span>{ " " }
@@ -429,6 +424,12 @@ export default function IndustrialDesignsSearchPage() {
               )) }
             </div>
           ) }
+        </div>
+        <div className="w-full h-full mt-4">
+          <Pagination totalItems={ industrialDesignsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
+                      currentPage={ searchParams.page } onPageChange={ (val) => {
+            setSearchParams((prev) => ({ ...prev, page: val }))
+          } }/>
         </div>
       </div>
 

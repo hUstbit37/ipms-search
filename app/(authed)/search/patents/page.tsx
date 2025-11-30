@@ -12,6 +12,7 @@ import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants
 import { queryClient } from "@/lib/react-query";
 import { Pagination } from "@/components/ui/pagination";
 import moment from "moment";
+import { Tooltip } from "@/components/ui/tooltip";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -235,10 +236,6 @@ export default function PatentsSearchPage() {
 
             {/* Results Count and Controls */ }
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
-              <Pagination totalItems={ patentsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
-                          currentPage={ searchParams.page }
-                          onPageChange={ (val) => setSearchParams((prev) => ({ ...prev, page: val })) }/>
-
               {/* View Toggle and Sort */ }
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
@@ -307,7 +304,9 @@ export default function PatentsSearchPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="font-semibold">{ item.name ?? "-" }</div>
+                        <Tooltip content={item.name ?? "-"}>
+                          <div className="font-semibold max-w-[350px] text-ellipsis overflow-hidden ">{ item.name ?? "-" }</div>
+                        </Tooltip>
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.application_number ?? "-" }
@@ -389,6 +388,11 @@ export default function PatentsSearchPage() {
               )) }
             </div>
           ) }
+          <div className="w-full h-full">
+            <Pagination totalItems={ patentsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
+                        currentPage={ searchParams.page }
+                        onPageChange={ (val) => setSearchParams((prev) => ({ ...prev, page: val })) }/>
+          </div>
         </div>
       </div>
 

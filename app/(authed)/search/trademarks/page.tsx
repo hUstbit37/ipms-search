@@ -295,13 +295,6 @@ export default function TrademarksSearchPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
-              <Pagination totalItems={ trademarksData?.total ?? 1 } currentPage={ searchParams.page }
-                          itemsPerPage={ DEFAULT_PAGINATION.per_page }
-                          onPageChange={ (pageVal) => setSearchParams((prev) => ({
-                            ...prev,
-                            page: pageVal
-                          })) }/>
-
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4">
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày nộp đơn</option>
@@ -447,6 +440,14 @@ export default function TrademarksSearchPage() {
               )) }
             </div>
           ) }
+          <div className="w-full h-full mt-4">
+            <Pagination totalItems={ trademarksData?.total ?? 1 } currentPage={ searchParams.page }
+                        itemsPerPage={ DEFAULT_PAGINATION.per_page }
+                        onPageChange={ (pageVal) => setSearchParams((prev) => ({
+                          ...prev,
+                          page: pageVal
+                        })) }/>
+          </div>
         </div>
       </div>
 

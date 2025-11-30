@@ -27,6 +27,9 @@ export interface IndustrialDesignResponse {
   certificate_date: string | null;
   expiry_date: string | null;
   country_code: string | null;
+  publication_date: string | null;
+  publication_number: string | null;
+  description: string | null;
   status: string | null;
   id: string;
   agency_id: string | null;

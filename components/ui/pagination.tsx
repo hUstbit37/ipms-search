@@ -103,7 +103,7 @@ export const Pagination = ({
   }
 
   return (
-    <div className="flex items-center justify-start py-4 font-sans text-sm">
+    <div className="flex items-center justify-center py-4 font-sans text-sm">
 
       {
         totalItems > 0 && (
