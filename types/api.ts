@@ -5,3 +5,8 @@ export interface PaginationResponse<T> {
   total_pages: number;
   items: T[];
 }
+
+export interface ResponseError<T> {
+  data: T;
+  message?: string;
+}

@@ -1,5 +1,5 @@
-import apiClient from '@/lib/api-client';
 import { PaginationResponse } from "@/types/api";
+import apiServerInstance from "@/lib/api/apiServerInstance";
 
 export interface IndustrialDesignParams {
   search?: string;
@@ -40,14 +40,9 @@ export interface IndustrialDesignResponse {
 
 export const industrialDesignsService = {
   get: async (params: IndustrialDesignParams, signal?: AbortSignal) => {
-    return await apiClient<PaginationResponse<IndustrialDesignResponse>>(
-      {
-        url: "/v1/public/industrial-designs",
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        params,
-        signal,
-      }
-    );
+    return await apiServerInstance.get<PaginationResponse<IndustrialDesignResponse>>("/industrial-designs", {
+      signal,
+      params
+    });
   },
 };

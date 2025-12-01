@@ -280,7 +280,7 @@ export default function PatentsSearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { patentsData?.items?.filter((item) => item.application_number).map((item) => (
+                  { patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                     <TableRow key={ item.id } className="hover:bg-transparent">
                       <TableCell>
                         <div
@@ -334,7 +334,7 @@ export default function PatentsSearchPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { patentsData?.items?.filter((item) => item.application_number).map((item) => (
+              { patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
@@ -378,7 +378,7 @@ export default function PatentsSearchPage() {
             </div>
           ) }
           <div className="w-full h-full mt-4">
-            <Pagination totalItems={ patentsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
+            <Pagination totalItems={ patentsData?.data?.total ?? 1 } itemsPerPage={ searchParams.page_size }
                         currentPage={ searchParams.page }
                         onPageChange={ (val) => setSearchParams((prev) => ({ ...prev, page: val })) }/>
           </div>
