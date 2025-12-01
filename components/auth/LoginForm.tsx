@@ -15,9 +15,15 @@ import { sleep } from "@/utils/common-utils";
 import { useMe } from "@/providers/auth/MeProvider";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useGlobalLoading } from "@/providers/loading/LoadingProvider";
+import { InputPassword } from "@/components/ui/input-password";
 
 export function LoginForm() {
   const router = useRouter();
+
+  const {
+    setIsGlobalLoading
+  } = useGlobalLoading();
 
   const {
     setAuthContext,
@@ -68,28 +74,33 @@ export function LoginForm() {
         await sleep(300);
 
         await meRefetch().then((res) => {
-          if (res?.data) {
-            setMe(res.data)
+          if (res?.data?.data) {
+            setMe(res.data.data)
             router.push("/search/trademarks")
+            setIsGlobalLoading(false);
           } else {
             resetMe()
             toast.error("Đã có lỗi xảy ra")
+            setIsGlobalLoading(false);
           }
         })
       } else {
         resetAuth()
         resetMe()
         toast.error("Thông tin tài khoản hoặc mật khẩu không chính xác")
+        setIsGlobalLoading(false);
       }
     },
     onError: async () => {
       resetAuth()
       resetMe()
       toast.error("Thông tin tài khoản hoặc mật khẩu không chính xác")
+      setIsGlobalLoading(false);
     }
   });
 
   const onSubmit = (data: LoginFormData) => {
+    setIsGlobalLoading(true);
     loginMutation.mutate({
       ...data
     })
@@ -112,7 +123,7 @@ export function LoginForm() {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="username">Mật khẩu</Label>
-        <Input {...register("password")} id="password" type="password" autoComplete="off" className={`min-w-96 ${errors?.password?.message ? "border-red-500" : ""}`} placeholder="Mật khẩu"  />
+        <InputPassword {...register("password")} id="password" className={`min-w-96 ${errors?.password?.message ? "border-red-500" : ""}`} placeholder="Mật khẩu" />
         {
           errors?.password?.message && (
             <ErrorMessage message={errors.password.message} />

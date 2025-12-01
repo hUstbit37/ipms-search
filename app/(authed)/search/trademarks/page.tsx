@@ -223,6 +223,7 @@ export default function TrademarksSearchPage() {
     }),
     queryKey: ["trademarks", { searchParams }],
   })
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "CẤP BẰNG":
@@ -286,7 +287,7 @@ export default function TrademarksSearchPage() {
                     onClick={ () => removeFilter(key) }
                     className="ml-2 cursor-pointer hover:text-red-600 flex-shrink-0"
                   >
-                    <XIcon size={15} color="#FF0000" />
+                    <XIcon size={ 15 } color="#FF0000"/>
                   </div>
                 </Badge>
               )) }
@@ -358,7 +359,7 @@ export default function TrademarksSearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { trademarksData?.items.filter((item) => item.application_number).map((item) => (
+                  { trademarksData?.data?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow key={ item.id } className="hover:bg-transparent">
                       <TableCell>
                         <div
@@ -410,7 +411,7 @@ export default function TrademarksSearchPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { trademarksData?.items?.filter((item) => item.application_number).map((item) => (
+              { trademarksData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
@@ -449,7 +450,7 @@ export default function TrademarksSearchPage() {
             </div>
           ) }
           <div className="w-full h-full mt-4">
-            <Pagination totalItems={ trademarksData?.total ?? 1 } currentPage={ searchParams.page }
+            <Pagination totalItems={ trademarksData?.data?.total ?? 0 } currentPage={ searchParams.page }
                         itemsPerPage={ DEFAULT_PAGINATION.per_page }
                         onPageChange={ (pageVal) => setSearchParams((prev) => ({
                           ...prev,

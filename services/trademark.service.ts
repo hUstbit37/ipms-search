@@ -1,6 +1,7 @@
 import apiClient from '@/lib/api-client';
 import type { IPRecord } from '@/types/ip';
 import { PaginationResponse } from "@/types/api";
+import apiServerInstance from "@/lib/api/apiServerInstance";
 
 export interface TrademarkParams {
   search?: string;
@@ -39,18 +40,7 @@ export interface TrademarkResponse {
 
 export const trademarkService = {
   search: async (params: TrademarkParams, signal?: AbortSignal) => {
-    return await apiClient<PaginationResponse<TrademarkResponse>>(
-      {
-        url: "/v1/public/trademarks",
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        params: {
-          ...params,
-          type: 'trademark'
-        },
-        signal,
-      }
-    );
+    return await apiServerInstance.get<PaginationResponse<TrademarkResponse>>("/trademarks", { signal, params });
   },
 
   // Lấy chi tiết nhãn hiệu theo ID
