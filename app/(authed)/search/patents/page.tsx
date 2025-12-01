@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
+import { companyService } from "@/services/company.service";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
 import { queryClient } from "@/lib/react-query";
 import { Pagination } from "@/components/ui/pagination";
@@ -42,6 +43,24 @@ export default function PatentsSearchPage() {
     queryFn: async () => await patentService.get(searchParams),
     queryKey: ["patents", { searchParams }],
   })
+
+  const {
+    data: companiesData,
+  } = useQuery({
+    queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
+    queryKey: ["companies"],
+  })
+
+  // Create a map for quick company lookup
+  const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
+    acc[company.id] = company.name;
+    return acc;
+  }, {} as Record<string, string>) || {};
+
+  console.log(companiesData);
+  
+  console.log(patentsData);
+  
 
   const handleSearch = async () => {
     setSearchParams({
@@ -283,9 +302,19 @@ export default function PatentsSearchPage() {
                   { patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                     <TableRow key={ item.id } className="hover:bg-transparent">
                       <TableCell>
-                        <div
-                          className="w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white shadow-sm">
-                          { item?.name ? item.name?.charAt(0) : "-" }
+                        <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm">
+                          {item?.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name || "Patent image"} 
+                            className="w-full h-full object-cover rounded"
+                            loading="lazy"
+                          />
+                          ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
+                            {item?.name ? item.name.charAt(0) : "-"}
+                          </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
@@ -300,7 +329,7 @@ export default function PatentsSearchPage() {
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        { "-" }
+                        { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.certificate_number || "-" }
@@ -309,19 +338,21 @@ export default function PatentsSearchPage() {
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        { "-" }
+                        <div className="max-w-[150px] truncate" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
+                          { item.owner_id ? (companyMap[item.owner_id] || "-") : "-" }
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        { "-" }
+                        { item.ipc_list ? item.ipc_list : "-" }
                       </TableCell>
                       <TableCell>
                         {
-                          item.status ? (
-                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.status) }` }>
-                          { item.status }
+                          item.wipo_status ? (
+                          <span className={ `text-xs px-2 py-1 rounded` }>
+                          { item.wipo_status }
                           </span>
                           ) : (
-                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.certificate_number ? "CẤP BẰNG" : "ĐANG XỬ LÝ") }` }>
+                          <span className={ `text-xs px-2 py-1 rounded` }>
                             { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
                           </span>
                           )

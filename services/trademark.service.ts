@@ -17,6 +17,9 @@ export interface TrademarkParams {
   page_size: number;
   sort_by?: string;
   sort_order?: string;
+  image_url?: string;
+  wipo_status?: string;
+  nice_class_text?: string;
 }
 
 export interface TrademarkResponse {

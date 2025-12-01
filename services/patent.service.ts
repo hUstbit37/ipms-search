@@ -15,6 +15,12 @@ export interface PatentParams {
   page_size: number;
   sort_by?: string;
   sort_order?: string;
+  image_url?: string;
+  wipo_status?: string;
+  publication_date?: string;
+  ipc_list?: string;
+  summary?: string;
+  owner_id?: string;
 }
 
 export interface PatentResponse {
@@ -33,6 +39,11 @@ export interface PatentResponse {
   created_by: string | null;
   created_at: string | null;
   updated_at: string | null;
+  publication_date: string | null;
+  ipc_list: string | null;
+  wipo_status: string | null;
+  owner_id: string | null;
+  image_url: string | null;
 }
 
 export const patentService = {

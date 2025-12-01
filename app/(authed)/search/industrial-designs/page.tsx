@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import AdvancedSearchModal from "@/components/industrial-designs/search/advanced-search-modal";
 import { FORMAT_DATE, initialSearchState } from "@/constants";
 import { IndustrialDesignParams, industrialDesignsService } from "@/services/industrial-designs.service";
+import { companyService } from "@/services/company.service";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
 import { Pagination } from "@/components/ui/pagination";
@@ -61,6 +62,20 @@ export default function IndustrialDesignsSearchPage() {
     queryFn: async () => await industrialDesignsService.get(searchParams),
     queryKey: [queryKey, { searchParams }],
   })
+
+  const {
+    data: companiesData,
+  } = useQuery({
+    queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
+    queryKey: ["companies"],
+  })
+
+  // Create a map for quick company lookup
+  const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
+    acc[company.id] = company.name;
+    return acc;
+  }, {} as Record<string, string>) || {};
+console.log(industrialDesignsData);
 
   const handleSearch = async () => {
     setSearchParams({
@@ -340,9 +355,19 @@ export default function IndustrialDesignsSearchPage() {
                     
                     <TableRow key={ item.id } className="hover:bg-transparent">
                       <TableCell>
-                        <div
-                          className="w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white shadow-sm">
-                          { item.name ? item.name.charAt(0) : "-" }
+                        <div className="w-16 h-16 rounded overflow-hidden">
+                          {item.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name || "Design"} 
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                          ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 flex items-center justify-center text-sm font-bold text-white shadow-sm">
+                            {item.name ? item.name.charAt(0) : "-"}
+                          </div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -364,16 +389,18 @@ export default function IndustrialDesignsSearchPage() {
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        { "-" }
+                        <div className="max-w-[150px] truncate" title={(item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-"}>
+                          { (item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-" }
+                        </div>
                       </TableCell>
                       <TableCell>
                         {
-                          item.status ? (
-                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.status) }` }>
-                          { item.status }
+                          item.wipo_status ? (
+                          <span className={ `text-xs px-2 py-1 rounded` }>
+                          { item.wipo_status }
                           </span>
                           ) : (
-                          <span className={ `text-xs px-2 py-1 rounded ${ getStatusColor(item.certificate_number ? "CẤP BẰNG" : "ĐANG XỬ LÝ") }` }>
+                          <span className={ `text-xs px-2 py-1 rounded` }>
                             { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
                           </span>
                           )
