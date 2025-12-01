@@ -51,14 +51,14 @@ export default function AdvancedSearchModal({
 }: AdvancedSearchModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-6xl min-w-5xl max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-4 pt-4 pb-4 border-b sticky top-0 bg-white dark:bg-zinc-950 z-10">
           <DialogTitle>Truy vấn nâng cao</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 overflow-y-auto flex-1 px-6 py-4 min-h-0">
+        <div className="grid grid-cols-1 gap-6 overflow-y-auto flex-1 px-6 py-4 min-h-0 w-full">
           {/* Các nước */}
-          <div>
+          <div className="w-full">
             <button
               onClick={() => {
                 const el = document.querySelector('[data-group="countries"]');
@@ -69,8 +69,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Các nước</span>
             </button>
-            <div data-group="countries" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="countries" className="ml-4 mt-2 flex flex-wrap justify-between items-center w-full gap-4">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước chủ đơn/Chủ bằng</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -84,7 +84,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước nộp đơn</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -98,7 +98,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước công bố</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -112,7 +112,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước của đơn ưu tiên</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -141,8 +141,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Phân loại</span>
             </button>
-            <div data-group="categories" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="categories" className="ml-4 mt-2 flex flex-wrap items-center justify-between w-full gap-4">
+              <div className="w-[32%]">
                 <label className="text-xs font-medium block mb-1">Nhóm sản phẩm/dịch vụ</label>
                 <Input
                   placeholder="Nhập phân loại..."
@@ -156,7 +156,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[32%]">
                 <label className="text-xs font-medium block mb-1">Danh mục sản phẩm dịch vụ</label>
                 <Input
                   placeholder="Nhập danh mục..."
@@ -170,7 +170,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[32%]">
                 <label className="text-xs font-medium block mb-1">Phân loại Viện</label>
                 <Input
                   placeholder="Nhập phân loại..."
@@ -199,8 +199,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Ngày</span>
             </button>
-            <div data-group="dates" className="space-y-3 ml-4 mt-2">
-              <div>
+            <div data-group="dates" className="space-y-3 ml-4 mt-2 flex items-center flex-wrap justify-between gap-4">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày nộp đơn</label>
                 <DatePickerSingle
                   value={advancedFilters.applicationDate}
@@ -213,7 +213,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày nộp đơn"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày công bố</label>
                 <DatePickerSingle
                   value={advancedFilters.publicationDate}
@@ -226,7 +226,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày công bố"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày cấp</label>
                 <DatePickerSingle
                   value={advancedFilters.certificateDate}
@@ -239,7 +239,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày cấp"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày hết hạn</label>
                 <DatePickerSingle
                   value={advancedFilters.expiryDate}
@@ -252,7 +252,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày hết hạn"
                 />
               </div>
-              <div>
+              <div className="w-full">
                 <label className="text-xs font-medium block mb-1">Ngày ưu tiên</label>
                 <DatePickerSingle
                   value={advancedFilters.priorityDate}
@@ -275,13 +275,13 @@ export default function AdvancedSearchModal({
                 const el = document.querySelector('[data-group="owner"]');
                 if (el) el.classList.toggle('hidden');
               }}
-              className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full"
+              className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full gap-4"
             >
               <span>▶</span>
               <span>Tên người</span>
             </button>
-            <div data-group="owner" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="owner" className="ml-4 mt-2 flex items-center flex-wrap justify-between">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Chủ đơn/Chủ bằng</label>
                 <Input
                   placeholder="Nhập tên chủ đơn..."
@@ -295,7 +295,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Đại diện SHCN</label>
                 <Input
                   placeholder="Nhập tên đại diện..."
@@ -324,8 +324,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Số</span>
             </button>
-            <div data-group="numbers" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="numbers" className="ml-4 mt-2 flex items-center flex-wrap justify-between w-full gap-4">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số bằng</label>
                 <Input
                   placeholder="Nhập số bằng..."
@@ -339,7 +339,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số đơn</label>
                 <Input
                   placeholder="Nhập số đơn..."
@@ -353,7 +353,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số đơn góc</label>
                 <Input
                   placeholder="Nhập số đơn góc..."
@@ -367,7 +367,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số ưu tiên</label>
                 <Input
                   placeholder="Nhập số ưu tiên..."
@@ -391,20 +391,20 @@ export default function AdvancedSearchModal({
                 const el = document.querySelector('[data-group="other"]');
                 if (el) el.classList.toggle('hidden');
               }}
-              className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full"
+              className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full gap-4"
             >
               <span>▶</span>
               <span>Mục khác</span>
             </button>
-            <div data-group="other" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="other" className="ml-4 mt-2 flex items-center flex-wrap justify-between gap-4">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Định danh</label>
                 <Input
                   placeholder="Nhập định danh..."
                   className="text-sm"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Nhãn hiệu</label>
                 <Input
                   placeholder="Nhập tên nhãn hiệu..."

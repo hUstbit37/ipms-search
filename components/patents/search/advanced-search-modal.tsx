@@ -38,7 +38,7 @@ export default function AdvancedSearchModal({
 }: AdvancedSearchModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-5xl min-w-5xl max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b sticky top-0 bg-white dark:bg-zinc-950 z-10">
           <DialogTitle>Tìm kiếm nâng cao Sáng chế</DialogTitle>
         </DialogHeader>
@@ -56,8 +56,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Các nước</span>
             </button>
-            <div data-group="countries" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="countries" className="ml-4 mt-2 flex justify-between gap-4 items-center flex-wrap">
+              <div className="w-full">
                 <label className="text-xs font-medium block mb-1">Mã Nước chủ đơn</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -116,8 +116,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Ngày</span>
             </button>
-            <div data-group="dates" className="space-y-3 ml-4 mt-2">
-              <div>
+            <div data-group="dates" className="ml-4 mt-2 justify-between flex w-full items-center flex-wrap gap-4">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày nộp đơn</label>
                 <DatePickerSingle
                   value={advancedFilters.applicationDate}
@@ -130,7 +130,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày nộp đơn"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày công bố</label>
                 <DatePickerSingle
                   value={advancedFilters.publicationDate}
@@ -143,7 +143,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày công bố"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày cấp</label>
                 <DatePickerSingle
                   value={advancedFilters.certificateDate}
@@ -156,7 +156,7 @@ export default function AdvancedSearchModal({
                   placeholder="Chọn ngày cấp"
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày hết hạn</label>
                 <DatePickerSingle
                   value={advancedFilters.expiryDate}
@@ -214,8 +214,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Số</span>
             </button>
-            <div data-group="numbers" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="numbers" className="ml-4 mt-2 flex justify-between gap-4 items-center flex-wrap">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số bằng</label>
                 <Input
                   placeholder="Nhập số bằng..."
@@ -229,7 +229,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số đơn</label>
                 <Input
                   placeholder="Nhập số đơn..."
@@ -258,8 +258,8 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Mục khác</span>
             </button>
-            <div data-group="other" className="space-y-2 ml-4 mt-2">
-              <div>
+            <div data-group="other" className="ml-4 mt-2 flex justify-between gap-4 items-center flex-wrap">
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Tên sáng chế</label>
                 <Input
                   placeholder="Nhập tên sáng chế..."
@@ -273,7 +273,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div>
+              <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Trạng thái</label>
                 <Input
                   placeholder="Cấp bằng, Đang xử lý..."
