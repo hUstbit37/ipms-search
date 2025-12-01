@@ -4,11 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function LoginPage() {
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-950">
-      <main className="container mx-auto px-4 py-16 min-w-screen min-h-screen flex flex-col gap-8 justify-center items-center">
-        <div className="text-3xl font-bold">IPMS</div>
-        <Card className="w-full max-w-md">
-          <CardHeader>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-background">
+      <div className="w-full max-w-sm">
+        <Card>
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4">
+              <h1 className="text-3xl font-bold">IPMS</h1>
+              <p className="text-xs text-muted-foreground mt-1">Tra cứu Sở hữu Trí tuệ</p>
+            </div>
             <CardTitle>Đăng nhập</CardTitle>
             <CardDescription>Nhập thông tin tài khoản của bạn để tiếp tục</CardDescription>
           </CardHeader>
@@ -16,7 +19,7 @@ export default function LoginPage() {
             <LoginForm />
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 }
