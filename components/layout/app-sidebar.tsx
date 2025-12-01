@@ -1,0 +1,87 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+
+import {
+  FileText,
+  Package,
+  Lightbulb,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Menu data for ipms-search
+const data = {
+  navMain: [
+    {
+      title: "Tra cứu",
+      items: [
+        { title: "Sáng chế", url: "/search/patents", icon: Lightbulb },
+        { title: "Nhãn hiệu", url: "/search/trademarks", icon: FileText },
+        { title: "Kiểu dáng công nghiệp", url: "/search/industrial-designs", icon: Package },
+      ],
+    },
+  ],
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar {...props}>
+      <SidebarHeader>
+        <h2 className="text-center mx-auto font-bold text-2xl">IPMS</h2>
+        <p className="text-center text-xs text-muted-foreground mt-1">Tra cứu SHTT</p>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {data.navMain.map((group) => (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const isActive = pathname === item.url;
+                  const Icon = item.icon;
+
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        className={cn(
+                          "hover:bg-blue-100 hover:text-blue-700",
+                          isActive && "bg-blue-100 text-blue-700 font-semibold"
+                        )}
+                      >
+                        <Link
+                          href={item.url}
+                          className="w-full flex items-center gap-2 px-2 py-5 rounded"
+                        >
+                          {Icon && <Icon className="h-4 w-4 shrink-0" />}
+                          <span className="whitespace-normal break-words">{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+
+      <SidebarRail />
+    </Sidebar>
+  );
+}

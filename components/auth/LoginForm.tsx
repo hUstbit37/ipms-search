@@ -120,7 +120,9 @@ export function LoginForm() {
         }
       </div>
 
-      <Button type="submit" className="bg-blue-500 hover:bg-blue-400">Submit</Button>
+      <Button type="submit" disabled={loginMutation.isPending} className="w-full">
+        {loginMutation.isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+      </Button>
     </form>
   )
 }

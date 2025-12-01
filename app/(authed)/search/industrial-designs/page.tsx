@@ -210,49 +210,45 @@ export default function IndustrialDesignsSearchPage() {
   };
 
   return (
-    <div className="flex-1">
+    <div className="space-y-4">
       {/* Search Section */ }
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-4 py-3">
-        <div className="container mx-auto">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
-            {/* Search Input */ }
-            <div className="flex-1 flex items-center bg-white rounded-full px-4 py-2 gap-2">
-              <Search className="w-5 h-5 text-gray-400 shrink-0"/>
-              <input
-                type="text"
-                placeholder="Nhập tìm kiếm..."
-                value={ searchQuery }
-                onChange={ (e) => setSearchQuery(e.target.value) }
-                className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
-              />
-            </div>
+      <div className="bg-white dark:bg-zinc-900 border rounded-lg p-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
+          {/* Search Input */ }
+          <div className="flex-1 flex items-center border rounded-lg px-4 py-2 gap-2">
+            <Search className="w-5 h-5 text-gray-400 shrink-0"/>
+            <input
+              type="text"
+              placeholder="Nhập tìm kiếm..."
+              value={ searchQuery }
+              onChange={ (e) => setSearchQuery(e.target.value) }
+              className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
+            />
+          </div>
 
-            {/* Buttons */ }
-            <div className="flex items-center gap-3 flex-wrap">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white text-blue-600 border-white hover:bg-blue-50 text-sm font-medium"
-                onClick={ handleSearch }
-              >
-                Truy vấn
-              </Button>
-              <Button
-                onClick={ () => setShowAdvancedFilter(true) }
-                variant="outline"
-                size="sm"
-                className="bg-white text-blue-600 border-white hover:bg-blue-50 text-sm font-medium"
-              >
-                Truy vấn nâng cao
-              </Button>
-            </div>
+          {/* Buttons */ }
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              size="sm"
+              className="text-sm font-medium"
+              onClick={ handleSearch }
+            >
+              Truy vấn
+            </Button>
+            <Button
+              onClick={ () => setShowAdvancedFilter(true) }
+              variant="outline"
+              size="sm"
+              className="text-sm font-medium"
+            >
+              Truy vấn nâng cao
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Filters and Controls */ }
-      <div className="bg-gray-50 dark:bg-zinc-900 border-b px-4 py-2">
-        <div className="container mx-auto">
+      <div className="bg-white dark:bg-zinc-900 border rounded-lg p-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {/* Filters */ }
             <div className="flex items-center gap-2 flex-wrap">
@@ -319,32 +315,30 @@ export default function IndustrialDesignsSearchPage() {
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Results Table */ }
-      <div className="px-4 py-2">
-        <div className="container mx-auto">
+      <div>
           { viewType === "table" ? (
-            <div className="overflow-x-auto rounded-lg border">
+            <div className="rounded-lg border">
               <Table>
-                <TableHeader className="bg-blue-700 dark:bg-blue-900">
-                  <TableRow>
-                    <TableHead className="text-white">HÌNH ẢNH</TableHead>
-                    <TableHead className="text-white">TÊN</TableHead>
-                    <TableHead className="text-white">SỐ ĐƠN</TableHead>
-                    <TableHead className="text-white">NGÀY NỘP ĐƠN</TableHead>
-                    <TableHead className="text-white">NGÀY CÔNG BỐ</TableHead>
-                    <TableHead className="text-white">SỐ BẰNG</TableHead>
-                    <TableHead className="text-white">NGÀY CẤP</TableHead>
-                    <TableHead className="text-white">CHỦ ĐƠN/CHỦ BẰNG</TableHead>
-                    <TableHead className="text-white">TRẠNG THÁI</TableHead>
+                <TableHeader className="bg-gray-100 dark:bg-zinc-800">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">HÌNH ẢNH</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TÊN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY NỘP ĐƠN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY CÔNG BỐ</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ BẰNG</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY CẤP</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">CHỦ ĐƠN/CHỦ BẰNG</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TRẠNG THÁI</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   { industrialDesignsData?.items.filter((item) => item.application_number).map((item) => (
                     
-                    <TableRow key={ item.id }>
+                    <TableRow key={ item.id } className="hover:bg-transparent">
                       <TableCell>
                         <div
                           className="w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white shadow-sm">
@@ -352,7 +346,7 @@ export default function IndustrialDesignsSearchPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-semibold">{ item.name ?? "-" }</div>
+                        <div className="font-semibold max-w-[150px] truncate" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.application_number }
@@ -438,13 +432,12 @@ export default function IndustrialDesignsSearchPage() {
               )) }
             </div>
           ) }
-        </div>
-        <div className="w-full h-full mt-4">
-          <Pagination totalItems={ industrialDesignsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
-                      currentPage={ searchParams.page } onPageChange={ (val) => {
-            setSearchParams((prev) => ({ ...prev, page: val }))
-          } }/>
-        </div>
+          <div className="w-full h-full mt-4">
+            <Pagination totalItems={ industrialDesignsData?.total ?? 1 } itemsPerPage={ searchParams.page_size }
+                        currentPage={ searchParams.page } onPageChange={ (val) => {
+              setSearchParams((prev) => ({ ...prev, page: val }))
+            } }/>
+          </div>
       </div>
 
       {/* Advanced Filter Modal */ }
