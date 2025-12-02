@@ -21,15 +21,18 @@ const initialAdvancedSearch = {
   publicationCountry: "",
   priorityCountry: "",
   // Phân loại
-  locarnoClass: "",
+  niceClass: "",
   productCategory: "",
   designDomain: "",
-  // Ngày (single date only)
-  applicationDate: "",
-  publicationDate: "",
-  certificateDate: "",
-  expiryDate: "",
-  priorityDate: "",
+  // Ngày (date ranges)
+  applicationDateFrom: "",
+  applicationDateTo: "",
+  publicationDateFrom: "",
+  publicationDateTo: "",
+  certificateDateFrom: "",
+  certificateDateTo: "",
+  expiryDateFrom: "",
+  expiryDateTo: "",
   // Tên người
   applicant: "",
   representative: "",
@@ -92,15 +95,30 @@ console.log(industrialDesignsData);
     })
   };
 
-  const handleAdvancedSearch = () => {
+  const handleAdvancedSearch = async () => {
     setSearchParams({
       ...initialSearchState,
-      status: advancedFilters?.status && advancedFilters.status ? advancedFilters.status : undefined,
-      application_number: advancedFilters?.applicationNumber ?? advancedFilters.applicationNumber ? advancedFilters.applicationNumber : undefined,
-      country_code: advancedFilters?.ownerCountry && advancedFilters.ownerCountry ? advancedFilters?.ownerCountry : undefined,
-      certificate_number: advancedFilters?.certificateNumber && advancedFilters.certificateNumber ? advancedFilters.certificateNumber : undefined,
-      application_date_from: advancedFilters?.applicationDate && advancedFilters.applicationDate ? advancedFilters?.applicationDate : undefined,
-      certificate_date_from: advancedFilters?.certificateDate ? advancedFilters.certificateDate : undefined,
+      status: advancedFilters?.status,
+      application_number: advancedFilters?.applicationNumber,
+      country_code: advancedFilters?.ownerCountry,
+      certificate_number: advancedFilters?.certificateNumber,
+      application_date_from: advancedFilters?.applicationDateFrom,
+      application_date_to: advancedFilters?.applicationDateTo,
+      certificate_date_from: advancedFilters?.certificateDateFrom,
+      certificate_date_to: advancedFilters?.certificateDateTo,
+      publicationDateFrom: advancedFilters?.publicationDateFrom,
+      publicationDateTo: advancedFilters?.publicationDateTo,
+      expiryDateFrom: advancedFilters?.expiryDateFrom,
+      expiryDateTo: advancedFilters?.expiryDateTo,
+      application_country: advancedFilters?.applicationCountry,
+      publication_country: advancedFilters?.publicationCountry,
+      priorityCountry: advancedFilters?.priorityCountry,
+      niceClass: advancedFilters?.niceClass,
+      applicant: advancedFilters?.applicant,
+      representative: advancedFilters?.representative,
+      name: advancedFilters?.designName,
+      basic_application_number: advancedFilters?.basicApplicationNumber,
+      priority_number: advancedFilters?.priorityNumber,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -113,8 +131,8 @@ console.log(industrialDesignsData);
       newActiveFilters["Chủ đơn"] = advancedFilters.applicant;
     }
 
-    if (advancedFilters.locarnoClass) {
-      newActiveFilters["Phân loại Locarno"] = advancedFilters.locarnoClass;
+    if (advancedFilters.niceClass) {
+      newActiveFilters["Phân loại Locarno"] = advancedFilters.niceClass;
     }
 
     if (advancedFilters.ownerCountry) {
@@ -141,24 +159,20 @@ console.log(industrialDesignsData);
       newActiveFilters["Lĩnh vực thiết kế"] = advancedFilters.designDomain;
     }
 
-    if (advancedFilters.applicationDate) {
-      newActiveFilters["Ngày nộp"] = advancedFilters.applicationDate;
+    if (advancedFilters.applicationDateFrom || advancedFilters.applicationDateTo) {
+      newActiveFilters["Ngày nộp"] = `${advancedFilters.applicationDateFrom || "..."} - ${advancedFilters.applicationDateTo || "..."}`;
     }
 
-    if (advancedFilters.publicationDate) {
-      newActiveFilters["Ngày công bố"] = advancedFilters.publicationDate;
+    if (advancedFilters.publicationDateFrom || advancedFilters.publicationDateTo) {
+      newActiveFilters["Ngày công bố"] = `${advancedFilters.publicationDateFrom || "..."} - ${advancedFilters.publicationDateTo || "..."}`;
     }
 
-    if (advancedFilters.certificateDate) {
-      newActiveFilters["Ngày cấp"] = advancedFilters.certificateDate;
+    if (advancedFilters.certificateDateFrom || advancedFilters.certificateDateTo) {
+      newActiveFilters["Ngày cấp"] = `${advancedFilters.certificateDateFrom || "..."} - ${advancedFilters.certificateDateTo || "..."}`;
     }
 
-    if (advancedFilters.expiryDate) {
-      newActiveFilters["Ngày hết hạn"] = advancedFilters.expiryDate;
-    }
-
-    if (advancedFilters.priorityDate) {
-      newActiveFilters["Ngày ưu tiên"] = advancedFilters.priorityDate;
+    if (advancedFilters.expiryDateFrom || advancedFilters.expiryDateTo) {
+      newActiveFilters["Ngày hết hạn"] = `${advancedFilters.expiryDateFrom || "..."} - ${advancedFilters.expiryDateTo || "..."}`;
     }
 
     if (advancedFilters.representative) {
@@ -199,6 +213,9 @@ console.log(industrialDesignsData);
 
     setActiveFilters(newActiveFilters);
     setShowAdvancedFilter(false);
+    await queryClient.invalidateQueries({
+      queryKey: [queryKey]
+    });
   };
 
   const handleResetFilters = () => {
@@ -207,10 +224,94 @@ console.log(industrialDesignsData);
     setSearchParams(initialSearchState)
   };
 
-  const removeFilter = (key: string) => {
+  const removeFilter = async (key: string) => {
     const updatedFilters = { ...activeFilters };
     delete updatedFilters[key];
     setActiveFilters(updatedFilters);
+
+    const newAdvancedFilters = { ...advancedFilters };
+    const newSearchParams = { ...searchParams };
+
+    switch(key) {
+      case "Số đơn":
+        newAdvancedFilters.applicationNumber = "";
+        delete newSearchParams.application_number;
+        break;
+      case "Số bằng":
+        newAdvancedFilters.certificateNumber = "";
+        delete newSearchParams.certificate_number;
+        break;
+      case "Chủ đơn":
+        newAdvancedFilters.applicant = "";
+        delete newSearchParams.applicant;
+        break;
+      case "Đại diện":
+        newAdvancedFilters.representative = "";
+        delete newSearchParams.representative;
+        break;
+      case "Phân loại Locarno":
+        newAdvancedFilters.niceClass = "";
+        delete newSearchParams.niceClass;
+        break;
+      case "Nước":
+        newAdvancedFilters.ownerCountry = "";
+        delete newSearchParams.country_code;
+        break;
+      case "Nước nộp đơn":
+        newAdvancedFilters.applicationCountry = "";
+        delete newSearchParams.application_country;
+        break;
+      case "Nước công bố":
+        newAdvancedFilters.publicationCountry = "";
+        delete newSearchParams.publication_country;
+        break;
+      case "Nước ưu tiên":
+        newAdvancedFilters.priorityCountry = "";
+        delete newSearchParams.priorityCountry;
+        break;
+      case "Ngày nộp":
+        newAdvancedFilters.applicationDateFrom = "";
+        newAdvancedFilters.applicationDateTo = "";
+        delete newSearchParams.application_date_from;
+        delete newSearchParams.application_date_to;
+        break;
+      case "Ngày công bố":
+        newAdvancedFilters.publicationDateFrom = "";
+        newAdvancedFilters.publicationDateTo = "";
+        delete newSearchParams.publicationDateFrom;
+        delete newSearchParams.publicationDateTo;
+        break;
+      case "Ngày cấp":
+        newAdvancedFilters.certificateDateFrom = "";
+        newAdvancedFilters.certificateDateTo = "";
+        delete newSearchParams.certificate_date_from;
+        delete newSearchParams.certificate_date_to;
+        break;
+      case "Ngày hết hạn":
+        newAdvancedFilters.expiryDateFrom = "";
+        newAdvancedFilters.expiryDateTo = "";
+        delete newSearchParams.expiryDateFrom;
+        delete newSearchParams.expiryDateTo;
+        break;
+      case "Số đơn gốc":
+        newAdvancedFilters.basicApplicationNumber = "";
+        delete newSearchParams.basic_application_number;
+        break;
+      case "Số ưu tiên":
+        newAdvancedFilters.priorityNumber = "";
+        delete newSearchParams.priority_number;
+        break;
+      case "Tên thiết kế":
+        newAdvancedFilters.designName = "";
+        delete newSearchParams.name;
+        break;
+    }
+
+    setAdvancedFilters(newAdvancedFilters);
+    setSearchParams(newSearchParams);
+    await queryClient.invalidateQueries({
+      queryKey: [queryKey]
+    });
   };
   const getStatusColor = (status: string) => {
     switch (status) {

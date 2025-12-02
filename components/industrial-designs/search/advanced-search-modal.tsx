@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { DatePickerSingle } from "@/components/common/date/date-picker-single";
+import { DateRangePicker } from "@/components/common/date/date-range-picker";
 
 interface AdvancedFilters {
   ownerCountry: string;
@@ -13,11 +13,14 @@ interface AdvancedFilters {
   locarnoClass: string;
   productCategory: string;
   designDomain: string;
-  applicationDate: string;
-  publicationDate: string;
-  certificateDate: string;
-  expiryDate: string;
-  priorityDate: string;
+  applicationDateFrom: string;
+  applicationDateTo: string;
+  publicationDateFrom: string;
+  publicationDateTo: string;
+  certificateDateFrom: string;
+  certificateDateTo: string;
+  expiryDateFrom: string;
+  expiryDateTo: string;
   applicant: string;
   representative: string;
   certificateNumber: string;
@@ -52,11 +55,11 @@ export default function AdvancedSearchModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl min-w-5xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b sticky top-0 bg-white dark:bg-zinc-950 z-10">
+        <DialogHeader className="px-4 pt-4 pb-2 border-b sticky top-0 bg-white dark:bg-zinc-950 z-10">
           <DialogTitle>Truy vấn nâng cao</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 overflow-y-auto flex-1 px-6 py-4 min-h-0">
+        <div className="grid grid-cols-1 gap-4 overflow-y-auto flex-1 px-4 pt-2 pb-4 min-h-0">
           {/* Các nước */}
           <div>
             <button
@@ -70,7 +73,7 @@ export default function AdvancedSearchModal({
               <span>Các nước</span>
             </button>
             <div data-group="countries" className="ml-4 mt-2 flex flex-wrap items-center justify-between gap-4 w-full">
-              <div className="w-[49%]">
+              {/* <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước chủ đơn/Chủ bằng</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -83,7 +86,7 @@ export default function AdvancedSearchModal({
                     })
                   }
                 />
-              </div>
+              </div> */}
               <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước nộp đơn</label>
                 <Input
@@ -129,64 +132,6 @@ export default function AdvancedSearchModal({
             </div>
           </div>
 
-          {/* Phân loại */}
-          <div>
-            <button
-              onClick={() => {
-                const el = document.querySelector('[data-group="categories"]');
-                if (el) el.classList.toggle('hidden');
-              }}
-              className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full"
-            >
-              <span>▶</span>
-              <span>Phân loại</span>
-            </button>
-            <div data-group="categories" className="ml-4 mt-2 flex flex-wrap items-center justify-between gap-4 w-full">
-              <div className="w-[32%]">
-                <label className="text-xs font-medium block mb-1">Phân loại Locarno</label>
-                <Input
-                  placeholder="Nhập phân loại Locarno..."
-                  className="text-sm"
-                  value={advancedFilters.locarnoClass}
-                  onChange={(e) =>
-                    onFiltersChange({
-                      ...advancedFilters,
-                      locarnoClass: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="w-[32%]">
-                <label className="text-xs font-medium block mb-1">Danh mục sản phẩm</label>
-                <Input
-                  placeholder="Nhập danh mục..."
-                  className="text-sm"
-                  value={advancedFilters.productCategory}
-                  onChange={(e) =>
-                    onFiltersChange({
-                      ...advancedFilters,
-                      productCategory: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="w-[32%]">
-                <label className="text-xs font-medium block mb-1">Lĩnh vực thiết kế</label>
-                <Input
-                  placeholder="Nhập lĩnh vực..."
-                  className="text-sm"
-                  value={advancedFilters.designDomain}
-                  onChange={(e) =>
-                    onFiltersChange({
-                      ...advancedFilters,
-                      designDomain: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Ngày */}
           <div>
             <button
@@ -199,70 +144,77 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Ngày</span>
             </button>
-            <div data-group="dates" className="ml-4 mt-2 flex flex-wrap items-center justify-between w-full gap-4">
-              <div className="w-[49%]">
+            <div data-group="dates" className="ml-4 mt-2 flex flex-wrap items-start justify-between gap-4">
+              <div className="w-full sm:w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày nộp đơn</label>
-                <DatePickerSingle
-                  value={advancedFilters.applicationDate}
-                  onChange={(date) =>
+                <DateRangePicker
+                  showPresets={true}
+                  date={{
+                    from: advancedFilters.applicationDateFrom ? new Date(advancedFilters.applicationDateFrom) : undefined,
+                    to: advancedFilters.applicationDateTo ? new Date(advancedFilters.applicationDateTo) : undefined
+                  }}
+                  onDateChange={(range) => {
                     onFiltersChange({
                       ...advancedFilters,
-                      applicationDate: date,
-                    })
-                  }
-                  placeholder="Chọn ngày nộp đơn"
+                      applicationDateFrom: range?.from ? range.from.toISOString().split('T')[0] : '',
+                      applicationDateTo: range?.to ? range.to.toISOString().split('T')[0] : ''
+                    });
+                  }}
+                  className="w-full"
                 />
               </div>
-              <div className="w-[49%]">
+              <div className="w-full sm:w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày công bố</label>
-                <DatePickerSingle
-                  value={advancedFilters.publicationDate}
-                  onChange={(date) =>
+                <DateRangePicker
+                  showPresets={true}
+                  date={{
+                    from: advancedFilters.publicationDateFrom ? new Date(advancedFilters.publicationDateFrom) : undefined,
+                    to: advancedFilters.publicationDateTo ? new Date(advancedFilters.publicationDateTo) : undefined
+                  }}
+                  onDateChange={(range) => {
                     onFiltersChange({
                       ...advancedFilters,
-                      publicationDate: date,
-                    })
-                  }
-                  placeholder="Chọn ngày công bố"
+                      publicationDateFrom: range?.from ? range.from.toISOString().split('T')[0] : '',
+                      publicationDateTo: range?.to ? range.to.toISOString().split('T')[0] : ''
+                    });
+                  }}
+                  className="w-full"
                 />
               </div>
-              <div className="w-[49%]">
+              <div className="w-full sm:w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày cấp</label>
-                <DatePickerSingle
-                  value={advancedFilters.certificateDate}
-                  onChange={(date) =>
+                <DateRangePicker
+                  showPresets={true}
+                  date={{
+                    from: advancedFilters.certificateDateFrom ? new Date(advancedFilters.certificateDateFrom) : undefined,
+                    to: advancedFilters.certificateDateTo ? new Date(advancedFilters.certificateDateTo) : undefined
+                  }}
+                  onDateChange={(range) => {
                     onFiltersChange({
                       ...advancedFilters,
-                      certificateDate: date,
-                    })
-                  }
-                  placeholder="Chọn ngày cấp"
+                      certificateDateFrom: range?.from ? range.from.toISOString().split('T')[0] : '',
+                      certificateDateTo: range?.to ? range.to.toISOString().split('T')[0] : ''
+                    });
+                  }}
+                  className="w-full"
                 />
               </div>
-              <div className="w-[49%]">
+              <div className="w-full sm:w-[49%]">
                 <label className="text-xs font-medium block mb-1">Ngày hết hạn</label>
-                <DatePickerSingle
-                  value={advancedFilters.expiryDate}
-                  onChange={(date) =>
+                <DateRangePicker
+                  showPresets={true}
+                  date={{
+                    from: advancedFilters.expiryDateFrom ? new Date(advancedFilters.expiryDateFrom) : undefined,
+                    to: advancedFilters.expiryDateTo ? new Date(advancedFilters.expiryDateTo) : undefined
+                  }}
+                  onDateChange={(range) => {
                     onFiltersChange({
                       ...advancedFilters,
-                      expiryDate: date,
-                    })
-                  }
-                  placeholder="Chọn ngày hết hạn"
-                />
-              </div>
-              <div className="w-full">
-                <label className="text-xs font-medium block mb-1">Ngày ưu tiên</label>
-                <DatePickerSingle
-                  value={advancedFilters.priorityDate}
-                  onChange={(date) =>
-                    onFiltersChange({
-                      ...advancedFilters,
-                      priorityDate: date,
-                    })
-                  }
-                  placeholder="Chọn ngày ưu tiên"
+                      expiryDateFrom: range?.from ? range.from.toISOString().split('T')[0] : '',
+                      expiryDateTo: range?.to ? range.to.toISOString().split('T')[0] : ''
+                    });
+                  }}
+                  className="w-full"
                 />
               </div>
             </div>
@@ -354,9 +306,9 @@ export default function AdvancedSearchModal({
                 />
               </div>
               <div className="w-[49%]">
-                <label className="text-xs font-medium block mb-1">Số đơn góc</label>
+                <label className="text-xs font-medium block mb-1">Số đơn gốc</label>
                 <Input
-                  placeholder="Nhập số đơn góc..."
+                  placeholder="Nhập số đơn gốc..."
                   className="text-sm"
                   value={advancedFilters.basicApplicationNumber}
                   onChange={(e) =>
@@ -367,7 +319,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div className="w-[49%]">
+              {/* <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Số ưu tiên</label>
                 <Input
                   placeholder="Nhập số ưu tiên..."
@@ -380,7 +332,65 @@ export default function AdvancedSearchModal({
                     })
                   }
                 />
+              </div> */}
+            </div>
+          </div>
+
+          {/* Phân loại */}
+          <div>
+            <button
+              onClick={() => {
+                const el = document.querySelector('[data-group="categories"]');
+                if (el) el.classList.toggle('hidden');
+              }}
+              className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full"
+            >
+              <span>▶</span>
+              <span>Phân loại</span>
+            </button>
+            <div data-group="categories" className="ml-4 mt-2 flex flex-wrap items-center justify-between gap-4 w-full">
+              <div className="w-[32%]">
+                <label className="text-xs font-medium block mb-1">Phân loại Locarno</label>
+                <Input
+                  placeholder="Nhập phân loại Locarno..."
+                  className="text-sm"
+                  value={advancedFilters.locarnoClass}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...advancedFilters,
+                      locarnoClass: e.target.value,
+                    })
+                  }
+                />
               </div>
+              {/* <div className="w-[32%]">
+                <label className="text-xs font-medium block mb-1">Danh mục sản phẩm</label>
+                <Input
+                  placeholder="Nhập danh mục..."
+                  className="text-sm"
+                  value={advancedFilters.productCategory}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...advancedFilters,
+                      productCategory: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="w-[32%]">
+                <label className="text-xs font-medium block mb-1">Lĩnh vực thiết kế</label>
+                <Input
+                  placeholder="Nhập lĩnh vực..."
+                  className="text-sm"
+                  value={advancedFilters.designDomain}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...advancedFilters,
+                      designDomain: e.target.value,
+                    })
+                  }
+                />
+              </div> */}
             </div>
           </div>
 
@@ -398,9 +408,9 @@ export default function AdvancedSearchModal({
             </button>
             <div data-group="other" className="ml-4 mt-2 flex flex-wrap items-center justify-between w-full gap-4">
               <div className="w-[32%]">
-                <label className="text-xs font-medium block mb-1">Tên thiết kế</label>
+                <label className="text-xs font-medium block mb-1">Tên KDCN</label>
                 <Input
-                  placeholder="Nhập tên thiết kế..."
+                  placeholder="Nhập tên KDCN..."
                   className="text-sm"
                   value={advancedFilters.designName}
                   onChange={(e) =>
@@ -411,7 +421,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div className="w-[32%]">
+              {/* <div className="w-[32%]">
                 <label className="text-xs font-medium block mb-1">Loại thiết kế</label>
                 <Input
                   placeholder="Nhập loại thiết kế..."
@@ -424,8 +434,8 @@ export default function AdvancedSearchModal({
                     })
                   }
                 />
-              </div>
-              <div className="w-[32%]">
+              </div> */}
+              {/* <div className="w-[32%]">
                 <label className="text-xs font-medium block mb-1">Mô tả sản phẩm</label>
                 <Input
                   placeholder="Nhập mô tả..."
@@ -438,7 +448,7 @@ export default function AdvancedSearchModal({
                     })
                   }
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
