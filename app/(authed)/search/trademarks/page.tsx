@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/trademarks/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { TrademarkParams, trademarkService } from "@/services/trademark.service";
@@ -346,7 +347,7 @@ export default function TrademarksSearchPage() {
       vienna_class: newAdvancedFilters?.viennaClass,
       applicant: newAdvancedFilters?.applicant,
       representative: newAdvancedFilters?.representative,
-      basic_application_number: newAdvancedFilters?.basicApplicationNumber,
+      basicApplicationNumber: newAdvancedFilters?.basicApplicationNumber,
       priority_number: newAdvancedFilters?.priorityNumber,
       trade_name: newAdvancedFilters?.tradeName,
     };
@@ -360,6 +361,7 @@ export default function TrademarksSearchPage() {
 
   const {
     data: trademarksData,
+    isLoading: isTrademarksLoading,
   } = useQuery({
     queryFn: async () => await trademarkService.search({
       ...searchParams
@@ -535,7 +537,44 @@ console.log('trade', trademarksData);
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { trademarksData?.data?.items.filter((item) => item.application_number).map((item) => (
+                  {isTrademarksLoading ? (
+                    // Loading skeleton
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={`skeleton-${index}`}>
+                        <TableCell>
+                          <Skeleton className="w-16 h-16 rounded" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-20" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-40" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-6 w-20 rounded-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    trademarksData?.data?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -610,13 +649,32 @@ console.log('trade', trademarksData);
                         )}
                       </TableCell>
                     </TableRow>
-                  )) }
+                  ))
+                  )}
                 </TableBody>
               </Table>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { trademarksData?.data?.items?.filter((item) => item.application_number).map((item) => (
+              {isTrademarksLoading ? (
+                // Loading skeleton for grid view
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={`grid-skeleton-${index}`}
+                    className="border rounded-lg p-4 bg-white dark:bg-zinc-900"
+                  >
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                trademarksData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
@@ -655,7 +713,8 @@ console.log('trade', trademarksData);
                     </p>
                   </div>
                 </div>
-              )) }
+              ))
+              )}
             </div>
           ) }
           <div className="w-full h-full mt-4">

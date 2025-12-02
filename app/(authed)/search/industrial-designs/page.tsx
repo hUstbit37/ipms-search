@@ -118,7 +118,7 @@ console.log(industrialDesignsData);
       representative: advancedFilters?.representative,
       name: advancedFilters?.designName,
       basic_application_number: advancedFilters?.basicApplicationNumber,
-      priority_number: advancedFilters?.priorityNumber,
+      // priority_number: advancedFilters?.priorityNumber,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
