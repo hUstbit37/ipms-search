@@ -17,6 +17,8 @@ import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants
 import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import { queryClient } from "@/lib/react-query";
+import { FileDown } from "lucide-react";
+import { exportTrademarksToExcel } from "@/utils/excel-export";
 
 const initialAdvancedSearchState = {
   ownerCountry: "",
@@ -485,6 +487,18 @@ console.log('trade', trademarksData);
 
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const currentPageData = trademarksData?.data?.items.filter((item) => item.application_number) || [];
+                    exportTrademarksToExcel(currentPageData, companyMap);
+                  }}
+                  className="text-xs sm:text-sm flex items-center gap-2"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Xuất Excel
+                </Button>
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày nộp đơn</option>
                   <option>Ngày cấp bằng</option>

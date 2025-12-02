@@ -16,6 +16,8 @@ import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import { Tooltip } from "@/components/ui/tooltip";
 import PatentDetailModal from "@/components/patents/patent-detail-modal";
+import { FileDown } from "lucide-react";
+import { exportPatentsToExcel } from "@/utils/excel-export";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -388,6 +390,18 @@ export default function PatentsSearchPage() {
             <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
               {/* View Toggle and Sort */ }
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const currentPageData = patentsData?.data?.items?.filter((item) => item.application_number) || [];
+                    exportPatentsToExcel(currentPageData, companyMap);
+                  }}
+                  className="text-xs sm:text-sm flex items-center gap-2"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Xuất Excel
+                </Button>
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày đơn đăng ký</option>
                   <option>Ngày cấp bằng</option>

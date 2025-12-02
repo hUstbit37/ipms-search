@@ -14,6 +14,8 @@ import { queryClient } from "@/lib/react-query";
 import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import DesignDetailModal from "@/components/industrial-designs/design-detail-modal";
+import { FileDown } from "lucide-react";
+import { exportIndustrialDesignsToExcel } from "@/utils/excel-export";
 
 const initialAdvancedSearch = {
   ownerCountry: "",
@@ -398,6 +400,18 @@ console.log(industrialDesignsData);
             <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center">
               {/* View Toggle and Sort */ }
               <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const currentPageData = industrialDesignsData?.data?.items.filter((item) => item.application_number) || [];
+                    exportIndustrialDesignsToExcel(currentPageData, companyMap);
+                  }}
+                  className="text-xs sm:text-sm flex items-center gap-2"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Xuất Excel
+                </Button>
                 <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
                   <option>Ngày nộp đơn</option>
                   <option>Ngày cấp bằng</option>
