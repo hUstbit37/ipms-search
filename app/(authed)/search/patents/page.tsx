@@ -90,25 +90,25 @@ export default function PatentsSearchPage() {
   const handleAdvancedSearch = async () => {
     setSearchParams({
       ...initialSearchState,
-      status: advancedFilters?.status && advancedFilters.status ? advancedFilters.status : undefined,
-      application_number: advancedFilters?.applicationNumber ?? advancedFilters.applicationNumber ? advancedFilters.applicationNumber : undefined,
-      country_code: advancedFilters?.countryCode && advancedFilters.countryCode ? advancedFilters?.countryCode : undefined,
-      certificate_number: advancedFilters?.certificateNumber && advancedFilters.certificateNumber ? advancedFilters.certificateNumber : undefined,
-      application_date_from: advancedFilters?.applicationDateFrom ? advancedFilters.applicationDateFrom : undefined,
-      application_date_to: advancedFilters?.applicationDateTo ? advancedFilters.applicationDateTo : undefined,
-      certificate_date_from: advancedFilters?.certificateDateFrom ? advancedFilters.certificateDateFrom : undefined,
-      certificate_date_to: advancedFilters?.certificateDateTo ? advancedFilters.certificateDateTo : undefined,
-      publicationDateFrom: advancedFilters?.publicationDateFrom ? advancedFilters.publicationDateFrom : undefined,
-      publicationDateTo: advancedFilters?.publicationDateTo ? advancedFilters.publicationDateTo : undefined,
-      expiryDateFrom: advancedFilters?.expiryDateFrom ? advancedFilters.expiryDateFrom : undefined,
-      expiryDateTo: advancedFilters?.expiryDateTo ? advancedFilters.expiryDateTo : undefined,
-      priorityCountry: advancedFilters?.priorityCountry ? advancedFilters.priorityCountry : undefined,
-      application_country: advancedFilters?.applicationCountry ? advancedFilters.applicationCountry : undefined,
-      publication_country: advancedFilters?.publicationCountry ? advancedFilters.publicationCountry : undefined,
-      niceClass: advancedFilters?.niceClass ? advancedFilters.niceClass : undefined,
-      applicant: advancedFilters?.applicant ? advancedFilters.applicant : undefined,
-      representative: advancedFilters?.representative ? advancedFilters.representative : undefined,
-      name: advancedFilters?.name ? advancedFilters.name : undefined,
+      status: advancedFilters?.status || undefined,
+      application_number: advancedFilters?.applicationNumber || undefined,
+      country_code: advancedFilters?.countryCode || undefined,
+      certificate_number: advancedFilters?.certificateNumber || undefined,
+      application_date_from: advancedFilters?.applicationDateFrom || undefined,
+      application_date_to: advancedFilters?.applicationDateTo || undefined,
+      certificate_date_from: advancedFilters?.certificateDateFrom || undefined,
+      certificate_date_to: advancedFilters?.certificateDateTo || undefined,
+      publicationDateFrom: advancedFilters?.publicationDateFrom || undefined,
+      publicationDateTo: advancedFilters?.publicationDateTo || undefined,
+      expiryDateFrom: advancedFilters?.expiryDateFrom || undefined,
+      expiryDateTo: advancedFilters?.expiryDateTo || undefined,
+      priorityCountry: advancedFilters?.priorityCountry || undefined,
+      application_country: advancedFilters?.applicationCountry || undefined,
+      publication_country: advancedFilters?.publicationCountry || undefined,
+      niceClass: advancedFilters?.niceClass || undefined,
+      applicant: advancedFilters?.applicant || undefined,
+      representative: advancedFilters?.representative || undefined,
+      name: advancedFilters?.name || undefined,
     })
     setSearchQuery("")
 
@@ -376,9 +376,7 @@ export default function PatentsSearchPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={ () => {
-                    setActiveFilters({});
-                  } }
+                  onClick={ handleResetFilters }
                   className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 text-xs sm:text-sm"
                 >
                   Xóa bộ lọc

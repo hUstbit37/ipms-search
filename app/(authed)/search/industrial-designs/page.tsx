@@ -5,7 +5,6 @@ import { LayoutGrid, List, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/industrial-designs/search/advanced-search-modal";
 import { FORMAT_DATE, initialSearchState } from "@/constants";
 import { IndustrialDesignParams, industrialDesignsService } from "@/services/industrial-designs.service";
@@ -64,8 +63,7 @@ export default function IndustrialDesignsSearchPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const {
-    data: industrialDesignsData,
-    isLoading: isDesignsLoading,
+    data: industrialDesignsData
   } = useQuery({
     queryFn: async () => await industrialDesignsService.get(searchParams),
     queryKey: [queryKey, { searchParams }],
@@ -100,27 +98,26 @@ console.log(industrialDesignsData);
   const handleAdvancedSearch = async () => {
     setSearchParams({
       ...initialSearchState,
-      status: advancedFilters?.status,
-      application_number: advancedFilters?.applicationNumber,
-      country_code: advancedFilters?.ownerCountry,
-      certificate_number: advancedFilters?.certificateNumber,
-      application_date_from: advancedFilters?.applicationDateFrom,
-      application_date_to: advancedFilters?.applicationDateTo,
-      certificate_date_from: advancedFilters?.certificateDateFrom,
-      certificate_date_to: advancedFilters?.certificateDateTo,
-      publicationDateFrom: advancedFilters?.publicationDateFrom,
-      publicationDateTo: advancedFilters?.publicationDateTo,
-      expiryDateFrom: advancedFilters?.expiryDateFrom,
-      expiryDateTo: advancedFilters?.expiryDateTo,
-      application_country: advancedFilters?.applicationCountry,
-      publication_country: advancedFilters?.publicationCountry,
-      priorityCountry: advancedFilters?.priorityCountry,
-      niceClass: advancedFilters?.niceClass,
-      applicant: advancedFilters?.applicant,
-      representative: advancedFilters?.representative,
-      name: advancedFilters?.designName,
-      basic_application_number: advancedFilters?.basicApplicationNumber,
-      // priority_number: advancedFilters?.priorityNumber,
+      status: advancedFilters?.status || undefined,
+      application_number: advancedFilters?.applicationNumber || undefined,
+      country_code: advancedFilters?.ownerCountry || undefined,
+      certificate_number: advancedFilters?.certificateNumber || undefined,
+      application_date_from: advancedFilters?.applicationDateFrom || undefined,
+      application_date_to: advancedFilters?.applicationDateTo || undefined,
+      certificate_date_from: advancedFilters?.certificateDateFrom || undefined,
+      certificate_date_to: advancedFilters?.certificateDateTo || undefined,
+      publicationDateFrom: advancedFilters?.publicationDateFrom || undefined,
+      publicationDateTo: advancedFilters?.publicationDateTo || undefined,
+      expiryDateFrom: advancedFilters?.expiryDateFrom || undefined,
+      expiryDateTo: advancedFilters?.expiryDateTo || undefined,
+      application_country: advancedFilters?.applicationCountry || undefined,
+      publication_country: advancedFilters?.publicationCountry || undefined,
+      priorityCountry: advancedFilters?.priorityCountry || undefined,
+      niceClass: advancedFilters?.niceClass || undefined,
+      applicant: advancedFilters?.applicant || undefined,
+      representative: advancedFilters?.representative || undefined,
+      name: advancedFilters?.designName || undefined,
+      basic_application_number: advancedFilters?.basicApplicationNumber || undefined,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -389,12 +386,10 @@ console.log(industrialDesignsData);
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={ () => {
-                    setActiveFilters({});
-                  } }
+                  onClick={ handleResetFilters }
                   className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 text-xs sm:text-sm"
                 >
-                  Clear
+                  Xóa bộ lọc
                 </Button>
               ) }
             </div>
@@ -457,41 +452,7 @@ console.log(industrialDesignsData);
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isDesignsLoading ? (
-                    // Loading skeleton
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={`skeleton-${index}`}>
-                        <TableCell>
-                          <Skeleton className="w-16 h-16 rounded" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-32" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-20" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-40" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-6 w-24 rounded-full" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    industrialDesignsData?.data?.items.filter((item) => item.application_number).map((item) => (
+                  { industrialDesignsData?.data?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -551,34 +512,13 @@ console.log(industrialDesignsData);
                         )}
                       </TableCell>
                     </TableRow>
-                  ))
-                  )}
+                  )) }
                 </TableBody>
               </Table>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {isDesignsLoading ? (
-                // Loading skeleton for grid view
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={`grid-skeleton-${index}`}
-                    className="border rounded-lg p-4 bg-white dark:bg-zinc-900"
-                  >
-                    <Skeleton className="h-6 w-32 mb-2" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-4 w-5/6" />
-                      <Skeleton className="h-4 w-4/5" />
-                      <Skeleton className="h-6 w-20 rounded-full" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                industrialDesignsData?.data?.items?.filter((item) => item.application_number).map((item) => (
+              { industrialDesignsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
@@ -621,8 +561,7 @@ console.log(industrialDesignsData);
                     </p>
                   </div>
                 </div>
-              ))
-              )}
+              )) }
             </div>
           ) }
           <div className="w-full h-full mt-4">
