@@ -1,4 +1,4 @@
-import apiInstance from "@/lib/api/apiInstance";
+import apiServerInstance from "@/lib/api/apiServerInstance";
 import { PaginationResponse } from "@/types/api";
 
 export interface Company {
@@ -22,11 +22,11 @@ export interface CompanyParams {
 }
 
 export const companyService = {
-  getAll: async (params: CompanyParams = { limit: 500, datasource: "ALL" }, signal?: AbortSignal) => {
-    return await apiInstance.get<PaginationResponse<Company>>("/v1/companies", { signal, params });
+  getAll: async (params: CompanyParams = { limit: 500, datasource: "ALL", page: 1, page_size: 500 }, signal?: AbortSignal) => {
+    return await apiServerInstance.get<PaginationResponse<Company>>("/companies", { signal, params });
   },
 
   getById: async (id: string, signal?: AbortSignal) => {
-    return await apiInstance.get<Company>(`/v1/companies/${id}`, { signal });
+    return await apiServerInstance.get<Company>(`/companies/${id}`, { signal });
   },
 };

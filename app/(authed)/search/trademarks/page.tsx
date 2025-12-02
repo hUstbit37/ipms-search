@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutGrid, List, Search, Trash2, XIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LayoutGrid, List, Search, Trash2, XIcon, Eye } from "lucide-react";
+import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -48,12 +50,15 @@ const initialAdvancedSearchState = {
 }
 
 export default function TrademarksSearchPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState(initialAdvancedSearchState);
   const [searchParams, setSearchParams] = useState<TrademarkParams>(initialSearchState);
+  const [showQuickView, setShowQuickView] = useState(false);
+  const [selectedTrademark, setSelectedTrademark] = useState<any>(null);
 
   const handleSearch = async () => {
     setSearchParams({
@@ -224,11 +229,27 @@ export default function TrademarksSearchPage() {
     }),
     queryKey: ["trademarks", { searchParams }],
   })
+console.log('trade', trademarksData);
 
   const {
     data: companiesData,
   } = useQuery({
-    queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
+    queryFn: async () => {
+      const [page1, page2, page3] = await Promise.all([
+        companyService.getAll({ limit: 500, datasource: "ALL", page: 1, page_size: 500 }),
+        companyService.getAll({ limit: 500, datasource: "ALL", page: 2, page_size: 500 }),
+        companyService.getAll({ limit: 500, datasource: "ALL", page: 3, page_size: 500 })
+      ]);
+      
+      // Merge the results
+      return {
+        ...page1,
+        data: {
+          ...page1.data,
+          items: [...(page1.data?.items || []), ...(page2.data?.items || []), ...(page3.data?.items || [])]
+        }
+      };
+    },
     queryKey: ["companies"],
   })
 
@@ -238,7 +259,8 @@ export default function TrademarksSearchPage() {
     return acc;
   }, {} as Record<string, string>) || {};
 
-  console.log(trademarksData);
+  console.log(companiesData, );
+  console.log(companyMap);
   
 
   const getStatusColor = (status: string) => {
@@ -377,9 +399,16 @@ export default function TrademarksSearchPage() {
                 </TableHeader>
                 <TableBody>
                   { trademarksData?.data?.items.filter((item) => item.application_number).map((item) => (
-                    <TableRow key={ item.id } className="hover:bg-transparent">
+                    <TableRow 
+                      key={ item.id } 
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setSelectedTrademark(item);
+                        setShowQuickView(true);
+                      }}
+                    >
                       <TableCell>
-                        <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm overflow-hidden">
+                        <div className="relative w-16 h-16 rounded flex items-center justify-center shadow-sm overflow-hidden group">
                           {item.image_url ? (
                           <img 
                             src={item.image_url} 
@@ -392,6 +421,16 @@ export default function TrademarksSearchPage() {
                             {item.name ? item.name.charAt(0) : "-"}
                           </div>
                           )}
+                          <div 
+                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTrademark(item);
+                              setShowQuickView(true);
+                            }}
+                          >
+                            <Eye className="w-6 h-6 text-white" />
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -445,7 +484,11 @@ export default function TrademarksSearchPage() {
               { trademarksData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
-                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
+                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
+                  onClick={() => {
+                    setSelectedTrademark(item);
+                    setShowQuickView(true);
+                  }}
                 >
                   <h3 className="font-semibold mb-2">{ item.application_number }</h3>
                   <div className="space-y-1 text-sm text-muted-foreground">
@@ -497,6 +540,13 @@ export default function TrademarksSearchPage() {
         onFiltersChange={ setAdvancedFilters }
         onSearch={ handleAdvancedSearch }
         onReset={ handleResetFilters }
+      />
+
+      <TrademarkDetailModal
+        open={ showQuickView }
+        onOpenChange={ setShowQuickView }
+        trademark={ selectedTrademark }
+        companyMap={ companyMap }
       />
     </div>
   );

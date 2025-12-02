@@ -2,6 +2,7 @@ import apiClient from '@/lib/api-client';
 import type { IPRecord } from '@/types/ip';
 import { PaginationResponse } from "@/types/api";
 import apiServerInstance from "@/lib/api/apiServerInstance";
+import apiInstance from "@/lib/api/apiInstance";
 
 export interface TrademarkParams {
   search?: string;
@@ -20,6 +21,8 @@ export interface TrademarkParams {
   image_url?: string;
   wipo_status?: string;
   nice_class_text?: string;
+  owner_id?: string;
+  publication_date?: string;
 }
 
 export interface TrademarkResponse {
@@ -39,6 +42,10 @@ export interface TrademarkResponse {
   created_by: string | null;
   created_at: string | null;
   updated_at: string | null;
+  image_url: string | null;
+  wipo_status: string | null;
+  nice_class_text: string | null;
+  publication_date: string | null;
 }
 
 export const trademarkService = {
@@ -46,16 +53,9 @@ export const trademarkService = {
     return await apiServerInstance.get<PaginationResponse<TrademarkResponse>>("/trademarks", { signal, params });
   },
 
-  // Lấy chi tiết nhãn hiệu theo ID
-  getById: async (id: string, signal?: AbortSignal): Promise<IPRecord> => {
-    return await apiClient<IPRecord>(
-      {
-        url: `/trademarks/${ id }`,
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        signal,
-      }
-    );
+  // Lấy chi tiết nhãn hiệu theo ID từ API public
+  getById: async (id: string, signal?: AbortSignal) => {
+    return await apiServerInstance.get<any>(`/trademarks/${id}`, { signal });
   },
 
   // Lấy nhãn hiệu theo số đơn
