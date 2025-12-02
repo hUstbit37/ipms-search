@@ -26,11 +26,15 @@ const initialAdvancedSearchState = {
   niceClass: "",
   productCategory: "",
   viennaClass: "",
-  // Ngày (single date only)
-  applicationDate: "",
-  publicationDate: "",
-  certificateDate: "",
-  expiryDate: "",
+  // Ngày (date ranges)
+  applicationDateFrom: "",
+  applicationDateTo: "",
+  publicationDateFrom: "",
+  publicationDateTo: "",
+  certificateDateFrom: "",
+  certificateDateTo: "",
+  expiryDateFrom: "",
+  expiryDateTo: "",
   priorityDate: "",
   // Tên người
   applicant: "",
@@ -79,8 +83,12 @@ export default function TrademarksSearchPage() {
       application_number: advancedFilters?.applicationNumber ?? advancedFilters.applicationNumber ? advancedFilters.applicationNumber : undefined,
       country_code: advancedFilters?.ownerCountry && advancedFilters.ownerCountry ? advancedFilters?.ownerCountry : undefined,
       certificate_number: advancedFilters?.certificateNumber && advancedFilters.certificateNumber ? advancedFilters.certificateNumber : undefined,
-      application_date_from: advancedFilters?.applicationDate && advancedFilters.applicationDate ? advancedFilters?.applicationDate : undefined,
-      certificate_date_from: advancedFilters?.certificateDate ? advancedFilters.certificateDate : undefined,
+      application_date_from: advancedFilters?.applicationDateFrom ? advancedFilters.applicationDateFrom : undefined,
+      application_date_to: advancedFilters?.applicationDateTo ? advancedFilters.applicationDateTo : undefined,
+      publication_date_from: advancedFilters?.publicationDateFrom ? advancedFilters.publicationDateFrom : undefined,
+      publication_date_to: advancedFilters?.publicationDateTo ? advancedFilters.publicationDateTo : undefined,
+      certificate_date_from: advancedFilters?.certificateDateFrom ? advancedFilters.certificateDateFrom : undefined,
+      certificate_date_to: advancedFilters?.certificateDateTo ? advancedFilters.certificateDateTo : undefined,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -121,20 +129,20 @@ export default function TrademarksSearchPage() {
       newActiveFilters["Vienna Class"] = advancedFilters.viennaClass;
     }
 
-    if (advancedFilters.applicationDate) {
-      newActiveFilters["Ngày nộp"] = advancedFilters.applicationDate;
+    if (advancedFilters.applicationDateFrom || advancedFilters.applicationDateTo) {
+      newActiveFilters["Ngày nộp đơn"] = `${advancedFilters.applicationDateFrom || ''} - ${advancedFilters.applicationDateTo || ''}`;
     }
 
-    if (advancedFilters.publicationDate) {
-      newActiveFilters["Ngày công bố"] = advancedFilters.publicationDate;
+    if (advancedFilters.publicationDateFrom || advancedFilters.publicationDateTo) {
+      newActiveFilters["Ngày công bố"] = `${advancedFilters.publicationDateFrom || ''} - ${advancedFilters.publicationDateTo || ''}`;
     }
 
-    if (advancedFilters.certificateDate) {
-      newActiveFilters["Ngày cấp"] = advancedFilters.certificateDate;
+    if (advancedFilters.certificateDateFrom || advancedFilters.certificateDateTo) {
+      newActiveFilters["Ngày cấp"] = `${advancedFilters.certificateDateFrom || ''} - ${advancedFilters.certificateDateTo || ''}`;
     }
 
-    if (advancedFilters.expiryDate) {
-      newActiveFilters["Ngày hết hạn"] = advancedFilters.expiryDate;
+    if (advancedFilters.expiryDateFrom || advancedFilters.expiryDateTo) {
+      newActiveFilters["Ngày hết hạn"] = `${advancedFilters.expiryDateFrom || ''} - ${advancedFilters.expiryDateTo || ''}`;
     }
 
     if (advancedFilters.priorityDate) {
@@ -193,10 +201,14 @@ export default function TrademarksSearchPage() {
       niceClass: "",
       productCategory: "",
       viennaClass: "",
-      applicationDate: "",
-      publicationDate: "",
-      certificateDate: "",
-      expiryDate: "",
+      applicationDateFrom: "",
+      applicationDateTo: "",
+      publicationDateFrom: "",
+      publicationDateTo: "",
+      certificateDateFrom: "",
+      certificateDateTo: "",
+      expiryDateFrom: "",
+      expiryDateTo: "",
       priorityDate: "",
       applicant: "",
       representative: "",
@@ -215,10 +227,109 @@ export default function TrademarksSearchPage() {
     setSearchParams(initialSearchState)
   };
 
-  const removeFilter = (key: string) => {
+  const removeFilter = async (key: string) => {
     const updatedFilters = { ...activeFilters };
     delete updatedFilters[key];
     setActiveFilters(updatedFilters);
+
+    // Clear corresponding advancedFilters based on the key
+    const newAdvancedFilters = { ...advancedFilters };
+    
+    switch(key) {
+      case "Số đơn":
+        newAdvancedFilters.applicationNumber = "";
+        break;
+      case "Chủ đơn":
+        newAdvancedFilters.applicant = "";
+        break;
+      case "NICE Class":
+        newAdvancedFilters.niceClass = "";
+        break;
+      case "Nước":
+        newAdvancedFilters.ownerCountry = "";
+        break;
+      case "Nước nộp đơn":
+        newAdvancedFilters.applicationCountry = "";
+        break;
+      case "Nước công bố":
+        newAdvancedFilters.publicationCountry = "";
+        break;
+      case "Nước ưu tiên":
+        newAdvancedFilters.priorityCountry = "";
+        break;
+      case "Danh mục":
+        newAdvancedFilters.productCategory = "";
+        break;
+      case "Vienna Class":
+        newAdvancedFilters.viennaClass = "";
+        break;
+      case "Ngày nộp đơn":
+        newAdvancedFilters.applicationDateFrom = "";
+        newAdvancedFilters.applicationDateTo = "";
+        break;
+      case "Ngày công bố":
+        newAdvancedFilters.publicationDateFrom = "";
+        newAdvancedFilters.publicationDateTo = "";
+        break;
+      case "Ngày cấp":
+        newAdvancedFilters.certificateDateFrom = "";
+        newAdvancedFilters.certificateDateTo = "";
+        break;
+      case "Ngày hết hạn":
+        newAdvancedFilters.expiryDateFrom = "";
+        newAdvancedFilters.expiryDateTo = "";
+        break;
+      case "Ngày ưu tiên":
+        newAdvancedFilters.priorityDate = "";
+        break;
+      case "Đại diện":
+        newAdvancedFilters.representative = "";
+        break;
+      case "Số bằng":
+        newAdvancedFilters.certificateNumber = "";
+        break;
+      case "Số đơn gốc":
+        newAdvancedFilters.basicApplicationNumber = "";
+        break;
+      case "Số ưu tiên":
+        newAdvancedFilters.priorityNumber = "";
+        break;
+      case "Nhãn hiệu":
+        newAdvancedFilters.tradeName = "";
+        break;
+      case "Hàng hóa/Dịch vụ":
+        newAdvancedFilters.goodsServices = "";
+        break;
+      case "Trạng thái chứng chỉ":
+        newAdvancedFilters.certificateStatus = "";
+        break;
+      case "Loại bản ghi":
+        newAdvancedFilters.recordType = "";
+        break;
+    }
+
+    setAdvancedFilters(newAdvancedFilters);
+
+    // Update search params and trigger new search
+    const newSearchParams = {
+      ...initialSearchState,
+      status: newAdvancedFilters?.status && newAdvancedFilters.status ? newAdvancedFilters.status : undefined,
+      application_number: newAdvancedFilters?.applicationNumber ? newAdvancedFilters.applicationNumber : undefined,
+      country_code: newAdvancedFilters?.ownerCountry ? newAdvancedFilters.ownerCountry : undefined,
+      certificate_number: newAdvancedFilters?.certificateNumber ? newAdvancedFilters.certificateNumber : undefined,
+      application_date_from: newAdvancedFilters?.applicationDateFrom ? newAdvancedFilters.applicationDateFrom : undefined,
+      application_date_to: newAdvancedFilters?.applicationDateTo ? newAdvancedFilters.applicationDateTo : undefined,
+      publication_date_from: newAdvancedFilters?.publicationDateFrom ? newAdvancedFilters.publicationDateFrom : undefined,
+      publication_date_to: newAdvancedFilters?.publicationDateTo ? newAdvancedFilters.publicationDateTo : undefined,
+      certificate_date_from: newAdvancedFilters?.certificateDateFrom ? newAdvancedFilters.certificateDateFrom : undefined,
+      certificate_date_to: newAdvancedFilters?.certificateDateTo ? newAdvancedFilters.certificateDateTo : undefined,
+    };
+
+    setSearchParams(newSearchParams);
+    
+    await queryClient.invalidateQueries({
+      queryKey: ["trademarks", { searchParams: newSearchParams }]
+    });
   };
 
   const {
