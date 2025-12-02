@@ -11,6 +11,17 @@ export interface PatentParams {
   application_date_to?: string;
   certificate_date_from?: string;
   certificate_date_to?: string;
+  publicationDateFrom?: string;
+  publicationDateTo?: string;
+  expiryDateFrom?: string;
+  expiryDateTo?: string;
+  application_country?: string;
+  publication_country?: string;
+  priorityCountry?: string;
+  niceClass?: string;
+  applicant?: string;
+  representative?: string;
+  name?: string;
   page: number;
   page_size: number;
   sort_by?: string;

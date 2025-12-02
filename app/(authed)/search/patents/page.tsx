@@ -19,13 +19,21 @@ import PatentDetailModal from "@/components/patents/patent-detail-modal";
 const initialAdvancedSearch = {
   applicationNumber: "",
   applicant: "",
+  representative: "",
   name: "",
-  ipcClassification: "",
-  applicationDate: "",
-  publicationDate: "",
-  certificateDate: "",
+  niceClass: "",
+  applicationDateFrom: "",
+  applicationDateTo: "",
+  publicationDateFrom: "",
+  publicationDateTo: "",
+  certificateDateFrom: "",
+  certificateDateTo: "",
   certificateNumber: "",
-  expiryDate: "",
+  expiryDateFrom: "",
+  expiryDateTo: "",
+  applicationCountry: "",
+  publicationCountry: "",
+  priorityCountry: "",
   countryCode: "",
   status: "",
 }
@@ -84,8 +92,21 @@ export default function PatentsSearchPage() {
       application_number: advancedFilters?.applicationNumber ?? advancedFilters.applicationNumber ? advancedFilters.applicationNumber : undefined,
       country_code: advancedFilters?.countryCode && advancedFilters.countryCode ? advancedFilters?.countryCode : undefined,
       certificate_number: advancedFilters?.certificateNumber && advancedFilters.certificateNumber ? advancedFilters.certificateNumber : undefined,
-      application_date_from: advancedFilters?.applicationDate && advancedFilters.applicationDate ? advancedFilters?.applicationDate : undefined,
-      certificate_date_from: advancedFilters?.certificateDate ? advancedFilters.certificateDate : undefined,
+      application_date_from: advancedFilters?.applicationDateFrom ? advancedFilters.applicationDateFrom : undefined,
+      application_date_to: advancedFilters?.applicationDateTo ? advancedFilters.applicationDateTo : undefined,
+      certificate_date_from: advancedFilters?.certificateDateFrom ? advancedFilters.certificateDateFrom : undefined,
+      certificate_date_to: advancedFilters?.certificateDateTo ? advancedFilters.certificateDateTo : undefined,
+      publicationDateFrom: advancedFilters?.publicationDateFrom ? advancedFilters.publicationDateFrom : undefined,
+      publicationDateTo: advancedFilters?.publicationDateTo ? advancedFilters.publicationDateTo : undefined,
+      expiryDateFrom: advancedFilters?.expiryDateFrom ? advancedFilters.expiryDateFrom : undefined,
+      expiryDateTo: advancedFilters?.expiryDateTo ? advancedFilters.expiryDateTo : undefined,
+      priorityCountry: advancedFilters?.priorityCountry ? advancedFilters.priorityCountry : undefined,
+      application_country: advancedFilters?.applicationCountry ? advancedFilters.applicationCountry : undefined,
+      publication_country: advancedFilters?.publicationCountry ? advancedFilters.publicationCountry : undefined,
+      niceClass: advancedFilters?.niceClass ? advancedFilters.niceClass : undefined,
+      applicant: advancedFilters?.applicant ? advancedFilters.applicant : undefined,
+      representative: advancedFilters?.representative ? advancedFilters.representative : undefined,
+      name: advancedFilters?.name ? advancedFilters.name : undefined,
     })
     setSearchQuery("")
 
@@ -95,36 +116,56 @@ export default function PatentsSearchPage() {
       newActiveFilters["Số đơn"] = advancedFilters.applicationNumber;
     }
 
+    if (advancedFilters.certificateNumber) {
+      newActiveFilters["Số bằng"] = advancedFilters.certificateNumber;
+    }
+
     if (advancedFilters.applicant) {
-      newActiveFilters["Người đơn"] = advancedFilters.applicant;
+      newActiveFilters["Chủ đơn"] = advancedFilters.applicant;
+    }
+
+    if (advancedFilters.representative) {
+      newActiveFilters["Đại diện SHCN"] = advancedFilters.representative;
     }
 
     if (advancedFilters.name) {
       newActiveFilters["Tên sáng chế"] = advancedFilters.name;
     }
 
-    if (advancedFilters.ipcClassification) {
-      newActiveFilters["Phân loại IPC"] = advancedFilters.ipcClassification;
+    if (advancedFilters.niceClass) {
+      newActiveFilters["Phân loại IPC"] = advancedFilters.niceClass;
     }
 
     if (advancedFilters.countryCode) {
       newActiveFilters["Quốc gia"] = advancedFilters.countryCode;
     }
 
-    if (advancedFilters.applicationDate) {
-      newActiveFilters["Ngày đơn"] = advancedFilters.applicationDate;
+    if (advancedFilters.applicationCountry) {
+      newActiveFilters["Mã nước nộp đơn"] = advancedFilters.applicationCountry;
     }
 
-    if (advancedFilters.publicationDate) {
-      newActiveFilters["Ngày công bố"] = advancedFilters.publicationDate;
+    if (advancedFilters.publicationCountry) {
+      newActiveFilters["Mã nước công bố"] = advancedFilters.publicationCountry;
     }
 
-    if (advancedFilters.certificateDate) {
-      newActiveFilters["Ngày cấp"] = advancedFilters.certificateDate;
+    if (advancedFilters.priorityCountry) {
+      newActiveFilters["Mã nước ưu tiên"] = advancedFilters.priorityCountry;
     }
 
-    if (advancedFilters.expiryDate) {
-      newActiveFilters["Ngày hết hạn"] = advancedFilters.expiryDate;
+    if (advancedFilters.applicationDateFrom || advancedFilters.applicationDateTo) {
+      newActiveFilters["Ngày nộp đơn"] = `${advancedFilters.applicationDateFrom || ''} - ${advancedFilters.applicationDateTo || ''}`;
+    }
+
+    if (advancedFilters.publicationDateFrom || advancedFilters.publicationDateTo) {
+      newActiveFilters["Ngày công bố"] = `${advancedFilters.publicationDateFrom || ''} - ${advancedFilters.publicationDateTo || ''}`;
+    }
+
+    if (advancedFilters.certificateDateFrom || advancedFilters.certificateDateTo) {
+      newActiveFilters["Ngày cấp"] = `${advancedFilters.certificateDateFrom || ''} - ${advancedFilters.certificateDateTo || ''}`;
+    }
+
+    if (advancedFilters.expiryDateFrom || advancedFilters.expiryDateTo) {
+      newActiveFilters["Ngày hết hạn"] = `${advancedFilters.expiryDateFrom || ''} - ${advancedFilters.expiryDateTo || ''}`;
     }
 
     if (advancedFilters.status) {
@@ -142,13 +183,21 @@ export default function PatentsSearchPage() {
     setAdvancedFilters({
       applicationNumber: "",
       applicant: "",
+      representative: "",
       name: "",
-      ipcClassification: "",
-      applicationDate: "",
-      publicationDate: "",
-      certificateDate: "",
+      niceClass: "",
+      applicationDateFrom: "",
+      applicationDateTo: "",
+      publicationDateFrom: "",
+      publicationDateTo: "",
+      certificateDateFrom: "",
+      certificateDateTo: "",
       certificateNumber: "",
-      expiryDate: "",
+      expiryDateFrom: "",
+      expiryDateTo: "",
+      applicationCountry: "",
+      publicationCountry: "",
+      priorityCountry: "",
       countryCode: "",
       status: "",
     });
@@ -156,10 +205,99 @@ export default function PatentsSearchPage() {
     setSearchParams(initialSearchState)
   };
 
-  const removeFilter = (key: string) => {
+  const removeFilter = async (key: string) => {
+    // Remove from active filters display
     const updatedFilters = { ...activeFilters };
     delete updatedFilters[key];
     setActiveFilters(updatedFilters);
+
+    // Clear corresponding advanced filter fields
+    const newAdvancedFilters = { ...advancedFilters };
+    
+    switch(key) {
+      case "Số đơn":
+        newAdvancedFilters.applicationNumber = "";
+        break;
+      case "Số bằng":
+        newAdvancedFilters.certificateNumber = "";
+        break;
+      case "Chủ đơn":
+        newAdvancedFilters.applicant = "";
+        break;
+      case "Đại diện SHCN":
+        newAdvancedFilters.representative = "";
+        break;
+      case "Tên sáng chế":
+        newAdvancedFilters.name = "";
+        break;
+      case "Phân loại IPC":
+        newAdvancedFilters.niceClass = "";
+        break;
+      case "Quốc gia":
+        newAdvancedFilters.countryCode = "";
+        break;
+      case "Mã nước nộp đơn":
+        newAdvancedFilters.applicationCountry = "";
+        break;
+      case "Mã nước công bố":
+        newAdvancedFilters.publicationCountry = "";
+        break;
+      case "Mã nước ưu tiên":
+        newAdvancedFilters.priorityCountry = "";
+        break;
+      case "Ngày nộp đơn":
+        newAdvancedFilters.applicationDateFrom = "";
+        newAdvancedFilters.applicationDateTo = "";
+        break;
+      case "Ngày công bố":
+        newAdvancedFilters.publicationDateFrom = "";
+        newAdvancedFilters.publicationDateTo = "";
+        break;
+      case "Ngày cấp":
+        newAdvancedFilters.certificateDateFrom = "";
+        newAdvancedFilters.certificateDateTo = "";
+        break;
+      case "Ngày hết hạn":
+        newAdvancedFilters.expiryDateFrom = "";
+        newAdvancedFilters.expiryDateTo = "";
+        break;
+      case "Trạng thái":
+        newAdvancedFilters.status = "";
+        break;
+    }
+
+    setAdvancedFilters(newAdvancedFilters);
+
+    // Rebuild search params from updated filters
+    const newSearchParams: PatentParams = {
+      ...initialSearchState,
+      status: newAdvancedFilters.status || undefined,
+      application_number: newAdvancedFilters.applicationNumber || undefined,
+      country_code: newAdvancedFilters.countryCode || undefined,
+      certificate_number: newAdvancedFilters.certificateNumber || undefined,
+      application_date_from: newAdvancedFilters.applicationDateFrom || undefined,
+      application_date_to: newAdvancedFilters.applicationDateTo || undefined,
+      publicationDateFrom: newAdvancedFilters.publicationDateFrom || undefined,
+      publicationDateTo: newAdvancedFilters.publicationDateTo || undefined,
+      certificate_date_from: newAdvancedFilters.certificateDateFrom || undefined,
+      certificate_date_to: newAdvancedFilters.certificateDateTo || undefined,
+      expiryDateFrom: newAdvancedFilters.expiryDateFrom || undefined,
+      expiryDateTo: newAdvancedFilters.expiryDateTo || undefined,
+      application_country: newAdvancedFilters.applicationCountry || undefined,
+      publication_country: newAdvancedFilters.publicationCountry || undefined,
+      priorityCountry: newAdvancedFilters.priorityCountry || undefined,
+      niceClass: newAdvancedFilters.niceClass || undefined,
+      applicant: newAdvancedFilters.applicant || undefined,
+      representative: newAdvancedFilters.representative || undefined,
+      name: newAdvancedFilters.name || undefined,
+    };
+
+    setSearchParams(newSearchParams);
+
+    // Re-run search with updated params
+    await queryClient.invalidateQueries({
+      queryKey: ["patents", { searchParams: newSearchParams }]
+    });
   };
 
   const getStatusColor = (status: string) => {
