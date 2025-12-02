@@ -18,11 +18,14 @@ import type { SearchParams, SearchResponse, IPRecord } from '@/types/ip';
 // Hook lấy chi tiết nhãn hiệu
 export const useTrademarkDetails = (
   id: string,
-  options?: Partial<UseQueryOptions<IPRecord>>
+  options?: Partial<UseQueryOptions<any>>
 ) => {
   return useQuery({
     queryKey: ['trademarks', 'details', id],
-    queryFn: () => trademarkService.getById(id),
+    queryFn: async () => {
+      const response = await trademarkService.getById(id);
+      return response.data;
+    },
     enabled: !!id,
     ...options,
   });

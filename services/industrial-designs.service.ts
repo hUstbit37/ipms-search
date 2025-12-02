@@ -36,6 +36,9 @@ export interface IndustrialDesignResponse {
   created_by: string | null;
   created_at: string | null;
   updated_at: string | null;
+  image_url: string | null;
+  wipo_status: string | null;
+  owner_id: string | null;
 }
 
 export const industrialDesignsService = {

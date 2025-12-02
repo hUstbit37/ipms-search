@@ -11,8 +11,9 @@ import { IndustrialDesignParams, industrialDesignsService } from "@/services/ind
 import { companyService } from "@/services/company.service";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
-import { Pagination } from "@/components/ui/pagination";
+import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
+import DesignDetailModal from "@/components/industrial-designs/design-detail-modal";
 
 const initialAdvancedSearch = {
   ownerCountry: "",
@@ -55,6 +56,8 @@ export default function IndustrialDesignsSearchPage() {
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState(initialAdvancedSearch);
   const [searchParams, setSearchParams] = useState<IndustrialDesignParams>(initialSearchState);
+  const [selectedDesign, setSelectedDesign] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const {
     data: industrialDesignsData
@@ -234,7 +237,7 @@ console.log(industrialDesignsData);
             <Search className="w-5 h-5 text-gray-400 shrink-0"/>
             <input
               type="text"
-              placeholder="Nhập tìm kiếm..."
+              placeholder="Nhập tìm kiếm theo tên thiết kế, số đơn, chủ đơn..."
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -352,8 +355,14 @@ console.log(industrialDesignsData);
                 </TableHeader>
                 <TableBody>
                   { industrialDesignsData?.data?.items.filter((item) => item.application_number).map((item) => (
-                    
-                    <TableRow key={ item.id } className="hover:bg-transparent">
+                    <TableRow 
+                      key={ item.id } 
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setSelectedDesign(item);
+                        setShowDetailModal(true);
+                      }}
+                    >
                       <TableCell>
                         <div className="w-16 h-16 rounded overflow-hidden">
                           {item.image_url ? (
@@ -371,7 +380,7 @@ console.log(industrialDesignsData);
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-semibold max-w-[150px] truncate" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
+                        <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.application_number }
@@ -389,22 +398,20 @@ console.log(industrialDesignsData);
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="max-w-[150px] truncate" title={(item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-"}>
+                        <div className="line-clamp-2" title={(item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-"}>
                           { (item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-" }
                         </div>
                       </TableCell>
                       <TableCell>
-                        {
-                          item.wipo_status ? (
-                          <span className={ `text-xs px-2 py-1 rounded` }>
-                          { item.wipo_status }
+                        {item.wipo_status ? (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.wipo_status}
                           </span>
-                          ) : (
-                          <span className={ `text-xs px-2 py-1 rounded` }>
-                            { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
                           </span>
-                          )
-                        }
+                        )}
                       </TableCell>
                     </TableRow>
                   )) }
@@ -460,10 +467,18 @@ console.log(industrialDesignsData);
             </div>
           ) }
           <div className="w-full h-full mt-4">
-            <Pagination totalItems={ industrialDesignsData?.data?.total ?? 0 } itemsPerPage={ searchParams.page_size }
-                        currentPage={ searchParams.page } onPageChange={ (val) => {
-              setSearchParams((prev) => ({ ...prev, page: val }))
-            } }/>
+            <PaginationComponent 
+              page={searchParams.page}
+              totalPages={Math.ceil((industrialDesignsData?.data?.total ?? 0) / searchParams.page_size)}
+              total={industrialDesignsData?.data?.total ?? 0}
+              onPageChange={(val) => setSearchParams((prev) => ({ ...prev, page: val }))}
+              pageSize={searchParams.page_size}
+              onPageSizeChange={(size) => setSearchParams((prev) => ({
+                ...prev,
+                page_size: size,
+                page: 1
+              }))}
+            />
           </div>
       </div>
 
@@ -475,6 +490,14 @@ console.log(industrialDesignsData);
         onFiltersChange={ setAdvancedFilters }
         onSearch={ handleAdvancedSearch }
         onReset={ handleResetFilters }
+      />
+
+      {/* Detail Modal */}
+      <DesignDetailModal
+        open={showDetailModal}
+        onOpenChange={setShowDetailModal}
+        design={selectedDesign}
+        companyMap={companyMap}
       />
     </div>
   );

@@ -3,9 +3,9 @@ import apiInstance from "@/lib/api/apiInstance";
 import { AxiosError } from "axios";
 import { ResponseError } from "@/types/api";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = req.cookies.get("token");
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const response = await apiInstance.get(`/v1/public/trademarks/${id}`, {

@@ -11,9 +11,10 @@ import { PatentParams, patentService } from "@/services/patent.service";
 import { companyService } from "@/services/company.service";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
 import { queryClient } from "@/lib/react-query";
-import { Pagination } from "@/components/ui/pagination";
+import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import { Tooltip } from "@/components/ui/tooltip";
+import PatentDetailModal from "@/components/patents/patent-detail-modal";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -36,6 +37,8 @@ export default function PatentsSearchPage() {
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState(initialAdvancedSearch);
   const [searchParams, setSearchParams] = useState<PatentParams>(initialSearchState);
+  const [selectedPatent, setSelectedPatent] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const {
     data: patentsData
@@ -184,7 +187,7 @@ export default function PatentsSearchPage() {
             <Search className="w-5 h-5 text-gray-400 shrink-0"/>
             <input
               type="text"
-              placeholder="Nhập tìm kiếm..."
+              placeholder="Nhập tìm kiếm theo tên sáng chế, số đơn, chủ đơn, IPC..."
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -300,7 +303,14 @@ export default function PatentsSearchPage() {
                 </TableHeader>
                 <TableBody>
                   { patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
-                    <TableRow key={ item.id } className="hover:bg-transparent">
+                    <TableRow 
+                      key={ item.id } 
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setSelectedPatent(item);
+                        setShowDetailModal(true);
+                      }}
+                    >
                       <TableCell>
                         <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm">
                           {item?.image_url ? (
@@ -318,7 +328,7 @@ export default function PatentsSearchPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="font-semibold max-w-[150px] truncate" title={item.name ?? "-"}>
+                        <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>
                           { item.name ?? "-" }
                         </div>
                       </TableCell>
@@ -338,7 +348,7 @@ export default function PatentsSearchPage() {
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="max-w-[150px] truncate" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
+                        <div className="line-clamp-2" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
                           { item.owner_id ? (companyMap[item.owner_id] || "-") : "-" }
                         </div>
                       </TableCell>
@@ -346,17 +356,15 @@ export default function PatentsSearchPage() {
                         { item.ipc_list ? item.ipc_list : "-" }
                       </TableCell>
                       <TableCell>
-                        {
-                          item.wipo_status ? (
-                          <span className={ `text-xs px-2 py-1 rounded` }>
-                          { item.wipo_status }
+                        {item.wipo_status ? (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.wipo_status}
                           </span>
-                          ) : (
-                          <span className={ `text-xs px-2 py-1 rounded` }>
-                            { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
                           </span>
-                          )
-                        }
+                        )}
                       </TableCell>
                     </TableRow>
                   )) }
@@ -409,9 +417,18 @@ export default function PatentsSearchPage() {
             </div>
           ) }
           <div className="w-full h-full mt-4">
-            <Pagination totalItems={ patentsData?.data?.total ?? 1 } itemsPerPage={ searchParams.page_size }
-                        currentPage={ searchParams.page }
-                        onPageChange={ (val) => setSearchParams((prev) => ({ ...prev, page: val })) }/>
+            <PaginationComponent 
+              page={searchParams.page}
+              totalPages={Math.ceil((patentsData?.data?.total ?? 0) / searchParams.page_size)}
+              total={patentsData?.data?.total ?? 0}
+              onPageChange={(val) => setSearchParams((prev) => ({ ...prev, page: val }))}
+              pageSize={searchParams.page_size}
+              onPageSizeChange={(size) => setSearchParams((prev) => ({
+                ...prev,
+                page_size: size,
+                page: 1
+              }))}
+            />
           </div>
       </div>
 
@@ -423,6 +440,14 @@ export default function PatentsSearchPage() {
         onFiltersChange={ setAdvancedFilters }
         onSearch={ handleAdvancedSearch }
         onReset={ handleResetFilters }
+      />
+
+      {/* Detail Modal */}
+      <PatentDetailModal
+        open={showDetailModal}
+        onOpenChange={setShowDetailModal}
+        patent={selectedPatent}
+        companyMap={companyMap}
       />
     </div>
   );

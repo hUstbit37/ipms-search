@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TrademarkParams, trademarkService } from "@/services/trademark.service";
 import { companyService } from "@/services/company.service";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
-import { Pagination } from "@/components/ui/pagination";
+import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import { queryClient } from "@/lib/react-query";
 
@@ -286,7 +286,7 @@ console.log('trade', trademarksData);
             <Search className="w-5 h-5 text-gray-400 shrink-0"/>
             <input
               type="text"
-              placeholder="Nhập tìm kiếm"
+              placeholder="Nhập tìm kiếm theo tên nhãn hiệu, số đơn, chủ đơn..."
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
@@ -351,28 +351,28 @@ console.log('trade', trademarksData);
                   <option>Ngày cấp bằng</option>
                   <option>Tên nhãn hiệu</option>
                 </select>
-                <Button
+                <button
                   onClick={ () => setViewType("table") }
                   className={ `p-2 rounded flex-shrink-0 ${
                     viewType === "table"
-                      ? "dark:bg-blue-900 text-white bg-blue-700"
-                      : "hover:bg-blue-600 dark:hover:bg-zinc-800 bg-blue-200"
+                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600"
+                      : "hover:bg-gray-100 dark:hover:bg-zinc-800"
                   }` }
                   title="Table view"
                 >
                   <List className="w-4 h-4"/>
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={ () => setViewType("grid") }
                   className={ `p-2 rounded flex-shrink-0 ${
                     viewType === "grid"
-                      ? "dark:bg-blue-900 text-white bg-blue-700"
-                      : "hover:bg-blue-600 dark:hover:bg-zinc-800 bg-blue-200"
+                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600"
+                      : "hover:bg-gray-100 dark:hover:bg-zinc-800"
                   }` }
                   title="Grid view"
                 >
                   <LayoutGrid className="w-4 h-4"/>
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -434,7 +434,7 @@ console.log('trade', trademarksData);
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-semibold max-w-[150px] truncate" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
+                        <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.code }
@@ -452,27 +452,25 @@ console.log('trade', trademarksData);
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="max-w-[150px] truncate" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
+                        <div className="line-clamp-2" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
                           { item.owner_id ? (companyMap[item.owner_id] || "-") : "-" }
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="max-w-[150px] truncate" title={(item as any).nice_class_text || "-"}>
-                          { (item as any).nice_class_text ? ((item as any).nice_class_text.length > 20 ? (item as any).nice_class_text.substring(0, 20) + "..." : (item as any).nice_class_text) : "-" }
+                        <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>
+                          { (item as any).nice_class_text || "-" }
                         </div>
                       </TableCell>
                       <TableCell>
-                        {
-                          item.wipo_status ? (
-                          <span className={ `text-xs px-2 py-1 rounded` }>
-                          { item.wipo_status }
+                        {item.wipo_status ? (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.wipo_status}
                           </span>
-                          ) : (
-                          <span className={ `text-xs px-2 py-1 rounded` }>
-                            { item.certificate_number ? "Cấp bằng" : "Đang giải quyết" }
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
                           </span>
-                          )
-                        }
+                        )}
                       </TableCell>
                     </TableRow>
                   )) }
@@ -524,12 +522,21 @@ console.log('trade', trademarksData);
             </div>
           ) }
           <div className="w-full h-full mt-4">
-            <Pagination totalItems={ trademarksData?.data?.total ?? 0 } currentPage={ searchParams.page }
-                        itemsPerPage={ DEFAULT_PAGINATION.per_page }
-                        onPageChange={ (pageVal) => setSearchParams((prev) => ({
-                          ...prev,
-                          page: pageVal
-                        })) }/>
+            <PaginationComponent 
+              page={searchParams.page}
+              totalPages={Math.ceil((trademarksData?.data?.total ?? 0) / searchParams.page_size)}
+              total={trademarksData?.data?.total ?? 0}
+              onPageChange={(pageVal) => setSearchParams((prev) => ({
+                ...prev,
+                page: pageVal
+              }))}
+              pageSize={searchParams.page_size}
+              onPageSizeChange={(size) => setSearchParams((prev) => ({
+                ...prev,
+                page_size: size,
+                page: 1
+              }))}
+            />
           </div>
       </div>
 
