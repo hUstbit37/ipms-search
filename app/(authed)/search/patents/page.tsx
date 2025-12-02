@@ -5,6 +5,7 @@ import { LayoutGrid, List, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
@@ -49,7 +50,8 @@ export default function PatentsSearchPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const {
-    data: patentsData
+    data: patentsData,
+    isLoading: isPatentsLoading,
   } = useQuery({
     queryFn: async () => await patentService.get(searchParams),
     queryKey: ["patents", { searchParams }],
@@ -440,7 +442,44 @@ export default function PatentsSearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
+                  {isPatentsLoading ? (
+                    // Loading skeleton
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={`skeleton-${index}`}>
+                        <TableCell>
+                          <Skeleton className="w-16 h-16 rounded" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-40" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-20" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-28" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-6 w-20 rounded-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -505,13 +544,36 @@ export default function PatentsSearchPage() {
                         )}
                       </TableCell>
                     </TableRow>
-                  )) }
+                  ))
+                  )}
                 </TableBody>
               </Table>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
+              {isPatentsLoading ? (
+                // Loading skeleton for grid view
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={`grid-skeleton-${index}`}
+                    className="border rounded-lg p-4 bg-white dark:bg-zinc-900"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <Skeleton className="h-5 w-32 flex-1" />
+                      <Skeleton className="h-6 w-20 rounded ml-2" />
+                    </div>
+                    <Skeleton className="h-4 w-24 mb-3" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                      <Skeleton className="h-3 w-2/3" />
+                      <Skeleton className="h-3 w-1/3" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
@@ -551,7 +613,8 @@ export default function PatentsSearchPage() {
                     </p>
                   </div>
                 </div>
-              )) }
+              ))
+              )}
             </div>
           ) }
           <div className="w-full h-full mt-4">
