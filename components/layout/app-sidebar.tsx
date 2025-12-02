@@ -33,6 +33,14 @@ const data = {
         { title: "Kiểu dáng công nghiệp", url: "/search/industrial-designs", icon: Package },
       ],
     },
+    {
+      title: "Quản lý IP",
+      items: [
+        { title: "Sáng chế", url: "/ip/patents", icon: Lightbulb },
+        { title: "Nhãn hiệu", url: "/ip/trademarks", icon: FileText },
+        { title: "Kiểu dáng công nghiệp", url: "/ip/industrial-designs", icon: Package },
+      ],
+    },
   ],
 };
 
