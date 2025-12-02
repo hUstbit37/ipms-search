@@ -14,6 +14,8 @@ export interface TrademarkParams {
   application_date_to?: string;
   certificate_date_from?: string;
   certificate_date_to?: string;
+  publication_date_from?: string;
+  publication_date_to?: string;
   page: number;
   page_size: number;
   sort_by?: string;

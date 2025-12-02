@@ -10,7 +10,7 @@ interface AdvancedFilters {
   applicationCountry: string;
   publicationCountry: string;
   priorityCountry: string;
-  locarnoClass: string;
+  niceClass: string;
   productCategory: string;
   designDomain: string;
   applicationDateFrom: string;
@@ -354,11 +354,11 @@ export default function AdvancedSearchModal({
                 <Input
                   placeholder="Nhập phân loại Locarno..."
                   className="text-sm"
-                  value={advancedFilters.locarnoClass}
+                  value={advancedFilters.niceClass}
                   onChange={(e) =>
                     onFiltersChange({
                       ...advancedFilters,
-                      locarnoClass: e.target.value,
+                      niceClass: e.target.value,
                     })
                   }
                 />
