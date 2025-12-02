@@ -89,6 +89,19 @@ export default function TrademarksSearchPage() {
       publication_date_to: advancedFilters?.publicationDateTo ? advancedFilters.publicationDateTo : undefined,
       certificate_date_from: advancedFilters?.certificateDateFrom ? advancedFilters.certificateDateFrom : undefined,
       certificate_date_to: advancedFilters?.certificateDateTo ? advancedFilters.certificateDateTo : undefined,
+      expiry_date_from: advancedFilters?.expiryDateFrom,
+      expiry_date_to: advancedFilters?.expiryDateTo,
+      application_country: advancedFilters?.applicationCountry,
+      publication_country: advancedFilters?.publicationCountry,
+      priority_country: advancedFilters?.priorityCountry,
+      nice_class: advancedFilters?.niceClass,
+      product_category: advancedFilters?.productCategory,
+      vienna_class: advancedFilters?.viennaClass,
+      applicant: advancedFilters?.applicant,
+      representative: advancedFilters?.representative,
+      basic_application_number: advancedFilters?.basicApplicationNumber,
+      priority_number: advancedFilters?.priorityNumber,
+      trade_name: advancedFilters?.tradeName,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -323,6 +336,19 @@ export default function TrademarksSearchPage() {
       publication_date_to: newAdvancedFilters?.publicationDateTo ? newAdvancedFilters.publicationDateTo : undefined,
       certificate_date_from: newAdvancedFilters?.certificateDateFrom ? newAdvancedFilters.certificateDateFrom : undefined,
       certificate_date_to: newAdvancedFilters?.certificateDateTo ? newAdvancedFilters.certificateDateTo : undefined,
+      expiry_date_from: newAdvancedFilters?.expiryDateFrom,
+      expiry_date_to: newAdvancedFilters?.expiryDateTo,
+      application_country: newAdvancedFilters?.applicationCountry,
+      publication_country: newAdvancedFilters?.publicationCountry,
+      priority_country: newAdvancedFilters?.priorityCountry,
+      nice_class: newAdvancedFilters?.niceClass,
+      product_category: newAdvancedFilters?.productCategory,
+      vienna_class: newAdvancedFilters?.viennaClass,
+      applicant: newAdvancedFilters?.applicant,
+      representative: newAdvancedFilters?.representative,
+      basic_application_number: newAdvancedFilters?.basicApplicationNumber,
+      priority_number: newAdvancedFilters?.priorityNumber,
+      trade_name: newAdvancedFilters?.tradeName,
     };
 
     setSearchParams(newSearchParams);
