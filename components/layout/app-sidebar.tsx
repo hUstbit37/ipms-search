@@ -8,6 +8,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -19,6 +20,9 @@ import {
   FileText,
   Package,
   Lightbulb,
+  ArrowRightLeft,
+  Settings,
+  Workflow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +45,21 @@ const data = {
         { title: "Kiểu dáng công nghiệp", url: "/ip/industrial-designs", icon: Package },
       ],
     },
+    {
+      title: "Li-xăng/Chuyển nhượng",
+      items: [
+      { title: "Li-xăng", url: "/contracts/licenses", icon: FileText },
+      { title: "Chuyển nhượng", url: "/contracts/transfers", icon: ArrowRightLeft },
+      ],
+    },
+
+    {
+      title: "Workflow",
+      items: [
+      { title: "Cấu hình", url: "/workflows/configs", icon: Settings },
+      { title: "Các quy trình", url: "/workflows/processes", icon: Workflow },
+      ],
+    },
   ],
 };
 
@@ -57,6 +76,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {data.navMain.map((group) => (
           <SidebarGroup key={group.title}>
+            <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase">
+              {group.title}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
@@ -74,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       >
                         <Link
                           href={item.url}
-                          className="w-full flex items-center gap-2 px-2 py-5 rounded"
+                          className="w-full flex items-center gap-2 px-2 py-4 rounded"
                         >
                           {Icon && <Icon className="h-4 w-4 shrink-0" />}
                           <span className="whitespace-normal break-words">{item.title}</span>
