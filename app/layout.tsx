@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IMPS Search - Tra cứu Sở hữu Trí tuệ",
+  title: "IPMS - Tra cứu Sở hữu Trí tuệ",
   description: "Hệ thống tra cứu dữ liệu sở hữu trí tuệ",
 };
 
