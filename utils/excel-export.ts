@@ -77,7 +77,7 @@ export const exportTrademarksToExcel = async (data: any[], companyMap: Record<st
       publication_date: item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : '-',
       certificate_number: item.certificate_number || '-',
       certificate_date: item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : '-',
-      owner: item.owner_id ? (companyMap[item.owner_id] || '-') : '-',
+      owner: item.owner_name || '-',
       nice_class_text: (item as any).nice_class_text || '-',
       status: item.wipo_status || (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
     });

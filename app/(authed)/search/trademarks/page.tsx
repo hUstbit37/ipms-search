@@ -391,37 +391,34 @@ export default function TrademarksSearchPage() {
   }, [searchParams, refetchTrademarks]);
 console.log('trade', trademarksData);
 
-  const {
-    data: companiesData,
-  } = useQuery({
-    queryFn: async () => {
-      const [page1, page2, page3] = await Promise.all([
-        companyService.getAll({ limit: 500, datasource: "ALL", page: 1, page_size: 500 }),
-        companyService.getAll({ limit: 500, datasource: "ALL", page: 2, page_size: 500 }),
-        companyService.getAll({ limit: 500, datasource: "ALL", page: 3, page_size: 500 })
-      ]);
+  // const {
+  //   data: companiesData,
+  // } = useQuery({
+  //   queryFn: async () => {
+  //     const [page1, page2, page3] = await Promise.all([
+  //       companyService.getAll({ limit: 500, datasource: "ALL", page: 1, page_size: 500 }),
+  //       companyService.getAll({ limit: 500, datasource: "ALL", page: 2, page_size: 500 }),
+  //       companyService.getAll({ limit: 500, datasource: "ALL", page: 3, page_size: 500 })
+  //     ]);
       
-      // Merge the results
-      return {
-        ...page1,
-        data: {
-          ...page1.data,
-          items: [...(page1.data?.items || []), ...(page2.data?.items || []), ...(page3.data?.items || [])]
-        }
-      };
-    },
-    queryKey: ["companies"],
-  })
+  //     // Merge the results
+  //     return {
+  //       ...page1,
+  //       data: {
+  //         ...page1.data,
+  //         items: [...(page1.data?.items || []), ...(page2.data?.items || []), ...(page3.data?.items || [])]
+  //       }
+  //     };
+  //   },
+  //   queryKey: ["companies"],
+  // })
 
   // Create a map for quick company lookup
-  const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
-    acc[company.id] = company.name;
-    return acc;
-  }, {} as Record<string, string>) || {};
-
-  console.log(companiesData, );
-  console.log(companyMap);
-  
+  // const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
+  //   acc[company.id] = company.name;
+  //   return acc;
+  // }, {} as Record<string, string>) || {};
+  const companyMap = {};
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -697,9 +694,7 @@ console.log('trade', trademarksData);
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="line-clamp-2" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
-                          { item.owner_id ? (companyMap[item.owner_id] || "-") : "-" }
-                        </div>
+                          { item.owner_name || "-" }
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>

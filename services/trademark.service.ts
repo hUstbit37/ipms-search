@@ -38,6 +38,9 @@ export interface TrademarkParams {
   nice_class_text?: string;
   owner_id?: string;
   publication_date?: string;
+  agency_id?: string;
+  owner_name?: string;
+  agency_name?: string;
 }
 
 export interface TrademarkResponse {
@@ -61,6 +64,11 @@ export interface TrademarkResponse {
   wipo_status: string | null;
   nice_class_text: string | null;
   publication_date: string | null;
+  publication_number: string | null;
+  color_claim: string | null;
+  vienna_class: string | null;
+  owner_name: string | null;
+  agency_name: string | null;
 }
 
 export const trademarkService = {
