@@ -55,6 +55,9 @@ export interface PatentResponse {
   wipo_status: string | null;
   owner_id: string | null;
   image_url: string | null;
+  owner_name: string | null;
+  agency_name: string | null;
+  owner: string | null;
 }
 
 export const patentService = {

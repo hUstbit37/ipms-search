@@ -74,22 +74,23 @@ export default function IndustrialDesignsSearchPage() {
     enabled: true,
   })
 
-  useEffect(() => {
-    refetchDesigns();
-  }, [searchParams, refetchDesigns]);
+  // useEffect(() => {
+  //   refetchDesigns();
+  // }, [searchParams, refetchDesigns]);
 
-  const {
-    data: companiesData,
-  } = useQuery({
-    queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
-    queryKey: ["companies"],
-  })
+  // const {
+  //   data: companiesData,
+  // } = useQuery({
+  //   queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
+  //   queryKey: ["companies"],
+  // })
 
   // Create a map for quick company lookup
-  const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
-    acc[company.id] = company.name;
-    return acc;
-  }, {} as Record<string, string>) || {};
+  // const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
+  //   acc[company.id] = company.name;
+  //   return acc;
+  // }, {} as Record<string, string>) || {};
+  const companyMap = {};
 console.log(industrialDesignsData);
 
   const handleSearch = async () => {
@@ -565,9 +566,7 @@ console.log(industrialDesignsData);
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="line-clamp-2" title={(item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-"}>
-                          { (item as any).owner_id ? (companyMap[(item as any).owner_id] || "-") : "-" }
-                        </div>
+                          { item.owner_name || "-" }
                       </TableCell>
                       <TableCell>
                         {item.wipo_status ? (

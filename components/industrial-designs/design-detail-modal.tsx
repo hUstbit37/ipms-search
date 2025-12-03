@@ -76,20 +76,28 @@ export default function DesignDetailModal({
                 value={design.certificate_date ? moment(design.certificate_date).format("DD/MM/YYYY") : ""}
               />
               <InfoField 
-                label="Số công bố" 
-                value={design.publication_number}
-              />
-              <InfoField 
-                label="Ngày công bố" 
-                value={design.publication_date ? moment(design.publication_date).format("DD/MM/YYYY") : ""}
+                label="Số công bố/Ngày công bố" 
+                value={design.publication_number || "" + (design.publication_date ? `  ${moment(design.publication_date).format("DD/MM/YYYY")}` : "")}
               />
               <InfoField 
                 label="Ngày hết hạn" 
                 value={design.expiry_date ? moment(design.expiry_date).format("DD/MM/YYYY") : ""}
               />
               <InfoField 
+                label="Phân loại Locarno" 
+                value={Array.isArray(design.locarno_list) ? design.locarno_list.join(', ') : (design.locarno_list || '-')}
+              />
+              <InfoField 
+                label="Tác giả" 
+                value={design?.authors || ""}
+              />
+              <InfoField 
                 label="Chủ đơn/Chủ bằng" 
-                value={design.owner_id ? companyMap[design.owner_id] : ""}
+                value={design.owner_name || ""}
+              />
+              <InfoField 
+                label="Đại diện" 
+                value={design?.agency_name || ""}
               />
             </div>
 

@@ -119,7 +119,7 @@ export const exportIndustrialDesignsToExcel = async (data: any[], companyMap: Re
       publication_date: item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : '-',
       certificate_number: item.certificate_number || '-',
       certificate_date: item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : '-',
-      owner: (item as any).owner_id ? (companyMap[(item as any).owner_id] || '-') : '-',
+      owner: item.owner_name || '-',
       status: item.wipo_status || (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
     });
   });
@@ -161,8 +161,8 @@ export const exportPatentsToExcel = async (data: any[], companyMap: Record<strin
       publication_date: item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : '-',
       certificate_number: item.certificate_number || '-',
       certificate_date: item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : '-',
-      owner: item.owner_id ? (companyMap[item.owner_id] || '-') : '-',
-      ipc_list: item.ipc_list || '-',
+      owner: item.owner_name || item.owner || '-',
+      ipc_list: Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-'),
       status: item.wipo_status || (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
     });
   });

@@ -66,20 +66,20 @@ export default function PatentsSearchPage() {
     refetchPatents();
   }, [searchParams, refetchPatents]);
 
-  const {
-    data: companiesData,
-  } = useQuery({
-    queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
-    queryKey: ["companies"],
-  })
+  // const {
+  //   data: companiesData,
+  // } = useQuery({
+  //   queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
+  //   queryKey: ["companies"],
+  // })
 
   // Create a map for quick company lookup
-  const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
-    acc[company.id] = company.name;
-    return acc;
-  }, {} as Record<string, string>) || {};
+  // const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
+  //   acc[company.id] = company.name;
+  //   return acc;
+  // }, {} as Record<string, string>) || {};
 
-  console.log(companiesData);
+  const companyMap = {};
   
   console.log(patentsData);
   
@@ -592,12 +592,10 @@ export default function PatentsSearchPage() {
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="line-clamp-2" title={item.owner_id ? (companyMap[item.owner_id] || "-") : "-"}>
-                          { item.owner_id ? (companyMap[item.owner_id] || "-") : "-" }
-                        </div>
+                          { item.owner_name || item.owner || "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                        { item.ipc_list ? item.ipc_list : "-" }
+                        { item.ipc_list ? (Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-')) : "-" }
                       </TableCell>
                       <TableCell>
                         {item.wipo_status ? (

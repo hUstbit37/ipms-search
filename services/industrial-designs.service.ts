@@ -52,6 +52,15 @@ export interface IndustrialDesignResponse {
   image_url: string | null;
   wipo_status: string | null;
   owner_id: string | null;
+  owner_name: string | null;
+  agency_name: string | null;
+  locarno_list: Array<string> | null;
+  authors: string | null;
+  priority_data: Array<{
+    appNumber: string;
+    date: string;
+    country: string;
+  }> | null;
 }
 
 export const industrialDesignsService = {
