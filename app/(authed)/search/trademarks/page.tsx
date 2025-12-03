@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LayoutGrid, List, Search, Trash2, XIcon, Eye } from "lucide-react";
 import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
@@ -66,6 +66,7 @@ export default function TrademarksSearchPage() {
   const [searchParams, setSearchParams] = useState<TrademarkParams>(initialSearchState);
   const [showQuickView, setShowQuickView] = useState(false);
   const [selectedTrademark, setSelectedTrademark] = useState<any>(null);
+  const [sortTrigger, setSortTrigger] = useState(0);
 
   const handleSearch = async () => {
     setSearchParams({
@@ -77,6 +78,18 @@ export default function TrademarksSearchPage() {
     await queryClient.invalidateQueries({
       queryKey: ["trademarks", { searchParams }]
     })
+  };
+
+  const handleSort = (field: string) => {
+    let newSortOrder: 'asc' | 'desc' = 'asc';
+    if (searchParams.sort_by === field) {
+      newSortOrder = searchParams.sort_order === 'asc' ? 'desc' : 'asc';
+    }
+    setSearchParams(prev => ({
+      ...prev,
+      sort_by: field,
+      sort_order: newSortOrder
+    }));
   };
 
   const handleAdvancedSearch = async () => {
@@ -364,12 +377,18 @@ export default function TrademarksSearchPage() {
   const {
     data: trademarksData,
     isLoading: isTrademarksLoading,
+    refetch: refetchTrademarks,
   } = useQuery({
     queryFn: async () => await trademarkService.search({
       ...searchParams
     }),
-    queryKey: ["trademarks", { searchParams }],
+    queryKey: ["trademarks", sortTrigger],
+    enabled: true,
   })
+
+  useEffect(() => {
+    refetchTrademarks();
+  }, [searchParams, refetchTrademarks]);
 console.log('trade', trademarksData);
 
   const {
@@ -430,6 +449,11 @@ console.log('trade', trademarksData);
               placeholder="Nhập tìm kiếm theo tên nhãn hiệu, số đơn, chủ đơn..."
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
+              onKeyDown={ (e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
             />
           </div>
@@ -490,19 +514,41 @@ console.log('trade', trademarksData);
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
                     const currentPageData = trademarksData?.data?.items.filter((item) => item.application_number) || [];
-                    exportTrademarksToExcel(currentPageData, companyMap);
+                    await exportTrademarksToExcel(currentPageData, companyMap);
                   }}
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
                   <FileDown className="w-4 h-4" />
                   Xuất Excel
                 </Button>
-                <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
-                  <option>Ngày nộp đơn</option>
-                  <option>Ngày cấp bằng</option>
-                  <option>Tên nhãn hiệu</option>
+                <select 
+                  className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
+                  value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value) {
+                      const [field, order] = value.split('-');
+                      setSearchParams(prev => ({
+                        ...prev,
+                        sort_by: field,
+                        sort_order: order as 'asc' | 'desc'
+                      }));
+                      setSortTrigger(prev => prev + 1);
+                    } else {
+                      setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
+                      setSortTrigger(prev => prev + 1);
+                    }
+                  }}
+                >
+                  <option value="">Sắp xếp theo</option>
+                  <option value="application_date-asc">Ngày nộp đơn: Cũ → Mới</option>
+                  <option value="application_date-desc">Ngày nộp đơn: Mới → Cũ</option>
+                  <option value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</option>
+                  <option value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</option>
+                  <option value="name-asc">Tên nhãn hiệu: A → Z</option>
+                  <option value="name-desc">Tên nhãn hiệu: Z → A</option>
                 </select>
                 <button
                   onClick={ () => setViewType("table") }
@@ -538,7 +584,7 @@ console.log('trade', trademarksData);
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">MÃU NHÃN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">MẪU NHÃN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NHÃN HIỆU</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY NỘP ĐƠN</TableHead>
@@ -587,6 +633,15 @@ console.log('trade', trademarksData);
                         </TableCell>
                       </TableRow>
                     ))
+                  ) : trademarksData?.data?.items.filter((item) => item.application_number).length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="h-64">
+                        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                          <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
+                          <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     trademarksData?.data?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow 
@@ -687,6 +742,11 @@ console.log('trade', trademarksData);
                     </div>
                   </div>
                 ))
+              ) : trademarksData?.data?.items.filter((item) => item.application_number).length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
+                  <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
+                  <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
+                </div>
               ) : (
                 trademarksData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div

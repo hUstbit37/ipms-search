@@ -26,6 +26,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
     "jotai": "^2.15.1",
     "jotai-tanstack-query": "^0.11.0",
     "lucide-react": "^0.555.0",
@@ -42,7 +43,6 @@
     "react-tooltip": "^5.30.0",
     "tailwind-merge": "^3.4.0",
     "uuid": "^13.0.0",
-    "xlsx": "^0.18.5",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

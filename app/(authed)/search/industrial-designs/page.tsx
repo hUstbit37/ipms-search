@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LayoutGrid, List, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,13 +63,20 @@ export default function IndustrialDesignsSearchPage() {
   const [searchParams, setSearchParams] = useState<IndustrialDesignParams>(initialSearchState);
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [sortTrigger, setSortTrigger] = useState(0);
 
   const {
-    data: industrialDesignsData
+    data: industrialDesignsData,
+    refetch: refetchDesigns,
   } = useQuery({
     queryFn: async () => await industrialDesignsService.get(searchParams),
-    queryKey: [queryKey, { searchParams }],
+    queryKey: ["industrial-designs", sortTrigger],
+    enabled: true,
   })
+
+  useEffect(() => {
+    refetchDesigns();
+  }, [searchParams, refetchDesigns]);
 
   const {
     data: companiesData,
@@ -93,8 +100,20 @@ console.log(industrialDesignsData);
     setActiveFilters({})
     setAdvancedFilters(initialAdvancedSearch)
     await queryClient.invalidateQueries({
-      queryKey: [queryKey, { searchParams }]
+      queryKey: ["industrialDesigns", { searchParams }]
     })
+  };
+
+  const handleSort = (field: string) => {
+    let newSortOrder: 'asc' | 'desc' = 'asc';
+    if (searchParams.sort_by === field) {
+      newSortOrder = searchParams.sort_order === 'asc' ? 'desc' : 'asc';
+    }
+    setSearchParams(prev => ({
+      ...prev,
+      sort_by: field,
+      sort_order: newSortOrder
+    }));
   };
 
   const handleAdvancedSearch = async () => {
@@ -342,6 +361,11 @@ console.log(industrialDesignsData);
               placeholder="Nhập tìm kiếm theo tên thiết kế, số đơn, chủ đơn..."
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
+              onKeyDown={ (e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
             />
           </div>
@@ -403,19 +427,41 @@ console.log(industrialDesignsData);
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
                     const currentPageData = industrialDesignsData?.data?.items.filter((item) => item.application_number) || [];
-                    exportIndustrialDesignsToExcel(currentPageData, companyMap);
+                    await exportIndustrialDesignsToExcel(currentPageData, companyMap);
                   }}
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
                   <FileDown className="w-4 h-4" />
                   Xuất Excel
                 </Button>
-                <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
-                  <option>Ngày nộp đơn</option>
-                  <option>Ngày cấp bằng</option>
-                  <option>Tên</option>
+                <select 
+                  className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
+                  value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value) {
+                      const [field, order] = value.split('-');
+                      setSearchParams(prev => ({
+                        ...prev,
+                        sort_by: field,
+                        sort_order: order as 'asc' | 'desc'
+                      }));
+                      setSortTrigger(prev => prev + 1);
+                    } else {
+                      setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
+                      setSortTrigger(prev => prev + 1);
+                    }
+                  }}
+                >
+                  <option value="">Sắp xếp theo</option>
+                  <option value="application_date-asc">Ngày nộp đơn: Cũ → Mới</option>
+                  <option value="application_date-desc">Ngày nộp đơn: Mới → Cũ</option>
+                  <option value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</option>
+                  <option value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</option>
+                  <option value="name-asc">Tên: A → Z</option>
+                  <option value="name-desc">Tên: Z → A</option>
                 </select>
                 <button
                   onClick={ () => setViewType("table") }
@@ -466,7 +512,16 @@ console.log(industrialDesignsData);
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  { industrialDesignsData?.data?.items.filter((item) => item.application_number).map((item) => (
+                  { industrialDesignsData?.data?.items.filter((item) => item.application_number).length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="h-64 text-center">
+                        <div className="flex flex-col items-center justify-center text-gray-500">
+                          <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
+                          <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : industrialDesignsData?.data?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -532,7 +587,12 @@ console.log(industrialDesignsData);
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              { industrialDesignsData?.data?.items?.filter((item) => item.application_number).map((item) => (
+              { industrialDesignsData?.data?.items?.filter((item) => item.application_number).length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
+                  <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
+                  <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
+                </div>
+              ) : industrialDesignsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"

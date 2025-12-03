@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LayoutGrid, List, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,14 +50,21 @@ export default function PatentsSearchPage() {
   const [searchParams, setSearchParams] = useState<PatentParams>(initialSearchState);
   const [selectedPatent, setSelectedPatent] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [sortTrigger, setSortTrigger] = useState(0);
 
   const {
     data: patentsData,
     isLoading: isPatentsLoading,
+    refetch: refetchPatents,
   } = useQuery({
     queryFn: async () => await patentService.get(searchParams),
-    queryKey: ["patents", { searchParams }],
+    queryKey: ["patents", sortTrigger],
+    enabled: true,
   })
+
+  useEffect(() => {
+    refetchPatents();
+  }, [searchParams, refetchPatents]);
 
   const {
     data: companiesData,
@@ -87,6 +94,18 @@ export default function PatentsSearchPage() {
     await queryClient.invalidateQueries({
       queryKey: ["patents", { searchParams }]
     })
+  };
+
+  const handleSort = (field: string) => {
+    let newSortOrder: 'asc' | 'desc' = 'asc';
+    if (searchParams.sort_by === field) {
+      newSortOrder = searchParams.sort_order === 'asc' ? 'desc' : 'asc';
+    }
+    setSearchParams(prev => ({
+      ...prev,
+      sort_by: field,
+      sort_order: newSortOrder
+    }));
   };
 
   const handleAdvancedSearch = async () => {
@@ -329,9 +348,14 @@ export default function PatentsSearchPage() {
             <Search className="w-5 h-5 text-gray-400 shrink-0"/>
             <input
               type="text"
-              placeholder="Nhập tìm kiếm theo tên sáng chế, số đơn, chủ đơn, IPC..."
+              placeholder="Nhập tìm kiếm theo tên sáng chế, số đơn, chủ đơn..."
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
+              onKeyDown={ (e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
             />
           </div>
@@ -393,19 +417,41 @@ export default function PatentsSearchPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
                     const currentPageData = patentsData?.data?.items?.filter((item) => item.application_number) || [];
-                    exportPatentsToExcel(currentPageData, companyMap);
+                    await exportPatentsToExcel(currentPageData, companyMap);
                   }}
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
                   <FileDown className="w-4 h-4" />
                   Xuất Excel
                 </Button>
-                <select className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1">
-                  <option>Ngày đơn đăng ký</option>
-                  <option>Ngày cấp bằng</option>
-                  <option>Tiêu đề</option>
+                <select 
+                  className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
+                  value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value) {
+                      const [field, order] = value.split('-');
+                      setSearchParams(prev => ({
+                        ...prev,
+                        sort_by: field,
+                        sort_order: order as 'asc' | 'desc'
+                      }));
+                      setSortTrigger(prev => prev + 1);
+                    } else {
+                      setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
+                      setSortTrigger(prev => prev + 1);
+                    }
+                  }}
+                >
+                  <option value="">Sắp xếp theo</option>
+                  <option value="application_date-asc">Ngày đơn đăng ký: Cũ → Mới</option>
+                  <option value="application_date-desc">Ngày đơn đăng ký: Mới → Cũ</option>
+                  <option value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</option>
+                  <option value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</option>
+                  <option value="name-asc">Tiêu đề: A → Z</option>
+                  <option value="name-desc">Tiêu đề: Z → A</option>
                 </select>
                 <button
                   onClick={ () => setViewType("table") }
@@ -490,6 +536,15 @@ export default function PatentsSearchPage() {
                         </TableCell>
                       </TableRow>
                     ))
+                  ) : patentsData?.data?.items?.filter((item) => item.application_number).length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={9} className="h-64 text-center">
+                        <div className="flex flex-col items-center justify-center text-gray-500">
+                          <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
+                          <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                     <TableRow 
@@ -584,6 +639,11 @@ export default function PatentsSearchPage() {
                     </div>
                   </div>
                 ))
+              ) : patentsData?.data?.items?.filter((item) => item.application_number).length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
+                  <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
+                  <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
+                </div>
               ) : (
                 patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
                 <div
