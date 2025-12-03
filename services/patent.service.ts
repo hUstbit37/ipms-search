@@ -58,6 +58,12 @@ export interface PatentResponse {
   owner_name: string | null;
   agency_name: string | null;
   owner: string | null;
+  authors: string | null;
+  pirority_data: Array<{
+    appNumber: string;
+    date: string;
+    country: string;
+  }> | null;
 }
 
 export const patentService = {

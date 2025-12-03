@@ -303,7 +303,7 @@ export default function AdvancedSearchModal({
               className="flex items-center gap-2 font-semibold text-sm cursor-pointer hover:text-blue-600 w-full gap-4"
             >
               <span>▶</span>
-              <span>Tên người</span>
+              <span>Chủ đơn/Đại diện</span>
             </button>
             <div data-group="owner" className="ml-4 mt-2 flex items-center flex-wrap justify-between">
               <div className="w-[49%]">
