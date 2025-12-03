@@ -649,21 +649,30 @@ export default function PatentsSearchPage() {
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-sm flex-1">{ item.name }</h3>
-                    {
-                      item.status ? (
-                        <span
-                          className={ `text-xs px-2 py-1 rounded whitespace-nowrap ml-2 ${ getStatusColor(item.status) }` }>
-                          { item.status }
-                        </span>
-                      ) : "-"
-                    }
+                    <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
+                    <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0">
+                      {item?.image_url ? (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name || "Patent image"} 
+                          className="w-full h-full object-cover rounded"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
+                          {item?.name ? item.name.charAt(0) : "-"}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3">{ item.application_number ?? "-" }</p>
                   <div className="space-y-2 text-xs text-muted-foreground">
                     <p>
-                      <span className="font-medium">Người đơn:</span>{ " " }
-                      { "-" }
+                      <span className="font-medium">Số đơn:</span>{ " " }
+                      { item.application_number || "-" }
+                    </p>
+                    <p>
+                      <span className="font-medium">Chủ đơn:</span>{ " " }
+                      { item.owner_name || item.owner || "-" }
                     </p>
                     <p>
                       <span className="font-medium">Ngày nộp:</span>{ " " }
@@ -671,7 +680,7 @@ export default function PatentsSearchPage() {
                     </p>
                     <p>
                       <span className="font-medium">Ngày công bố:</span>{ " " }
-                      { "-" }
+                      { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                     </p>
                     <p>
                       <span className="font-medium">Số bằng:</span>{ " " }
@@ -679,7 +688,7 @@ export default function PatentsSearchPage() {
                     </p>
                     <p>
                       <span className="font-medium">IPC:</span>{ " " }
-                      { "-" }
+                      { item.ipc_list ? (Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-')) : "-" }
                     </p>
                   </div>
                 </div>

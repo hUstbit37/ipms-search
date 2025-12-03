@@ -752,33 +752,57 @@ console.log('trade', trademarksData);
                     setShowQuickView(true);
                   }}
                 >
-                  <h3 className="font-semibold mb-2">{ item.application_number }</h3>
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
+                    <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0">
+                      {item?.image_url ? (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name || "Patent image"} 
+                          className="w-full h-full object-cover rounded"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
+                          {item?.name ? item.name.charAt(0) : "-"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>
-                      <span className="font-medium">Applicant:</span>{ " " }
-                      { "-" }
+                      <span className="font-medium">Số đơn:</span>{ " " }
+                      { item.application_number || "-" }
                     </p>
                     <p>
-                      <span className="font-medium">Application Date:</span>{ " " }
+                      <span className="font-medium">Chủ đơn:</span>{ " " }
+                      { item.owner_name || "-" }
+                    </p>
+                    <p>
+                      <span className="font-medium">Ngày nộp đơn:</span>{ " " }
                       { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                     </p>
                     <p>
+                      <span className="font-medium">Ngày công bố:</span>{ " " }
+                      { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
+                    </p>
+                    <p>
                       <span className="font-medium">Nice Class:</span>{ " " }
-                      { "-" }
+                      <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>
+                        { (item as any).nice_class_text || "-"}
+                      </div>
                     </p>
                     <p>
-                      <span className="font-medium">Country:</span>{ " " }
-                      { item.country_code }
-                    </p>
-                    <p>
-                      <span className="font-medium">Status:</span>{ " " }
-                      {
-                        item.status ? (
-                          <Badge variant="default" className="bg-green-600 text-xs">
-                            { item.status }
-                          </Badge>
-                        ) : "-"
-                      }
+                      <span className="font-medium">Trạng thái:</span>{ " " }
+                      {item.wipo_status ? (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.wipo_status}
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded font-bold">
+                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
+                          </span>
+                        )}
                     </p>
                   </div>
                 </div>
