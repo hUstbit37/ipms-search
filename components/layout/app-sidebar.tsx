@@ -69,7 +69,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <h2 className="text-center mx-auto font-bold text-2xl">IPMS ADMIN</h2>
+        <h2 className="text-center mx-auto font-bold text-2xl">IPMS</h2>
         {/* <p className="text-center text-xs text-muted-foreground mt-1">Tra cứu SHTT</p> */}
       </SidebarHeader>
 
