@@ -16,9 +16,11 @@ export async function POST(req: NextRequest) {
     path: "/",
     maxAge: 0,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && !process.env.NOT_SUCURE,
     sameSite: "lax",
   });
+
+  res.cookies.delete("token")
 
   return res;
 }
