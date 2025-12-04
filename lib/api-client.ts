@@ -1,15 +1,15 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import apiInstance from "@/lib/api/apiInstance";
 import { getDefaultStore, RESET } from "@/lib/jotai";
 import { authContextAtom } from "@/providers/auth/AuthProvider";
 import { isNullish } from "@/utils/common-utils";
+import apiServerInstance from "@/lib/api/apiServerInstance";
 
 const store = getDefaultStore();
 
 export const apiClient = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
   const source = axios.CancelToken.source();
 
-  apiInstance.interceptors.request.use(
+  apiServerInstance.interceptors.request.use(
     (config) => {
       const token = store.get(authContextAtom);
       if (token && token.token) {
@@ -20,20 +20,20 @@ export const apiClient = <T>(config: AxiosRequestConfig, options?: AxiosRequestC
     (error) => Promise.reject(error),
   );
 
-  apiInstance.interceptors.response.use(
+  apiServerInstance.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
         const authContextType = store.get(authContextAtom);
         if (!isNullish(authContextType?.refreshToken) && !isNullish(authContextType?.token)) {
-          apiInstance.post<{access_token: string, refresh_token: string}>("/v1/auth/refresh", {
+          apiServerInstance.post<{access_token: string, refresh_token: string}>("/v1/auth/refresh", {
             refresh_token: authContextType.refreshToken,
           })
             .then((res) => {
-              if (!isNullish(res.data?.access_token) && !isNullish(res.data?.refresh_token)) {
+              if (!isNullish(res?.data?.access_token) && !isNullish(res?.data?.refresh_token)) {
                 store.set(authContextAtom, {
-                  refreshToken: res.data.refresh_token,
-                  token: res.data.access_token,
+                  refreshToken: res?.data.refresh_token,
+                  token: res?.data?.access_token,
                   isAuthenticated: true,
                 });
               } else {
@@ -51,7 +51,7 @@ export const apiClient = <T>(config: AxiosRequestConfig, options?: AxiosRequestC
       return Promise.reject(error);
     },
   );
-  const promise = apiInstance({
+  const promise = apiServerInstance({
     ...config,
     ...options,
     cancelToken: source.token,

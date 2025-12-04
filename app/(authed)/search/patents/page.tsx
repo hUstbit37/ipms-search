@@ -418,7 +418,7 @@ export default function PatentsSearchPage() {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    const currentPageData = patentsData?.data?.items?.filter((item) => item.application_number) || [];
+                    const currentPageData = patentsData?.items?.filter((item) => item.application_number) || [];
                     await exportPatentsToExcel(currentPageData, companyMap);
                   }}
                   className="text-xs sm:text-sm flex items-center gap-2"
@@ -536,7 +536,7 @@ export default function PatentsSearchPage() {
                         </TableCell>
                       </TableRow>
                     ))
-                  ) : patentsData?.data?.items?.filter((item) => item.application_number).length === 0 ? (
+                  ) : patentsData?.items?.filter((item) => item.application_number).length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="h-64 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-500">
@@ -546,7 +546,7 @@ export default function PatentsSearchPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
+                    patentsData?.items?.filter((item) => item.application_number).map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -637,13 +637,13 @@ export default function PatentsSearchPage() {
                     </div>
                   </div>
                 ))
-              ) : patentsData?.data?.items?.filter((item) => item.application_number).length === 0 ? (
+              ) : patentsData?.items?.filter((item) => item.application_number).length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
                   <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
                   <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
                 </div>
               ) : (
-                patentsData?.data?.items?.filter((item) => item.application_number).map((item) => (
+                patentsData?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
@@ -699,8 +699,8 @@ export default function PatentsSearchPage() {
           <div className="w-full h-full mt-4">
             <PaginationComponent 
               page={searchParams.page}
-              totalPages={Math.ceil((patentsData?.data?.total ?? 0) / searchParams.page_size)}
-              total={patentsData?.data?.total ?? 0}
+              totalPages={Math.ceil((patentsData?.total ?? 0) / searchParams.page_size)}
+              total={patentsData?.total ?? 0}
               onPageChange={(val) => setSearchParams((prev) => ({ ...prev, page: val }))}
               pageSize={searchParams.page_size}
               onPageSizeChange={(size) => setSearchParams((prev) => ({

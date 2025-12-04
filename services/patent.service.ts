@@ -1,5 +1,5 @@
 import { PaginationResponse } from "@/types/api";
-import apiServerInstance from "@/lib/api/apiServerInstance";
+import apiClient from "@/lib/api-client";
 
 export interface PatentParams {
   search?: string;
@@ -68,6 +68,14 @@ export interface PatentResponse {
 
 export const patentService = {
   get: async (params: PatentParams, signal?: AbortSignal) => {
-    return await apiServerInstance.get<PaginationResponse<PatentResponse>>("/patents", { signal, params });
+    return await apiClient<PaginationResponse<PatentResponse>>(
+      {
+        url: "/v1/public/patents",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        signal,
+        params
+      }
+    );
   },
 };

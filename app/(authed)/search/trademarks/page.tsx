@@ -512,7 +512,7 @@ console.log('trade', trademarksData);
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    const currentPageData = trademarksData?.data?.items.filter((item) => item.application_number) || [];
+                    const currentPageData = trademarksData?.items.filter((item) => item.application_number) || [];
                     await exportTrademarksToExcel(currentPageData, companyMap);
                   }}
                   className="text-xs sm:text-sm flex items-center gap-2"
@@ -630,7 +630,7 @@ console.log('trade', trademarksData);
                         </TableCell>
                       </TableRow>
                     ))
-                  ) : trademarksData?.data?.items.filter((item) => item.application_number).length === 0 ? (
+                  ) : trademarksData?.items.filter((item) => item.application_number).length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={10} className="h-64">
                         <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -640,7 +640,7 @@ console.log('trade', trademarksData);
                       </TableCell>
                     </TableRow>
                   ) : (
-                    trademarksData?.data?.items.filter((item) => item.application_number).map((item) => (
+                    trademarksData?.items.filter((item) => item.application_number).map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -737,13 +737,13 @@ console.log('trade', trademarksData);
                     </div>
                   </div>
                 ))
-              ) : trademarksData?.data?.items.filter((item) => item.application_number).length === 0 ? (
+              ) : trademarksData?.items.filter((item) => item.application_number).length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
                   <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
                   <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
                 </div>
               ) : (
-                trademarksData?.data?.items?.filter((item) => item.application_number).map((item) => (
+                trademarksData?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
@@ -813,8 +813,8 @@ console.log('trade', trademarksData);
           <div className="w-full h-full mt-4">
             <PaginationComponent 
               page={searchParams.page}
-              totalPages={Math.ceil((trademarksData?.data?.total ?? 0) / searchParams.page_size)}
-              total={trademarksData?.data?.total ?? 0}
+              totalPages={Math.ceil((trademarksData?.total ?? 0) / searchParams.page_size)}
+              total={trademarksData?.total ?? 0}
               onPageChange={(pageVal) => setSearchParams((prev) => ({
                 ...prev,
                 page: pageVal

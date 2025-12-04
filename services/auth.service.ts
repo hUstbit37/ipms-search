@@ -1,5 +1,6 @@
 import apiClient from '@/lib/api-client';
-import apiServerInstance from "@/lib/api/apiServerInstance";
+
+
 
 export interface LoginBody {
   username: string;
@@ -22,11 +23,28 @@ export interface LoginResponse {
 
 export const authService = {
   login: async (body: LoginBody, signal?: AbortSignal) => {
-    return await apiServerInstance.post<LoginResponse>("/auth/login", body, { signal });
+    return await apiClient<LoginResponse>(
+      {
+        baseURL: process.env?.NEXT_PUBLIC_API_AUTH_BASE_URL ?? "/api",
+        url: "/v1/auth/login",
+        method: "POST",
+        data: body,
+        headers: { "Content-Type": "application/json" },
+        signal
+      }
+    );
   },
 
   logout: async (signal?: AbortSignal) => {
-    return await apiServerInstance.post("/auth/logout", { signal });
+    return await apiClient(
+      {
+        baseURL: process.env?.NEXT_PUBLIC_API_AUTH_BASE_URL ?? "/api",
+        url: "/v1/auth/logout",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal
+      }
+    );
   },
 
   changePassword: async (body: ChangePasswordBody, signal?: AbortSignal) => {

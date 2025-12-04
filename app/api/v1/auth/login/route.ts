@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       path: "/",
       maxAge: 60 * 60 * 24,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" && !process.env.NOT_SUCURE,
       sameSite: "lax",
     });
 

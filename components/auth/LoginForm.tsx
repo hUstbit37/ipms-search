@@ -63,10 +63,10 @@ export function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: async (body: LoginBody) => await authService.login(body),
     onSuccess: async (data) => {
-      if (data?.data?.access_token) {
+      if (data?.access_token) {
         setAuthContext(true)
-        setAccessToken(data.data.access_token)
-        setRefreshToken(data.data?.refresh_token ?? "")
+        setAccessToken(data.access_token)
+        setRefreshToken(data?.refresh_token ?? "")
         await queryClient.invalidateQueries({
           queryKey: ["me"]
         })
@@ -74,8 +74,8 @@ export function LoginForm() {
         await sleep(300);
 
         await meRefetch().then((res) => {
-          if (res?.data?.data) {
-            setMe(res.data.data)
+          if (res?.data) {
+            setMe(res.data)
             router.push("/search/trademarks")
             setIsGlobalLoading(false);
           } else {
@@ -91,7 +91,7 @@ export function LoginForm() {
         setIsGlobalLoading(false);
       }
     },
-    onError: async () => {
+    onError: async (err) => {
       resetAuth()
       resetMe()
       toast.error("Thông tin tài khoản hoặc mật khẩu không chính xác")
