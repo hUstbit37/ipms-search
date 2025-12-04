@@ -25,12 +25,12 @@ export default function TrademarkDetailPage() {
     queryKey: ["companies"],
   });
 
-  const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
+  const companyMap = companiesData?.items?.reduce((acc, company) => {
     acc[company.id] = company.name;
     return acc;
   }, {} as Record<string, string>) || {};
 
-  const trademark = trademarkData?.data;
+  const trademark = trademarkData;
 
   if (isLoading) {
     return (
