@@ -1,15 +1,34 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OverlayLoading } from "@/components/loading/OverlayLoading";
 import { useGlobalLoading } from "@/providers/loading/LoadingProvider";
+import { useAuth } from "@/providers/auth/AuthProvider";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { authContext } = useAuth();
+  const { isGlobalLoading } = useGlobalLoading();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const {
-    isGlobalLoading
-  } = useGlobalLoading()
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (authContext?.isAuthenticated && authContext?.token) {
+      router.push("/search/trademarks");
+    }
+  }, [authContext, router, isMounted]);
+
+  if (isMounted && authContext?.isAuthenticated && authContext?.token) {
+    return <OverlayLoading show={true} />;
+  }
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-background">

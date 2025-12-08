@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import {
   SidebarInset,
@@ -31,6 +31,7 @@ import { useMutation } from "@/lib/react-query";
 import { authService } from "@/services/auth.service";
 import { toast } from "react-toastify";
 import { getInitialsName } from "@/utils/common-utils";
+import { OverlayLoading } from "@/components/loading/OverlayLoading";
 
 const breadcrumbMap: Record<string, string> = {
   search: "Tra cứu",
@@ -47,7 +48,25 @@ export default function AuthedLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { me, resetMe } = useMe();
-  const { resetAuth } = useAuth();
+  const { authContext, resetAuth } = useAuth();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Wait for client-side hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Client-side authentication check
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (!authContext?.isAuthenticated || !authContext?.token) {
+      router.push("/login");
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [authContext, router, isMounted]);
 
   const segments = pathname.split("/").filter((seg) => seg && seg.length > 0);
 
@@ -77,6 +96,11 @@ export default function AuthedLayout({
   const logout = () => {
     logoutMutation.mutate();
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return <OverlayLoading show={true} />;
+  }
 
   return (
     <SidebarProvider>

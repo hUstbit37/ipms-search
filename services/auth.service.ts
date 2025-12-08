@@ -25,7 +25,7 @@ export const authService = {
   login: async (body: LoginBody, signal?: AbortSignal) => {
     return await apiClient<LoginResponse>(
       {
-        baseURL: process.env?.NEXT_PUBLIC_API_AUTH_BASE_URL ?? "/api",
+        // baseURL: process.env?.NEXT_PUBLIC_API_AUTH_BASE_URL ?? "/api",
         url: "/v1/auth/login",
         method: "POST",
         data: body,
