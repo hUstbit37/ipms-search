@@ -423,7 +423,7 @@ export default function IndustrialDesignsSearchPage() {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    const currentPageData = industrialDesignsData?.items.filter((item) => item.application_number) || [];
+                    const currentPageData = industrialDesignsData?.items || [];
                     await exportIndustrialDesignsToExcel(currentPageData, companyMap);
                   }}
                   className="text-xs sm:text-sm flex items-center gap-2"
@@ -519,7 +519,7 @@ export default function IndustrialDesignsSearchPage() {
                         <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                       </TableRow>
                     ))
-                  ) : industrialDesignsData?.items?.filter((item) => item.application_number).length === 0 ? (
+                  ) : industrialDesignsData?.items?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="h-64 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-500">
@@ -529,7 +529,7 @@ export default function IndustrialDesignsSearchPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    industrialDesignsData?.items?.filter((item) => item.application_number).map((item) => (
+                    industrialDesignsData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
@@ -615,7 +615,7 @@ export default function IndustrialDesignsSearchPage() {
                   <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
                 </div>
               ) : (
-                industrialDesignsData?.items?.filter((item) => item.application_number).map((item) => (
+                industrialDesignsData?.items?.map((item) => (
                 <div
                   key={ item.id }
                   className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
