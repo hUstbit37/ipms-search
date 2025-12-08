@@ -618,11 +618,15 @@ export default function IndustrialDesignsSearchPage() {
                 industrialDesignsData?.items?.filter((item) => item.application_number).map((item) => (
                 <div
                   key={ item.id }
-                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
+                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
+                  onClick={() => {
+                    setSelectedDesign(item);
+                    setShowDetailModal(true);
+                  }}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0">
+                    <div className="w-32 h-32 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0">
                       {item?.image_url ? (
                         <img 
                           src={item.image_url} 
