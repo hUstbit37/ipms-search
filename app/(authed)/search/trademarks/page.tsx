@@ -117,7 +117,7 @@ export default function TrademarksSearchPage() {
       representative: advancedFilters?.representative || undefined,
       basic_application_number: advancedFilters?.basicApplicationNumber || undefined,
       priority_number: advancedFilters?.priorityNumber || undefined,
-      trade_name: advancedFilters?.tradeName || undefined,
+      name: advancedFilters?.tradeName || undefined,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -151,7 +151,7 @@ export default function TrademarksSearchPage() {
     }
 
     if (advancedFilters.productCategory) {
-      newActiveFilters["Danh mục"] = advancedFilters.productCategory;
+      newActiveFilters["Danh mục sản phẩm dịch vụ"] = advancedFilters.productCategory;
     }
 
     if (advancedFilters.viennaClass) {
@@ -286,7 +286,7 @@ export default function TrademarksSearchPage() {
       case "Nước ưu tiên":
         newAdvancedFilters.priorityCountry = "";
         break;
-      case "Danh mục":
+      case "Danh mục sản phẩm dịch vụ":
         newAdvancedFilters.productCategory = "";
         break;
       case "Vienna Class":
@@ -364,7 +364,7 @@ export default function TrademarksSearchPage() {
       representative: newAdvancedFilters?.representative,
       basicApplicationNumber: newAdvancedFilters?.basicApplicationNumber,
       priority_number: newAdvancedFilters?.priorityNumber,
-      trade_name: newAdvancedFilters?.tradeName,
+      name: newAdvancedFilters?.tradeName,
     };
 
     setSearchParams(newSearchParams);

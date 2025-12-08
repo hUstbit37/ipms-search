@@ -80,7 +80,7 @@ export default function AdvancedSearchModal({
                   }
                 />
               </div>
-              <div className="w-[49%]">
+              {/* <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước công bố</label>
                 <Input
                   placeholder="VN, US, JP..."
@@ -93,7 +93,7 @@ export default function AdvancedSearchModal({
                     })
                   }
                 />
-              </div>
+              </div> */}
               <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Mã Nước của đơn ưu tiên</label>
                 <Input

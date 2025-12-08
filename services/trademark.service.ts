@@ -29,6 +29,7 @@ export interface TrademarkParams {
   basic_application_number?: string;
   priority_number?: string;
   trade_name?: string;
+  name?: string;
   page: number;
   page_size: number;
   sort_by?: string;
