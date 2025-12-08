@@ -14,7 +14,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/select'
 
-const PAGE_SIZE_OPTIONS = [20, 50, 100, 200];
+const PAGE_SIZE_OPTIONS = [30, 60, 120, 240];
 
 type Props = {
 	page: number;

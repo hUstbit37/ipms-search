@@ -1,6 +1,6 @@
 export const DEFAULT_PAGINATION = {
   page: 1,
-  per_page: 20,
+  per_page: 30,
 }
 
 export const FORMAT_DATE = "DD/MM/YYYY";
