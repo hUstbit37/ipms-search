@@ -539,18 +539,18 @@ export default function IndustrialDesignsSearchPage() {
                       }}
                     >
                       <TableCell>
-                        <div className="w-16 h-16 rounded overflow-hidden">
-                          {item.image_url ? (
-                          <img 
-                            src={item.image_url} 
-                            alt={item.name || "Design"} 
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
+                        <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-1 flex-shrink-0 overflow-hidden bg-gray-50">
+                          {item?.image_url ? (
+                            <img 
+                              src={item.image_url} 
+                              alt={item.name || "Patent image"} 
+                              className="max-w-full max-h-full object-contain"
+                              loading="lazy"
+                            />
                           ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 flex items-center justify-center text-sm font-bold text-white shadow-sm">
-                            {item.name ? item.name.charAt(0) : "-"}
-                          </div>
+                            <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
+                              {item?.name ? item.name.charAt(0) : "-"}
+                            </div>
                           )}
                         </div>
                       </TableCell>
@@ -575,7 +575,7 @@ export default function IndustrialDesignsSearchPage() {
                       <TableCell className="text-sm">
                           { item.owner_name || "-" }
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {item.wipo_status ? (
                           <span className="text-xs px-2 py-1 rounded font-bold">
                             {item.wipo_status}
@@ -626,12 +626,12 @@ export default function IndustrialDesignsSearchPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <div className="w-32 h-32 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0">
+                    <div className="w-32 h-32 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0 overflow-hidden bg-gray-50">
                       {item?.image_url ? (
                         <img 
                           src={item.image_url} 
-                          alt={item.name || "Patent image"} 
-                          className="w-full h-full object-cover rounded"
+                          alt={item.name || "Image"} 
+                          className="max-w-full max-h-full object-contain"
                           loading="lazy"
                         />
                       ) : (
