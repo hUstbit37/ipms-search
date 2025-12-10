@@ -13,6 +13,7 @@ import AdvancedSearchModal from "@/components/trademarks/search/advanced-search-
 import { useQuery } from "@tanstack/react-query";
 import { TrademarkParams, trademarkService } from "@/services/trademark.service";
 import { companyService } from "@/services/company.service";
+import { useAuth } from "@/providers/auth/AuthProvider";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
 import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
@@ -374,6 +375,8 @@ export default function TrademarksSearchPage() {
     });
   };
 
+  const { authContext } = useAuth();
+
   const {
     data: trademarksData,
     isLoading: isTrademarksLoading,
@@ -383,7 +386,7 @@ export default function TrademarksSearchPage() {
       ...searchParams
     }),
     queryKey: ["trademarks", sortTrigger],
-    enabled: true,
+    enabled: !!authContext?.token, // Chỉ gọi API khi có token
   })
 
   useEffect(() => {

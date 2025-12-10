@@ -9,7 +9,7 @@ import { LoginFormData, loginSchema } from "@/schemas/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { queryClient, useQuery, useMutation } from "@/lib/react-query";
 import { LoginBody, authService } from "@/services/auth.service";
-import { useAuth } from "@/providers/auth/AuthProvider";
+import { useAuth, authContextAtom } from "@/providers/auth/AuthProvider";
 import { meService } from "@/services/me.service";
 import { sleep } from "@/utils/common-utils";
 import { useMe } from "@/providers/auth/MeProvider";
@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useGlobalLoading } from "@/providers/loading/LoadingProvider";
 import { InputPassword } from "@/components/ui/input-password";
+import { getDefaultStore } from "@/lib/jotai";
 
 export function LoginForm() {
   const router = useRouter();
@@ -64,26 +65,54 @@ export function LoginForm() {
     mutationFn: async (body: LoginBody) => await authService.login(body),
     onSuccess: async (data) => {
       if (data?.access_token) {
+        const store = getDefaultStore();
+        
+        // Set token và refresh token trước
         setAuthContext(true)
         setAccessToken(data.access_token)
         setRefreshToken(data?.refresh_token ?? "")
+        
+        // Đợi token được lưu vào localStorage và store
+        // Kiểm tra token đã có trong store chưa (tối đa 2 giây)
+        let retries = 0;
+        const maxRetries = 20; // 20 * 100ms = 2 giây
+        while (retries < maxRetries) {
+          const currentAuth = store.get(authContextAtom);
+          if (currentAuth?.token === data.access_token) {
+            break;
+          }
+          await sleep(100);
+          retries++;
+        }
+
+        // Invalidate queries để clear cache
         await queryClient.invalidateQueries({
           queryKey: ["me"]
         })
 
+        // Đợi thêm một chút để đảm bảo token đã sẵn sàng trong interceptor
         await sleep(300);
 
-        await meRefetch().then((res) => {
+        // Gọi API me với token đã được lưu
+        try {
+          const res = await meRefetch();
           if (res?.data) {
             setMe(res.data)
+            // Đợi thêm một chút trước khi navigate để đảm bảo state đã được update
+            await sleep(200);
             router.push("/search/trademarks")
             setIsGlobalLoading(false);
           } else {
             resetMe()
-            toast.error("Đã có lỗi xảy ra")
+            toast.error("Đã có lỗi xảy ra khi lấy thông tin người dùng")
             setIsGlobalLoading(false);
           }
-        })
+        } catch (error) {
+          console.error("Error fetching user info:", error);
+          resetMe()
+          toast.error("Đã có lỗi xảy ra khi lấy thông tin người dùng")
+          setIsGlobalLoading(false);
+        }
       } else {
         resetAuth()
         resetMe()

@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Docker & Deployment files
+DEPLOY.md
+docker-build-push.ps1
+Dockerfile
+.dockerignore
+deploy.ps1
+k8s/
+.yarn/
+lib/api/
+package.json
+yarn.lock
