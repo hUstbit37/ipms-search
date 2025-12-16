@@ -68,6 +68,7 @@ export default function TrademarksSearchPage() {
   const [showQuickView, setShowQuickView] = useState(false);
   const [selectedTrademark, setSelectedTrademark] = useState<any>(null);
   const [sortTrigger, setSortTrigger] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleSearch = async () => {
     setSearchParams({
@@ -423,6 +424,40 @@ console.log('trade', trademarksData);
   // }, {} as Record<string, string>) || {};
   const companyMap = {};
 
+  const handleExportAllTrademarks = async () => {
+    setIsExporting(true);
+    try {
+      const baseParams = {
+        ...searchParams,
+        page: 1,
+        page_size: 500,
+      };
+
+      const firstPage = await trademarkService.search(baseParams);
+      const totalPagesRaw =
+        firstPage?.total_pages ??
+        (firstPage?.total && baseParams.page_size
+          ? Math.ceil(firstPage.total / baseParams.page_size)
+          : 1);
+      const totalPages = Math.min(totalPagesRaw || 1, 4); // tối đa 4 query ~ 2000 record
+
+      const allItems = [...(firstPage?.items || [])];
+
+      for (let page = 2; page <= (totalPages || 1); page++) {
+        const pageData = await trademarkService.search({ ...baseParams, page });
+        if (pageData?.items?.length) {
+          allItems.push(...pageData.items);
+        }
+      }
+
+      await exportTrademarksToExcel(allItems, companyMap);
+    } catch (error) {
+      console.error("Failed to export trademarks to Excel", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "CẤP BẰNG":
@@ -514,14 +549,12 @@ console.log('trade', trademarksData);
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={async () => {
-                    const currentPageData = trademarksData?.items || [];
-                    await exportTrademarksToExcel(currentPageData, companyMap);
-                  }}
+                  onClick={ handleExportAllTrademarks }
+                  disabled={ isExporting }
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
                   <FileDown className="w-4 h-4" />
-                  Xuất Excel
+                  { isExporting ? "Đang xuất..." : "Xuất Excel" }
                 </Button>
                 <select 
                   className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"

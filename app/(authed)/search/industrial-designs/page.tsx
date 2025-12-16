@@ -64,6 +64,7 @@ export default function IndustrialDesignsSearchPage() {
   const [searchParams, setSearchParams] = useState<IndustrialDesignParams>(initialSearchState);
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const {
     data: industrialDesignsData,
@@ -115,6 +116,40 @@ export default function IndustrialDesignsSearchPage() {
       sort_by: field,
       sort_order: newSortOrder
     }));
+  };
+
+  const handleExportAllIndustrialDesigns = async () => {
+    setIsExporting(true);
+    try {
+      const baseParams = {
+        ...searchParams,
+        page: 1,
+        page_size: 500,
+      };
+
+      const firstPage = await industrialDesignsService.get(baseParams);
+      const totalPagesRaw =
+        firstPage?.total_pages ??
+        (firstPage?.total && baseParams.page_size
+          ? Math.ceil(firstPage.total / baseParams.page_size)
+          : 1);
+      const totalPages = Math.min(totalPagesRaw || 1, 4); // tối đa 4 query ~ 2000 record
+
+      const allItems = [...(firstPage?.items || [])];
+
+      for (let page = 2; page <= (totalPages || 1); page++) {
+        const pageData = await industrialDesignsService.get({ ...baseParams, page });
+        if (pageData?.items?.length) {
+          allItems.push(...pageData.items);
+        }
+      }
+
+      await exportIndustrialDesignsToExcel(allItems, companyMap);
+    } catch (error) {
+      console.error("Failed to export industrial designs to Excel", error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleAdvancedSearch = async () => {
@@ -422,14 +457,12 @@ export default function IndustrialDesignsSearchPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={async () => {
-                    const currentPageData = industrialDesignsData?.items || [];
-                    await exportIndustrialDesignsToExcel(currentPageData, companyMap);
-                  }}
+                  onClick={ handleExportAllIndustrialDesigns }
+                  disabled={ isExporting }
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
                   <FileDown className="w-4 h-4" />
-                  Xuất Excel
+                  { isExporting ? "Đang xuất..." : "Xuất Excel" }
                 </Button>
                 <select 
                   className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
