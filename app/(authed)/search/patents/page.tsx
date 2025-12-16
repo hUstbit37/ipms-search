@@ -17,7 +17,6 @@ import moment from "moment";
 import { Tooltip } from "@/components/ui/tooltip";
 import PatentDetailModal from "@/components/patents/patent-detail-modal";
 import { FileDown } from "lucide-react";
-import { exportPatentsToExcel } from "@/utils/excel-export";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -110,7 +109,26 @@ export default function PatentsSearchPage() {
         }
       }
 
-      await exportPatentsToExcel(allItems, companyMap);
+      // Call API to export with images
+      const response = await fetch('/api/export/patents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items: allItems }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export patents');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Sang_che_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to export patents to Excel", error);
     } finally {

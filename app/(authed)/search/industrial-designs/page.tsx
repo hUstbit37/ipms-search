@@ -16,7 +16,6 @@ import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import DesignDetailModal from "@/components/industrial-designs/design-detail-modal";
 import { FileDown } from "lucide-react";
-import { exportIndustrialDesignsToExcel } from "@/utils/excel-export";
 
 const initialAdvancedSearch = {
   ownerCountry: "",
@@ -144,7 +143,26 @@ export default function IndustrialDesignsSearchPage() {
         }
       }
 
-      await exportIndustrialDesignsToExcel(allItems, companyMap);
+      // Call API to export with images
+      const response = await fetch('/api/export/industrial-designs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items: allItems }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export industrial designs');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Kieu_dang_cong_nghiep_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to export industrial designs to Excel", error);
     } finally {
