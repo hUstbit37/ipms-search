@@ -439,7 +439,7 @@ console.log('trade', trademarksData);
         (firstPage?.total && baseParams.page_size
           ? Math.ceil(firstPage.total / baseParams.page_size)
           : 1);
-      const totalPages = Math.min(totalPagesRaw || 1, 4); // tối đa 4 query ~ 2000 record
+      const totalPages = Math.min(totalPagesRaw || 1, 3); // tối đa 3 query ~ 1500 record
 
       const allItems = [...(firstPage?.items || [])];
 
@@ -450,7 +450,25 @@ console.log('trade', trademarksData);
         }
       }
 
-      await exportTrademarksToExcel(allItems, companyMap);
+      const response = await fetch('/api/export/trademarks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items: allItems }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export trademarks');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Nhan_hieu_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Failed to export trademarks to Excel", error);
     } finally {
