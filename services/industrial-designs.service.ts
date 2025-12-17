@@ -17,14 +17,13 @@ export interface IndustrialDesignParams {
   publicationDateTo?: string;
   expiryDateFrom?: string;
   expiryDateTo?: string;
-  application_country?: string;
-  publication_country?: string;
   priorityCountry?: string;
   niceClass?: string;
+  productCategory?: string;
   applicant?: string;
   representative?: string;
   name?: string;
-  basic_application_number?: string;
+  basicApplicationNumber?: string;
   priority_number?: string;
   page: number;
   page_size: number;

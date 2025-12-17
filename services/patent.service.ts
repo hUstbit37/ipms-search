@@ -15,10 +15,9 @@ export interface PatentParams {
   publicationDateTo?: string;
   expiryDateFrom?: string;
   expiryDateTo?: string;
-  application_country?: string;
-  publication_country?: string;
   priorityCountry?: string;
   niceClass?: string;
+  productCategory?: string;
   applicant?: string;
   representative?: string;
   name?: string;

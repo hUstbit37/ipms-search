@@ -175,7 +175,7 @@ export default function IndustrialDesignsSearchPage() {
       ...initialSearchState,
       status: advancedFilters?.status || undefined,
       application_number: advancedFilters?.applicationNumber || undefined,
-      country_code: advancedFilters?.ownerCountry || undefined,
+      country_code: advancedFilters?.applicationCountry || advancedFilters?.ownerCountry || undefined,
       certificate_number: advancedFilters?.certificateNumber || undefined,
       application_date_from: advancedFilters?.applicationDateFrom || undefined,
       application_date_to: advancedFilters?.applicationDateTo || undefined,
@@ -185,14 +185,13 @@ export default function IndustrialDesignsSearchPage() {
       publicationDateTo: advancedFilters?.publicationDateTo || undefined,
       expiryDateFrom: advancedFilters?.expiryDateFrom || undefined,
       expiryDateTo: advancedFilters?.expiryDateTo || undefined,
-      application_country: advancedFilters?.applicationCountry || undefined,
-      publication_country: advancedFilters?.publicationCountry || undefined,
       priorityCountry: advancedFilters?.priorityCountry || undefined,
       niceClass: advancedFilters?.niceClass || undefined,
+      productCategory: advancedFilters?.productCategory || undefined,
       applicant: advancedFilters?.applicant || undefined,
       representative: advancedFilters?.representative || undefined,
       name: advancedFilters?.designName || undefined,
-      basic_application_number: advancedFilters?.basicApplicationNumber || undefined,
+      basicApplicationNumber: advancedFilters?.basicApplicationNumber || undefined,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -301,84 +300,91 @@ export default function IndustrialDesignsSearchPage() {
     setActiveFilters(updatedFilters);
 
     const newAdvancedFilters = { ...advancedFilters };
-    const newSearchParams = { ...searchParams };
 
     switch(key) {
       case "Số đơn":
         newAdvancedFilters.applicationNumber = "";
-        delete newSearchParams.application_number;
         break;
       case "Số bằng":
         newAdvancedFilters.certificateNumber = "";
-        delete newSearchParams.certificate_number;
         break;
       case "Chủ đơn":
         newAdvancedFilters.applicant = "";
-        delete newSearchParams.applicant;
         break;
       case "Đại diện":
         newAdvancedFilters.representative = "";
-        delete newSearchParams.representative;
         break;
       case "Phân loại Locarno":
         newAdvancedFilters.niceClass = "";
-        delete newSearchParams.niceClass;
         break;
       case "Nước":
         newAdvancedFilters.ownerCountry = "";
-        delete newSearchParams.country_code;
         break;
       case "Nước nộp đơn":
         newAdvancedFilters.applicationCountry = "";
-        delete newSearchParams.application_country;
         break;
       case "Nước công bố":
         newAdvancedFilters.publicationCountry = "";
-        delete newSearchParams.publication_country;
         break;
       case "Nước ưu tiên":
         newAdvancedFilters.priorityCountry = "";
-        delete newSearchParams.priorityCountry;
+        break;
+      case "Danh mục":
+        newAdvancedFilters.productCategory = "";
         break;
       case "Ngày nộp":
         newAdvancedFilters.applicationDateFrom = "";
         newAdvancedFilters.applicationDateTo = "";
-        delete newSearchParams.application_date_from;
-        delete newSearchParams.application_date_to;
         break;
       case "Ngày công bố":
         newAdvancedFilters.publicationDateFrom = "";
         newAdvancedFilters.publicationDateTo = "";
-        delete newSearchParams.publicationDateFrom;
-        delete newSearchParams.publicationDateTo;
         break;
       case "Ngày cấp":
         newAdvancedFilters.certificateDateFrom = "";
         newAdvancedFilters.certificateDateTo = "";
-        delete newSearchParams.certificate_date_from;
-        delete newSearchParams.certificate_date_to;
         break;
       case "Ngày hết hạn":
         newAdvancedFilters.expiryDateFrom = "";
         newAdvancedFilters.expiryDateTo = "";
-        delete newSearchParams.expiryDateFrom;
-        delete newSearchParams.expiryDateTo;
         break;
       case "Số đơn gốc":
         newAdvancedFilters.basicApplicationNumber = "";
-        delete newSearchParams.basic_application_number;
         break;
       case "Số ưu tiên":
         newAdvancedFilters.priorityNumber = "";
-        delete newSearchParams.priority_number;
         break;
       case "Tên thiết kế":
         newAdvancedFilters.designName = "";
-        delete newSearchParams.name;
         break;
     }
 
     setAdvancedFilters(newAdvancedFilters);
+
+    // Rebuild search params from updated filters
+    const newSearchParams: IndustrialDesignParams = {
+      ...initialSearchState,
+      status: newAdvancedFilters.status || undefined,
+      application_number: newAdvancedFilters.applicationNumber || undefined,
+      country_code: newAdvancedFilters.applicationCountry || newAdvancedFilters.ownerCountry || undefined,
+      certificate_number: newAdvancedFilters.certificateNumber || undefined,
+      application_date_from: newAdvancedFilters.applicationDateFrom || undefined,
+      application_date_to: newAdvancedFilters.applicationDateTo || undefined,
+      publicationDateFrom: newAdvancedFilters.publicationDateFrom || undefined,
+      publicationDateTo: newAdvancedFilters.publicationDateTo || undefined,
+      certificate_date_from: newAdvancedFilters.certificateDateFrom || undefined,
+      certificate_date_to: newAdvancedFilters.certificateDateTo || undefined,
+      expiryDateFrom: newAdvancedFilters.expiryDateFrom || undefined,
+      expiryDateTo: newAdvancedFilters.expiryDateTo || undefined,
+      priorityCountry: newAdvancedFilters.priorityCountry || undefined,
+      niceClass: newAdvancedFilters.niceClass || undefined,
+      productCategory: newAdvancedFilters.productCategory || undefined,
+      applicant: newAdvancedFilters.applicant || undefined,
+      representative: newAdvancedFilters.representative || undefined,
+      name: newAdvancedFilters.designName || undefined,
+      basicApplicationNumber: newAdvancedFilters.basicApplicationNumber || undefined,
+    };
+
     setSearchParams(newSearchParams);
   };
   const getStatusColor = (status: string) => {
