@@ -54,6 +54,12 @@ const data = {
     },
 
     {
+      title: "Quản lý tài liệu",
+      items: [
+      { title: "Tài liệu nội bộ", url: "/document", icon: FileText },
+      ],
+    },
+    {
       title: "Workflow",
       items: [
       { title: "Cấu hình", url: "/workflows/configs", icon: Settings },
