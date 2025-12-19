@@ -48,6 +48,6 @@ Dockerfile
 deploy.ps1
 k8s/
 .yarn/
-lib/api/
+# lib/api/
 package.json
 yarn.lock
