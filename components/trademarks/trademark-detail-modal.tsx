@@ -2,6 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import moment from "moment"
+import ImageShow from "@/components/common/image/image-show";
 
 interface TrademarkDetailModalProps {
   open: boolean
@@ -31,17 +32,22 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
           {/* Logo Section */}
           <div className="mb-2 pb-2">
             <div className="font-semibold text-sm text-gray-900">(540) Hình ảnh</div>
-            <div className="w-48 h-48 border flex items-center justify-center overflow-hidden bg-white">
-              {trademark.image_url ? (
-                <img
-                  src={trademark.image_url || "/placeholder.svg"}
-                  alt={trademark.name || "Logo"}
-                  className="w-full h-full object-contain p-2"
-                />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {trademark.image_urls && trademark.image_urls.length > 0 ? (
+                trademark.image_urls.map((imageUrl: string, index: number) => (
+                  <ImageShow
+                    key={index}
+                    src={imageUrl || ""} 
+                    alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
+                    size="xxl"
+                  />
+                ))
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 flex items-center justify-center">
-                  <span className="text-white font-bold text-5xl">{trademark.name?.charAt(0) || "?"}</span>
-                </div>
+                <ImageShow
+                  src="" 
+                  alt={trademark.name || "Trademark image"} 
+                  size="xxl"
+                />
               )}
             </div>
           </div>

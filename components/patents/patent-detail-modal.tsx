@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import moment from "moment";
+import ImageShow from "../common/image/image-show";
 
 interface PatentDetailModalProps {
   open: boolean;
@@ -36,27 +37,23 @@ export default function PatentDetailModal({
           {/* Image - full width row */}
           <div className="py-2 border-b border-gray-200 dark:border-gray-700 grid grid-cols-6 gap-4">
             <div className="font-bold text-xs col-span-1">Hình ảnh</div>
-            <div className="text-xs text-gray-700 dark:text-gray-300 col-span-5">
-              <div className="flex gap-2 flex-wrap">
-                {(() => {
-                  // Support both single image_url (string) and multiple images (array)
-                  const images = Array.isArray(patent.image_url) 
-                    ? patent.image_url 
-                    : patent.image_url 
-                      ? [patent.image_url] 
-                      : [];
-                  
-                  if (images.length === 0) {
-                    return <div className="text-gray-400 text-xs">No image</div>;
-                  }
-                  
-                  return images.map((imageUrl: string, index: number) => (
-                    <div key={index} className="w-24 h-24 border border-gray-300 flex items-center justify-center bg-white">
-                      <img src={imageUrl} alt={`Image ${index + 1}`} className="max-w-full max-h-full object-contain p-1" />
-                    </div>
-                  ));
-                })()}
-              </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {patent.image_urls && patent.image_urls.length > 0 ? (
+                patent.image_urls.map((imageUrl: string, index: number) => (
+                  <ImageShow
+                    key={index}
+                    src={imageUrl || ""} 
+                    alt={`${patent.name || "Patent image"} ${index + 1}`} 
+                    size="xxl"
+                  />
+                ))
+              ) : (
+                <ImageShow
+                  src="" 
+                  alt={patent.name || "Patent image"} 
+                  size="xxl"
+                />
+              )}
             </div>
           </div>
 

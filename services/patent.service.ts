@@ -63,6 +63,7 @@ export interface PatentResponse {
     date: string;
     country: string;
   }> | null;
+  image_urls: string[] | null;
 }
 
 export const patentService = {

@@ -16,6 +16,7 @@ import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import DesignDetailModal from "@/components/industrial-designs/design-detail-modal";
 import { FileDown } from "lucide-react";
+import ImageShow from "@/components/common/image/image-show";
 
 const initialAdvancedSearch = {
   ownerCountry: "",
@@ -596,20 +597,11 @@ export default function IndustrialDesignsSearchPage() {
                       }}
                     >
                       <TableCell>
-                        <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-1 flex-shrink-0 overflow-hidden bg-gray-50">
-                          {item?.image_url ? (
-                            <img 
-                              src={item.image_url} 
-                              alt={item.name || "Patent image"} 
-                              className="max-w-full max-h-full object-contain"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
-                              {item?.name ? item.name.charAt(0) : "-"}
-                            </div>
-                          )}
-                        </div>
+                        <ImageShow
+                          src={item.image_urls?.[0] || ""} 
+                          alt={item.name || "Industrial design image"} 
+                          size="lg"
+                        />
                       </TableCell>
                       <TableCell>
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
@@ -683,20 +675,11 @@ export default function IndustrialDesignsSearchPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <div className="w-32 h-32 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0 overflow-hidden bg-gray-50">
-                      {item?.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name || "Image"} 
-                          className="max-w-full max-h-full object-contain"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
-                          {item?.name ? item.name.charAt(0) : "-"}
-                        </div>
-                      )}
-                    </div>
+                    <ImageShow
+                      src={item.image_urls?.[0] || ""} 
+                      alt={item.name || "Industrial design image"} 
+                      size="xl"
+                    />
                   </div>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>

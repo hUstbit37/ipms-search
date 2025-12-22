@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { ImageIcon } from 'lucide-react';
 
-interface ImageShowListProps {
+interface ImageShowProps {
   src?: string | null;
   alt?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   className?: string;
   fallbackSrc?: string;
 }
 
-const ImageShowList: React.FC<ImageShowListProps> = ({
+const ImageShow: React.FC<ImageShowProps> = ({
   src,
   alt = "Image",
   size = 'md',
@@ -22,13 +22,17 @@ const ImageShowList: React.FC<ImageShowListProps> = ({
   const sizeClasses = {
     sm: 'w-[40px] h-[40px] min-w-[40px] min-h-[40px]',
     md: 'w-[50px] h-[50px] min-w-[50px] min-h-[50px]',
-    lg: 'w-[80px] h-[80px] min-w-[80px] min-h-[80px]'
+    lg: 'w-[80px] h-[80px] min-w-[80px] min-h-[80px]',
+    xl: 'w-[100px] h-[100px] min-w-[100px] min-h-[100px]',
+    xxl: 'w-[120px] h-[120px] min-w-[120px] min-h-[120px]'
   };
 
   const iconSizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
-    lg: 'w-10 h-10'
+    lg: 'w-10 h-10',
+    xl: 'w-12 h-12',
+    xxl: 'w-14 h-14'
   };
 
   // Placeholder khi không có ảnh hoặc lỗi
@@ -76,4 +80,4 @@ const ImageShowList: React.FC<ImageShowListProps> = ({
   );
 };
 
-export default ImageShowList;
+export default ImageShow;

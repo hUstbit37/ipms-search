@@ -68,6 +68,7 @@ export interface TrademarkResponse {
   vienna_class: string | null;
   owner_name: string | null;
   agency_name: string | null;
+  image_urls: string[] | null;
 }
 
 export const trademarkService = {

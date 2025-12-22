@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import { LayoutGrid, List, Search, Trash2, XIcon, Eye } from "lucide-react";
 import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/trademarks/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { TrademarkParams, trademarkService } from "@/services/trademark.service";
-import { companyService } from "@/services/company.service";
 import { useAuth } from "@/providers/auth/AuthProvider";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
 import PaginationComponent from "@/components/common/Pagination";
@@ -20,6 +18,7 @@ import moment from "moment";
 import { queryClient } from "@/lib/react-query";
 import { FileDown } from "lucide-react";
 import { exportTrademarksToExcel } from "@/utils/excel-export";
+import ImageShow from "@/components/common/image/image-show";
 
 const initialAdvancedSearchState = {
   ownerCountry: "",
@@ -391,33 +390,6 @@ export default function TrademarksSearchPage() {
   }, [searchParams, refetchTrademarks]);
 console.log('trade', trademarksData);
 
-  // const {
-  //   data: companiesData,
-  // } = useQuery({
-  //   queryFn: async () => {
-  //     const [page1, page2, page3] = await Promise.all([
-  //       companyService.getAll({ limit: 500, datasource: "ALL", page: 1, page_size: 500 }),
-  //       companyService.getAll({ limit: 500, datasource: "ALL", page: 2, page_size: 500 }),
-  //       companyService.getAll({ limit: 500, datasource: "ALL", page: 3, page_size: 500 })
-  //     ]);
-      
-  //     // Merge the results
-  //     return {
-  //       ...page1,
-  //       data: {
-  //         ...page1.data,
-  //         items: [...(page1.data?.items || []), ...(page2.data?.items || []), ...(page3.data?.items || [])]
-  //       }
-  //     };
-  //   },
-  //   queryKey: ["companies"],
-  // })
-
-  // Create a map for quick company lookup
-  // const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
-  //   acc[company.id] = company.name;
-  //   return acc;
-  // }, {} as Record<string, string>) || {};
   const companyMap = {};
 
   const handleExportAllTrademarks = async () => {
@@ -700,26 +672,17 @@ console.log('trade', trademarksData);
                       }}
                     >
                       <TableCell>
-                        <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-1 flex-shrink-0 overflow-hidden bg-gray-50">
-                          {item?.image_url ? (
-                            <img 
-                              src={item.image_url} 
-                              alt={item.name || "Patent image"} 
-                              className="max-w-full max-h-full object-contain"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
-                              {item?.name ? item.name.charAt(0) : "-"}
-                            </div>
-                          )}
-                        </div>
+                        <ImageShow
+                          src={item.image_urls?.[0] || ""} 
+                          alt={item.name || "Trademark image"} 
+                          size="lg"
+                        />
                       </TableCell>
                       <TableCell>
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        { item.code }
+                        { item.application_number }
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
@@ -794,20 +757,11 @@ console.log('trade', trademarksData);
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <div className="w-32 h-32 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0 overflow-hidden bg-gray-50">
-                      {item?.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name || "Patent image"} 
-                          className="max-w-full max-h-full object-contain"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
-                          {item?.name ? item.name.charAt(0) : "-"}
-                        </div>
-                      )}
-                    </div>
+                    <ImageShow
+                      src={item.image_urls?.[0] || ""} 
+                      alt={item.name || "Trademark image"} 
+                      size="xl"
+                    />
                   </div>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>

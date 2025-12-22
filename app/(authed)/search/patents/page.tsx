@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
-import { companyService } from "@/services/company.service";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
 import { queryClient } from "@/lib/react-query";
 import PaginationComponent from "@/components/common/Pagination";
@@ -17,6 +16,7 @@ import moment from "moment";
 import { Tooltip } from "@/components/ui/tooltip";
 import PatentDetailModal from "@/components/patents/patent-detail-modal";
 import { FileDown } from "lucide-react";
+import ImageShow from "@/components/common/image/image-show";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -602,20 +602,11 @@ export default function PatentsSearchPage() {
                       }}
                     >
                       <TableCell>
-                        <div className="w-16 h-16 rounded flex items-center justify-center shadow-sm ml-1 flex-shrink-0 overflow-hidden bg-gray-50">
-                          {item?.image_url ? (
-                            <img 
-                              src={item.image_url} 
-                              alt={item.name || "Patent image"} 
-                              className="max-w-full max-h-full object-contain"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
-                              {item?.name ? item.name.charAt(0) : "-"}
-                            </div>
-                          )}
-                        </div>
+                        <ImageShow
+                          src={item.image_urls?.[0] || ""} 
+                          alt={item.name || "Patent image"} 
+                          size="lg"
+                        />
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>
@@ -700,20 +691,11 @@ export default function PatentsSearchPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <div className="w-32 h-32 rounded flex items-center justify-center shadow-sm ml-2 flex-shrink-0 overflow-hidden bg-gray-50">
-                      {item?.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name || "Image"} 
-                          className="max-w-full max-h-full object-contain"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded flex items-center justify-center text-sm font-bold text-white">
-                          {item?.name ? item.name.charAt(0) : "-"}
-                        </div>
-                      )}
-                    </div>
+                    <ImageShow
+                      src={item.image_urls?.[0] || ""} 
+                      alt={item.name || "Patent image"} 
+                      size="xl"
+                    />
                   </div>
                   <div className="space-y-2 text-xs text-muted-foreground">
                     <p>

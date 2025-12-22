@@ -62,6 +62,7 @@ export interface IndustrialDesignResponse {
     date: string;
     country: string;
   }> | null;
+  image_urls: string[] | null;
 }
 
 export const industrialDesignsService = {
