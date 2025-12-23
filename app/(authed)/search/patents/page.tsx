@@ -5,7 +5,6 @@ import { LayoutGrid, List, Search, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
@@ -55,12 +54,15 @@ export default function PatentsSearchPage() {
   const {
     data: patentsData,
     isLoading: isPatentsLoading,
+  isFetching: isPatentsFetching,
     refetch: refetchPatents,
   } = useQuery({
     queryFn: async () => await patentService.get(searchParams),
-    queryKey: ["patents", sortTrigger],
+  queryKey: ["patents", searchParams, sortTrigger],
     enabled: true,
   })
+
+const isPatentsPending = isPatentsLoading || isPatentsFetching;
 
   useEffect(() => {
     refetchPatents();
@@ -144,7 +146,7 @@ export default function PatentsSearchPage() {
     setActiveFilters({})
     setAdvancedFilters(initialAdvancedSearch)
     await queryClient.invalidateQueries({
-      queryKey: ["patents", { searchParams }]
+      queryKey: ["patents"]
     })
   };
 
@@ -367,7 +369,7 @@ export default function PatentsSearchPage() {
 
     // Re-run search with updated params
     await queryClient.invalidateQueries({
-      queryKey: ["patents", { searchParams: newSearchParams }]
+      queryKey: ["patents"]
     });
   };
 
@@ -413,9 +415,17 @@ export default function PatentsSearchPage() {
             <Button
               size="sm"
               className="text-sm font-medium"
+              disabled={isPatentsPending}
               onClick={ handleSearch }
             >
-              Tìm kiếm
+              {isPatentsPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang truy vấn...
+                </span>
+              ) : (
+                "Tìm kiếm"
+              )}
             </Button>
             <Button
               onClick={ () => setShowAdvancedFilter(true) }
@@ -550,42 +560,15 @@ export default function PatentsSearchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isPatentsLoading ? (
-                    // Loading skeleton
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={`skeleton-${index}`}>
-                        <TableCell>
-                          <Skeleton className="w-16 h-16 rounded" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-40" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-20" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-32" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-28" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-6 w-20 rounded-full" />
-                        </TableCell>
-                      </TableRow>
-                    ))
+                  {isPatentsPending ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="h-40">
+                        <div className="flex items-center justify-center gap-2 text-gray-500">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>Đang tải dữ liệu...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ) : patentsData?.items?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="h-64 text-center">
@@ -657,27 +640,11 @@ export default function PatentsSearchPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {isPatentsLoading ? (
-                // Loading skeleton for grid view
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={`grid-skeleton-${index}`}
-                    className="border rounded-lg p-4 bg-white dark:bg-zinc-900"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <Skeleton className="h-5 w-32 flex-1" />
-                      <Skeleton className="h-6 w-20 rounded ml-2" />
-                    </div>
-                    <Skeleton className="h-4 w-24 mb-3" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                      <Skeleton className="h-3 w-2/3" />
-                      <Skeleton className="h-3 w-1/3" />
-                    </div>
-                  </div>
-                ))
+              {isPatentsPending ? (
+                <div className="col-span-full flex items-center justify-center h-40 text-gray-500 gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Đang tải dữ liệu...</span>
+                </div>
               ) : patentsData?.items?.length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
                   <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>

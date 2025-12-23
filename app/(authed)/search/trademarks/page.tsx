@@ -7,7 +7,6 @@ import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/trademarks/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { TrademarkParams, trademarkService } from "@/services/trademark.service";
@@ -76,7 +75,7 @@ export default function TrademarksSearchPage() {
     setActiveFilters({})
     setAdvancedFilters(initialAdvancedSearchState)
     await queryClient.invalidateQueries({
-      queryKey: ["trademarks", { searchParams }]
+      queryKey: ["trademarks"]
     })
   };
 
@@ -215,7 +214,7 @@ export default function TrademarksSearchPage() {
     setActiveFilters(newActiveFilters);
     setShowAdvancedFilter(false);
     await queryClient.invalidateQueries({
-      queryKey: ["trademarks", { searchParams }]
+      queryKey: ["trademarks"]
     })
   };
 
@@ -366,7 +365,7 @@ export default function TrademarksSearchPage() {
     setSearchParams(newSearchParams);
     
     await queryClient.invalidateQueries({
-      queryKey: ["trademarks", { searchParams: newSearchParams }]
+      queryKey: ["trademarks"]
     });
   };
 
@@ -375,14 +374,17 @@ export default function TrademarksSearchPage() {
   const {
     data: trademarksData,
     isLoading: isTrademarksLoading,
+  isFetching: isTrademarksFetching,
     refetch: refetchTrademarks,
   } = useQuery({
     queryFn: async () => await trademarkService.search({
       ...searchParams
     }),
-    queryKey: ["trademarks", sortTrigger],
+  queryKey: ["trademarks", searchParams, sortTrigger],
     enabled: !!authContext?.token, // Chỉ gọi API khi có token
   })
+
+const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
 
   useEffect(() => {
     refetchTrademarks();
@@ -482,9 +484,17 @@ console.log('trade', trademarksData);
             <Button
               size="sm"
               className="text-sm font-medium"
+              disabled={isTrademarksPending}
               onClick={ handleSearch }
             >
-              Truy vấn
+              {isTrademarksPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang truy vấn...
+                </span>
+              ) : (
+                "Truy vấn"
+              )}
             </Button>
             <Button
               onClick={ () => setShowAdvancedFilter(true) }
@@ -619,42 +629,15 @@ console.log('trade', trademarksData);
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isTrademarksLoading ? (
-                    // Loading skeleton
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={`skeleton-${index}`}>
-                        <TableCell>
-                          <Skeleton className="w-16 h-16 rounded" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-32" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-20" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-40" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-32" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-6 w-20 rounded-full" />
-                        </TableCell>
-                      </TableRow>
-                    ))
+                  {isTrademarksPending ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="h-40">
+                        <div className="flex items-center justify-center gap-2 text-gray-500">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>Đang tải dữ liệu...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ) : trademarksData?.items?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={10} className="h-64">
@@ -726,23 +709,11 @@ console.log('trade', trademarksData);
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {isTrademarksLoading ? (
-                // Loading skeleton for grid view
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={`grid-skeleton-${index}`}
-                    className="border rounded-lg p-4 bg-white dark:bg-zinc-900"
-                  >
-                    <Skeleton className="h-6 w-32 mb-2" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-6 w-20 rounded-full" />
-                    </div>
-                  </div>
-                ))
+              {isTrademarksPending ? (
+                <div className="col-span-full flex items-center justify-center h-40 text-gray-500 gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Đang tải dữ liệu...</span>
+                </div>
               ) : trademarksData?.items?.length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
                   <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>

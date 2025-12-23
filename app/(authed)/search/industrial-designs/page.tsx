@@ -5,7 +5,6 @@ import { LayoutGrid, List, Search, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import AdvancedSearchModal from "@/components/industrial-designs/search/advanced-search-modal";
 import { FORMAT_DATE, initialSearchState } from "@/constants";
 import { IndustrialDesignParams, industrialDesignsService } from "@/services/industrial-designs.service";
@@ -430,9 +429,17 @@ export default function IndustrialDesignsSearchPage() {
             <Button
               size="sm"
               className="text-sm font-medium"
+              disabled={isLoading}
               onClick={ handleSearch }
             >
-              Truy vấn
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang truy vấn...
+                </span>
+              ) : (
+                "Truy vấn"
+              )}
             </Button>
             <Button
               onClick={ () => setShowAdvancedFilter(true) }
@@ -568,19 +575,14 @@ export default function IndustrialDesignsSearchPage() {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <TableRow key={`skeleton-${index}`}>
-                        <TableCell><Skeleton className="w-16 h-16 rounded" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                      </TableRow>
-                    ))
+                    <TableRow>
+                      <TableCell colSpan={9} className="h-40">
+                        <div className="flex items-center justify-center gap-2 text-gray-500">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>Đang tải dữ liệu...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ) : industrialDesignsData?.items?.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} className="h-64 text-center">
@@ -648,20 +650,10 @@ export default function IndustrialDesignsSearchPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {isLoading ? (
-                Array.from({ length: 6 }).map((_, index) => (
-                  <div key={`grid-skeleton-${index}`} className="border rounded-lg p-4 bg-white dark:bg-zinc-900">
-                    <Skeleton className="h-6 w-32 mb-2" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-4 w-5/6" />
-                      <Skeleton className="h-4 w-4/5" />
-                      <Skeleton className="h-6 w-20 rounded-full" />
-                    </div>
-                  </div>
-                ))
+                <div className="col-span-full flex items-center justify-center h-40 text-gray-500 gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Đang tải dữ liệu...</span>
+                </div>
               ) : industrialDesignsData?.items?.filter((item) => item.application_number).length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
                   <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
