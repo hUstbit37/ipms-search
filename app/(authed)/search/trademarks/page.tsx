@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, List, Search, Trash2, XIcon, Eye } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2 } from "lucide-react";
 import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,6 @@ import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants
 import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import { queryClient } from "@/lib/react-query";
-import { FileDown } from "lucide-react";
 import { exportTrademarksToExcel } from "@/utils/excel-export";
 import ImageShow from "@/components/common/image/image-show";
 
@@ -539,7 +538,11 @@ console.log('trade', trademarksData);
                   disabled={ isExporting }
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
-                  <FileDown className="w-4 h-4" />
+                  { isExporting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FileDown className="w-4 h-4" />
+                  ) }
                   { isExporting ? "Đang xuất..." : "Xuất Excel" }
                 </Button>
                 <select 

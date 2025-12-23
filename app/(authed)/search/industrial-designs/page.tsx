@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2 } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
@@ -486,7 +486,11 @@ export default function IndustrialDesignsSearchPage() {
                   disabled={ isExporting }
                   className="text-xs sm:text-sm flex items-center gap-2"
                 >
-                  <FileDown className="w-4 h-4" />
+                  { isExporting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <FileDown className="w-4 h-4" />
+                  ) }
                   { isExporting ? "Đang xuất..." : "Xuất Excel" }
                 </Button>
                 <select 
