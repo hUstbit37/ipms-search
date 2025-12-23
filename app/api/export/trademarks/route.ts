@@ -69,9 +69,17 @@ const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
 };
 
 const getImageExtension = (url: string): 'png' | 'jpeg' => {
-  const lower = url.toLowerCase();
-  if (lower.endsWith('.png')) return 'png';
-  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'jpeg';
+  // Extract pathname to ignore query strings when detecting extension
+  const pathname = (() => {
+    try {
+      return new URL(url).pathname.toLowerCase();
+    } catch {
+      return url.toLowerCase();
+    }
+  })();
+
+  if (pathname.endsWith('.png')) return 'png';
+  if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) return 'jpeg';
   // default
   return 'png';
 };
@@ -128,13 +136,19 @@ export async function POST(req: NextRequest) {
       row.height = 100;
 
       // Add image after row is created, using anchor coordinates
-      if (item.image_url) {
+      const imageUrl =
+        item.image_url ||
+        (Array.isArray((item as any).image_urls)
+          ? (item as any).image_urls[0]
+          : undefined);
+
+      if (imageUrl) {
         try {
-          const res = await fetch(item.image_url);
+          const res = await fetch(imageUrl, { cache: 'no-store' });
           if (res.ok) {
             const arrayBuffer = await res.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer) as unknown as Buffer;
-            const extension = getImageExtension(item.image_url);
+            const extension = getImageExtension(imageUrl);
 
             const imageId = workbook.addImage({
               buffer,
