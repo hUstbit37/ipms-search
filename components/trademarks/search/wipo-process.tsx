@@ -17,7 +17,6 @@ export default function WipoProcess({ wipo_process }: WipoProcessProps) {
 
   return (
     <div className="space-y-4">
-      <div className="font-semibold text-sm text-gray-900 mb-4">Tiến trình WIPO</div>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">

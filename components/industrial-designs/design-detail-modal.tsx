@@ -3,7 +3,16 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import moment from "moment";
-import ImageShow from "../common/image/image-show";
+import PriorityData from "@/components/patents/search/priority-data";
+import AuthorsDetail from "@/components/patents/search/authors-detail";
+import IpcDetail from "@/components/patents/search/ipc-detail";
+import LocarnoDetail from "@/components/industrial-designs/search/locarno-detail";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import ImageShow from "@/components/common/image/image-show";
+import OwnersDetail from "@/components/trademarks/search/owners-detail";
+import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
+import WipoProcess from "@/components/trademarks/search/wipo-process";
+import IpDocument from "@/components/trademarks/search/ip-document";
 
 interface DesignDetailModalProps {
   open: boolean;
@@ -11,43 +20,6 @@ interface DesignDetailModalProps {
   design: any;
   companyMap: Record<string, string>;
 }
-
-const formatAuthorsRaw = (authorsRaw: unknown): string => {
-  if (Array.isArray(authorsRaw)) {
-    return authorsRaw.filter(Boolean).join("; ");
-  }
-  if (typeof authorsRaw === "string") return authorsRaw;
-  return "";
-};
-
-const formatOwnersRaw = (ownersRaw: unknown): string => {
-  if (Array.isArray(ownersRaw)) {
-    return ownersRaw
-      .map((entry) => {
-        if (typeof entry !== "string") return "";
-        return entry.trim();
-      })
-      .filter(Boolean)
-      .join("; ");
-  }
-  if (typeof ownersRaw === "string") {
-    return ownersRaw.trim();
-  }
-  return "";
-};
-
-const formatAgenciesRaw = (agenciesRaw: unknown): string => {
-  if (Array.isArray(agenciesRaw)) {
-    return agenciesRaw
-      .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
-      .filter(Boolean)
-      .join("; ");
-  }
-  if (typeof agenciesRaw === "string") {
-    return agenciesRaw.trim();
-  }
-  return "";
-};
 
 export default function DesignDetailModal({
   open,
@@ -58,95 +30,158 @@ export default function DesignDetailModal({
   if (!design) return null;
 
   const InfoField = ({ label, value }: { label: string; value?: string | null }) => (
-    <div className="py-2 border-b border-gray-200 dark:border-gray-700 last:border-0 grid grid-cols-3 gap-4">
-      <div className="font-bold text-xs col-span-1">{label}</div>
-      <div className="text-xs text-gray-700 dark:text-gray-300 col-span-2">{value || ""}</div>
+    <div className="py-2 flex items-start gap-4">
+      <div className="font-semibold text-sm text-gray-900 min-w-[250px]">{label}</div>
+      <div className="text-sm text-gray-700 flex-1">{value || ""}</div>
     </div>
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[96vw] w-full max-h-[90vh] overflow-y-auto p-8">
+      <DialogContent className="!max-w-[96vw] w-full max-h-[95vh] min-h-[95vh] overflow-y-auto p-8">
         <VisuallyHidden>
           <DialogTitle>{design.name || "Chi tiết kiểu dáng công nghiệp"}</DialogTitle>
         </VisuallyHidden>
-        <div className="space-y-4">
-          {/* Image - full width row */}
-          <div className="py-2 border-b border-gray-200 dark:border-gray-700 grid grid-cols-6 gap-4">
-            <div className="font-bold text-xs col-span-1">Hình ảnh</div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {design.image_urls && design.image_urls.length > 0 ? (
-                design.image_urls.map((imageUrl: string, index: number) => (
-                  <ImageShow
-                    key={index}
-                    src={imageUrl || ""} 
-                    alt={`${design.name || "Industrial design image"} ${index + 1}`} 
-                    size="xxl"
-                  />
-                ))
-              ) : (
-                <ImageShow
-                  src="" 
-                  alt={design.name || "Industrial design image"} 
-                  size="xxl"
+        <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="mx-2 mt-0">
+            <TabsTrigger value="info" className="cursor-pointer">Thông tin</TabsTrigger>
+            <TabsTrigger value="images" className="cursor-pointer">Hình vẽ</TabsTrigger>
+            <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
+            <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
+            {/* Two Column Grid */}
+            <div className="grid grid-cols-2 gap-x-16 gap-y-0">
+              {/* Left Column */}
+              <div>
+                <InfoField label="Tên sáng chế" value={design.name || ""} />
+                <InfoField
+                  label="Số bằng và Ngày cấp"
+                  value={
+                    design.certificate_number && design.certificate_date
+                      ? `${design.certificate_number} ${moment(design.certificate_date).format("YYYY.MM.DD")}`
+                      : ""
+                  }
                 />
+                <InfoField
+                  label="Expiration Date"
+                  value={design.expiry_date ? moment(design.expiry_date).format("YYYY.MM.DD") : ""}
+                />  
+                <InfoField
+                  label="Số đơn và Ngày nộp đơn"
+                  value={`${design.application_number || ""} ${design.application_date ? moment(design.application_date).format("YYYY.MM.DD") : ""}`.trim()}
+                />
+                <PriorityData priority_data={design.priority_data} />
+              </div>
+
+              {/* Right Column */}
+              <div>
+                <InfoField label="Loại đơn" value="Thông thường" />
+                <InfoField label="Trạng thái" value={design.wipo_status || (design.certificate_number ? "Cấp bằng" : "Đang giải quyết")} />
+                <InfoField
+                  label="Số công bố và Ngày công bố"
+                  value={`${design.publication_number || ""} ${design.publication_date ? moment(design.publication_date).format("YYYY.MM.DD") : ""}`.trim()}
+                />
+              </div>
+            </div>
+            {/* Tóm tắt */}
+            <div>
+              <InfoField label="Tóm tắt" value={design.summary || ""} />
+            </div>
+
+            {/* Locarno class */}
+            <div> 
+              <LocarnoDetail 
+                locarno_list={design.locarno_list}
+                locarno_list_raw={design.locarno_list_raw}
+              />
+            </div>
+
+             {/* Tác giả */}
+             <div>
+               <AuthorsDetail
+                 authors_raw={design.authors_raw}
+                 authors={design.authors}
+               />
+             </div>
+
+            {/* Applicant - Full Width */}
+            <div>
+              <OwnersDetail
+                owners_raw={design.owners_raw}
+                owners={design.owners}
+                owner_name={design.owner_name}
+              />
+            </div>
+
+            <div>
+              <AgenciesDetail
+                agencies_raw={design.agencies_raw}
+                agencies={design.agencies}
+                agency_name={design.agency_name || ""}
+              />
+            </div>
+            {/* Yêu cầu bảo hộ */}
+            <div>
+              <div className="font-semibold text-sm text-gray-900 mb-2">Yêu cầu bảo hộ</div>
+              {design.request_protections && Array.isArray(design.request_protections) && design.request_protections.length > 0 ? (
+                <div className="border rounded-lg overflow-hidden max-w-2xl">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 border-b">Mô tả</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 border-b">Yêu cầu bảo hộ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {design.request_protections.map((item: any, index: number) => (
+                        <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
+                          <td className="px-4 py-2 text-sm text-gray-700">{item["Mô tả"] || ""}</td>
+                          <td className="px-4 py-2 text-sm text-gray-700">{item["Yêu cầu bảo hộ"] || ""}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500"></div>
               )}
             </div>
-          </div>
+          </TabsContent>
 
-          <div className="grid grid-cols-2 gap-x-16 gap-y-0">
-            {/* Left column */}
-            <div>
-              <InfoField label="Mã kiểu dáng" value={design.code} />
-              <InfoField label="Tên kiểu dáng" value={design.name} />
-              <InfoField label="Số đơn" value={design.application_number} />
-              <InfoField 
-                label="Ngày nộp đơn" 
-                value={design.application_date ? moment(design.application_date).format("DD/MM/YYYY") : ""}
-              />
-              <InfoField label="Số bằng" value={design.certificate_number} />
-              <InfoField 
-                label="Ngày cấp bằng" 
-                value={design.certificate_date ? moment(design.certificate_date).format("DD/MM/YYYY") : ""}
-              />
-              <InfoField 
-                label="Số công bố/Ngày công bố" 
-                value={design.publication_number || "" + (design.publication_date ? `  ${moment(design.publication_date).format("DD/MM/YYYY")}` : "")}
-              />
-              <InfoField 
-                label="Ngày hết hạn" 
-                value={design.expiry_date ? moment(design.expiry_date).format("DD/MM/YYYY") : ""}
-              />
-              <InfoField 
-                label="Phân loại Locarno" 
-                value={Array.isArray(design.locarno_list) ? design.locarno_list.join(', ') : (design.locarno_list || '-')}
-              />
-              <InfoField 
-                label="Tác giả" 
-                value={formatAuthorsRaw(design?.authors_raw) || design?.authors || ""}
-              />
-              <InfoField 
-                label="Chủ đơn/Chủ bằng" 
-                value={formatOwnersRaw(design?.owners_raw) || design.owner_name || ""}
-              />
-              <InfoField 
-                label="Đại diện" 
-                value={formatAgenciesRaw(design?.agencies_raw) || design?.agency_name || ""}
-              />
-            </div>
+           {/* Hình vẽ */}
+           <TabsContent value="images" className="flex-1 overflow-y-auto px-2 sm:px-4 mt-4">
+             <div className="mb-2 pb-2">
+               <div className="font-semibold text-sm text-gray-900 mb-2">Hình ảnh</div>
+               <div className="flex flex-wrap gap-1">
+                 {design.image_urls && design.image_urls.length > 0 ? (
+                   design.image_urls.map((imageUrl: string, index: number) => (
+                     <div key={index} className="flex-shrink-0">
+                       <ImageShow 
+                         src={imageUrl || ""} 
+                         alt={`${design.name || "Design image"} ${index + 1}`} 
+                         size="xxxl" 
+                       />
+                     </div>
+                   ))
+                 ) : (
+                   <div className="flex-shrink-0">
+                     <ImageShow src="" alt={design.name || "Design image"} size="xxl" />
+                   </div>
+                 )}
+               </div>
+             </div>
+           </TabsContent>
 
-            {/* Right column */}
-            <div>
-              <InfoField 
-                label="Trạng thái" 
-                value={design.wipo_status || (design.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
-              />
-              <InfoField label="Quốc gia" value={design.country_code} />
-              <InfoField label="Mô tả" value={design.description} />
-              <InfoField label="Tóm tắt" value={design.summary} />
-            </div>
-          </div>
-        </div>
+          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4">
+            <WipoProcess wipo_process={design.wipo_process} />
+          </TabsContent>
+
+          <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">
+            <IpDocument documents={design.documents} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

@@ -45,7 +45,7 @@ export default function PatentDetailModal({
         </VisuallyHidden>
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mx-2 mt-0">
-            <TabsTrigger value="info" className="cursor-pointer">Thông tin</TabsTrigger>
+            <TabsTrigger value="info" className="cursor-pointer">Dữ liệu thư mục</TabsTrigger>
             <TabsTrigger value="images" className="cursor-pointer">Hình vẽ</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
@@ -149,10 +149,10 @@ export default function PatentDetailModal({
            <TabsContent value="images" className="flex-1 overflow-y-auto px-2 sm:px-4 mt-4">
              <div className="mb-2 pb-2">
                <div className="font-semibold text-sm text-gray-900 mb-2">Hình ảnh</div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
+               <div className="flex flex-wrap gap-1">
                  {patent.image_urls && patent.image_urls.length > 0 ? (
                    patent.image_urls.map((imageUrl: string, index: number) => (
-                     <div key={index} className="w-full aspect-square">
+                     <div key={index} className="flex-shrink-0">
                        <ImageShow 
                          src={imageUrl || ""} 
                          alt={`${patent.name || "Patent image"} ${index + 1}`} 
@@ -161,8 +161,8 @@ export default function PatentDetailModal({
                      </div>
                    ))
                  ) : (
-                   <div className="w-full aspect-square">
-                     <ImageShow src="" alt={patent.name || "Patent image"} size="xxl" />
+                   <div className="flex-shrink-0">
+                     <ImageShow src="" alt={patent.name || " image"} size="xxl" />
                    </div>
                  )}
                </div>
