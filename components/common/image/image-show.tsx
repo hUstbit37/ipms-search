@@ -4,7 +4,7 @@ import { ImageIcon } from 'lucide-react';
 interface ImageShowProps {
   src?: string | null;
   alt?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xxxl';
   className?: string;
   fallbackSrc?: string;
 }
@@ -24,7 +24,8 @@ const ImageShow: React.FC<ImageShowProps> = ({
     md: 'w-[50px] h-[50px] min-w-[50px] min-h-[50px]',
     lg: 'w-[80px] h-[80px] min-w-[80px] min-h-[80px]',
     xl: 'w-[100px] h-[100px] min-w-[100px] min-h-[100px]',
-    xxl: 'w-[120px] h-[120px] min-w-[120px] min-h-[120px]'
+    xxl: 'w-[120px] h-[120px] min-w-[120px] min-h-[120px]',
+    xxxl: 'w-[200px] h-[200px] min-w-[200px] min-h-[200px]'
   };
 
   const iconSizeClasses = {
@@ -32,7 +33,8 @@ const ImageShow: React.FC<ImageShowProps> = ({
     md: 'w-6 h-6',
     lg: 'w-10 h-10',
     xl: 'w-12 h-12',
-    xxl: 'w-14 h-14'
+    xxl: 'w-14 h-14',
+    xxxl: 'w-16 h-16'
   };
 
   // Placeholder khi không có ảnh hoặc lỗi

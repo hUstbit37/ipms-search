@@ -24,7 +24,7 @@ export default function WipoProcess({ wipo_process }: WipoProcessProps) {
             <tr>
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 border-b">Tiến trình</th>
               <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 border-b">Ngày</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 border-b">Trạng thái</th>
+              {/* <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 border-b">Trạng thái</th> */}
             </tr>
           </thead>
           <tbody>
@@ -32,7 +32,7 @@ export default function WipoProcess({ wipo_process }: WipoProcessProps) {
               <tr key={index} className="border-b last:border-0">
                 <td className="px-4 py-2 text-sm text-gray-700">{process["Tiến trình"] || ""}</td>
                 <td className="px-4 py-2 text-sm text-gray-700">{process["Ngày"] || ""}</td>
-                <td className="px-4 py-2 text-sm text-gray-700">{process["Trạng thái"] || ""}</td>
+                {/* <td className="px-4 py-2 text-sm text-gray-700">{process["Trạng thái"] || ""}</td> */}
               </tr>
             ))}
           </tbody>
