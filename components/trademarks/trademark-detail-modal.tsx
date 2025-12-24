@@ -83,7 +83,12 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <div className="mb-2 pb-2">
               <div className="font-semibold text-sm text-gray-900">Hình ảnh</div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {trademark.image_urls && trademark.image_urls.length > 0 ? (
+                <ImageShow
+                    src={trademark.image_urls?.[0] || ""} 
+                    alt={'image'} 
+                    size="xxl"
+                  />
+                {/* {trademark.image_urls && trademark.image_urls.length > 0 ? (
                   trademark.image_urls.map((imageUrl: string, index: number) => (
                     <ImageShow
                       key={index}
@@ -98,7 +103,7 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
                     alt={trademark.name || "Trademark image"} 
                     size="xxl"
                   />
-                )}
+                )} */}
               </div>
             </div>
 

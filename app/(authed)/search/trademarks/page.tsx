@@ -687,7 +687,7 @@ console.log('trade', trademarksData);
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>
-                          { (item as any).nice_class_text || "-" }
+                        { item.nice_class_text || item.nice_class_list?.join(", ") || "-" }
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
@@ -757,7 +757,7 @@ console.log('trade', trademarksData);
                     <p>
                       <span className="font-medium">Nice Class:</span>{ " " }
                       <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>
-                        { (item as any).nice_class_text || "-"}
+                        { item.nice_class_text || item.nice_class_list?.join(", ") || "-" }
                       </div>
                     </p>
                     <p>
