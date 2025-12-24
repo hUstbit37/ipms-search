@@ -683,7 +683,7 @@ console.log('trade', trademarksData);
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                          { item.owner_name || "-" }
+                          { item.owner_name || item.owners?.[0]?.name || "-" }
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>
@@ -692,11 +692,11 @@ console.log('trade', trademarksData);
                       </TableCell>
                       <TableCell className="text-center">
                         {item.wipo_status ? (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
+                          <span className="text-xs py-1 rounded font-bold">
                             {item.wipo_status}
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
+                          <span className="text-xs py-1 rounded font-bold">
                             {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
                           </span>
                         )}
@@ -744,7 +744,7 @@ console.log('trade', trademarksData);
                     </p>
                     <p>
                       <span className="font-medium">Chủ đơn:</span>{ " " }
-                      { item.owner_name || "-" }
+                      {  item.owner_name || item.owners?.[0]?.name || "-" }
                     </p>
                     <p>
                       <span className="font-medium">Ngày nộp đơn:</span>{ " " }
@@ -763,11 +763,11 @@ console.log('trade', trademarksData);
                     <p>
                       <span className="font-medium">Trạng thái:</span>{ " " }
                       {item.wipo_status ? (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
+                          <span className="text-xs py-1 rounded font-bold">
                             {item.wipo_status}
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
+                          <span className="text-xs py-1 rounded font-bold">
                             {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
                           </span>
                         )}

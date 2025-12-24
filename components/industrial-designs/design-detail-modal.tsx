@@ -12,6 +12,43 @@ interface DesignDetailModalProps {
   companyMap: Record<string, string>;
 }
 
+const formatAuthorsRaw = (authorsRaw: unknown): string => {
+  if (Array.isArray(authorsRaw)) {
+    return authorsRaw.filter(Boolean).join("; ");
+  }
+  if (typeof authorsRaw === "string") return authorsRaw;
+  return "";
+};
+
+const formatOwnersRaw = (ownersRaw: unknown): string => {
+  if (Array.isArray(ownersRaw)) {
+    return ownersRaw
+      .map((entry) => {
+        if (typeof entry !== "string") return "";
+        return entry.trim();
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof ownersRaw === "string") {
+    return ownersRaw.trim();
+  }
+  return "";
+};
+
+const formatAgenciesRaw = (agenciesRaw: unknown): string => {
+  if (Array.isArray(agenciesRaw)) {
+    return agenciesRaw
+      .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof agenciesRaw === "string") {
+    return agenciesRaw.trim();
+  }
+  return "";
+};
+
 export default function DesignDetailModal({
   open,
   onOpenChange,
@@ -86,15 +123,15 @@ export default function DesignDetailModal({
               />
               <InfoField 
                 label="Tác giả" 
-                value={design?.authors || ""}
+                value={formatAuthorsRaw(design?.authors_raw) || design?.authors || ""}
               />
               <InfoField 
                 label="Chủ đơn/Chủ bằng" 
-                value={design.owner_name || ""}
+                value={formatOwnersRaw(design?.owners_raw) || design.owner_name || ""}
               />
               <InfoField 
                 label="Đại diện" 
-                value={design?.agency_name || ""}
+                value={formatAgenciesRaw(design?.agencies_raw) || design?.agency_name || ""}
               />
             </div>
 

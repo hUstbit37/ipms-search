@@ -1,8 +1,15 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import moment from "moment"
 import ImageShow from "@/components/common/image/image-show";
+import OwnersDetail from "@/components/trademarks/search/owners-detail";
+import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
+import NiceDetail from "@/components/trademarks/search/nice-detail";
+import ViennaDetail from "@/components/trademarks/search/vienna-detail";
+import WipoProcess from "@/components/trademarks/search/wipo-process";
+import IpDocument from "@/components/trademarks/search/ip-document";
 
 interface TrademarkDetailModalProps {
   open: boolean
@@ -10,6 +17,42 @@ interface TrademarkDetailModalProps {
   trademark: any
   companyMap: Record<string, string>
 }
+const formatAuthorsRaw = (authorsRaw: unknown): string => {
+  if (Array.isArray(authorsRaw)) {
+    return authorsRaw.filter(Boolean).join("; ");
+  }
+  if (typeof authorsRaw === "string") return authorsRaw;
+  return "";
+};
+
+const formatOwnersRaw = (ownersRaw: unknown): string => {
+  if (Array.isArray(ownersRaw)) {
+    return ownersRaw
+      .map((entry) => {
+        if (typeof entry !== "string") return "";
+        return entry.trim();
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof ownersRaw === "string") {
+    return ownersRaw.trim();
+  }
+  return "";
+};
+
+const formatAgenciesRaw = (agenciesRaw: unknown): string => {
+  if (Array.isArray(agenciesRaw)) {
+    return agenciesRaw
+      .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof agenciesRaw === "string") {
+    return agenciesRaw.trim();
+  }
+  return "";
+};
 
 export default function TrademarkDetailModal({ open, onOpenChange, trademark, companyMap }: TrademarkDetailModalProps) {
   if (!trademark) return null
@@ -23,101 +66,124 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
-        <DialogHeader className="border-b pb-3">
+      <DialogContent className="min-w-7xl min-h-[95vh] max-h-[95vh] overflow-hidden flex flex-col">
+        <DialogHeader className="border-b pb-1">
           <DialogTitle className="text-base font-semibold">Chi tiết nhãn hiệu</DialogTitle>
         </DialogHeader>
 
-        <div className="overflow-y-auto flex-1 px-4">
-          {/* Logo Section */}
-          <div className="mb-2 pb-2">
-            <div className="font-semibold text-sm text-gray-900">(540) Hình ảnh</div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {trademark.image_urls && trademark.image_urls.length > 0 ? (
-                trademark.image_urls.map((imageUrl: string, index: number) => (
+        <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="mx-2 mt-0">
+            <TabsTrigger value="info" className="cursor-pointer">Thông tin</TabsTrigger>
+            <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
+            <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
+            {/* Logo Section */}
+            <div className="mb-2 pb-2">
+              <div className="font-semibold text-sm text-gray-900">Hình ảnh</div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {trademark.image_urls && trademark.image_urls.length > 0 ? (
+                  trademark.image_urls.map((imageUrl: string, index: number) => (
+                    <ImageShow
+                      key={index}
+                      src={imageUrl || ""} 
+                      alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
+                      size="xxl"
+                    />
+                  ))
+                ) : (
                   <ImageShow
-                    key={index}
-                    src={imageUrl || ""} 
-                    alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
+                    src="" 
+                    alt={trademark.name || "Trademark image"} 
                     size="xxl"
                   />
-                ))
-              ) : (
-                <ImageShow
-                  src="" 
-                  alt={trademark.name || "Trademark image"} 
-                  size="xxl"
+                )}
+              </div>
+            </div>
+
+            {/* Two Column Grid */}
+            <div className="grid grid-cols-2 gap-x-16 gap-y-0">
+              {/* Left Column */}
+              <div>
+                <InfoRow label="Loại" value="Nhãn hiệu" />
+                <InfoRow
+                  label="Số bằng và Ngày cấp"
+                  value={
+                    trademark.certificate_number && trademark.certificate_date
+                      ? `${trademark.certificate_number} ${moment(trademark.certificate_date).format("YYYY.MM.DD")}`
+                      : ""
+                  }
                 />
-              )}
-            </div>
-          </div>
+                <InfoRow
+                  label="Expiration Date"
+                  value={trademark.expiry_date ? moment(trademark.expiry_date).format("YYYY.MM.DD") : ""}
+                />
+                <InfoRow
+                  label="Số đơn và Ngày nộp đơn"
+                  value={`${trademark.application_number || ""} ${trademark.application_date ? moment(trademark.application_date).format("YYYY.MM.DD") : ""}`.trim()}
+                />
+                <InfoRow label="Mark" value={`${trademark.name || ""}`} />
+                <InfoRow label="Đơn ưu tiên" value="" />
+              </div>
 
-          {/* Two Column Grid */}
-          <div className="grid grid-cols-2 gap-x-16 gap-y-0">
-            {/* Left Column */}
+              {/* Right Column */}
+              <div>
+                <InfoRow label="Loại đơn" value="Thông thường" />
+                <InfoRow label="Trạng thái" value={trademark.wipo_status || (trademark.certificate_number ? "Cấp bằng" : "Đang giải quyết")} />
+                <InfoRow
+                  label="Số công bố và Ngày công bố"
+                  value={`${trademark.publication_number || ""} ${trademark.publication_date ? moment(trademark.publication_date).format("YYYY.MM.DD") : ""}`.trim()}
+                />
+                <InfoRow label="Màu sắc bảo hộ" value={trademark.color_claim || ""} />
+              </div>
+            </div>
+
             <div>
-              <InfoRow label="Loại" value="Nhãn hiệu" />
-              <InfoRow
-                label="(111) Số VB và Ngày cấp"
-                value={
-                  trademark.certificate_number && trademark.certificate_date
-                    ? `${trademark.certificate_number} ${moment(trademark.certificate_date).format("YYYY.MM.DD")}`
-                    : ""
-                }
+              <NiceDetail
+                nice_class_list_raw={trademark.nice_class_list_raw}
+                nice_class_list={trademark.nice_class_list}
+                nice_class_text={trademark.nice_class_text}
               />
-              <InfoRow
-                label="(181) Expiration Date"
-                value={trademark.expiry_date ? moment(trademark.expiry_date).format("YYYY.MM.DD") : ""}
-              />
-              <InfoRow
-                label="(200) Số đơn và Ngày nộp đơn"
-                value={`${trademark.application_number || ""} ${trademark.application_date ? moment(trademark.application_date).format("YYYY.MM.DD") : ""}`.trim()}
-              />
-              <InfoRow label="(541) Mark" value={`${trademark.name || ""}`} />
-              <InfoRow label="(300) Đơn ưu tiên" value="" />
             </div>
 
-            {/* Right Column */}
             <div>
-              <InfoRow label="Loại đơn" value="Thông thường" />
-              <InfoRow label="Trạng thái" value={trademark.wipo_status || ""} />
-              <InfoRow
-                label="(400) Số công bố và Ngày công bố"
-                value={`${trademark.publication_number || ""} ${trademark.publication_date ? moment(trademark.publication_date).format("YYYY.MM.DD") : ""}`.trim()}
+              <ViennaDetail
+                vienna_class_list_raw={trademark.vienna_class_list_raw}
+                vienna_class={trademark.vienna_class}
               />
-              <InfoRow label="(591) Màu sắc bảo hộ" value={trademark.color_claim || ""} />
             </div>
-          </div>
 
-          <div>
-            <InfoRow label="(511) Lớp Nice" value={trademark.nice_class_text || ""} leftCol={true} />
-          </div>
+            {/* Applicant - Full Width */}
+            <div>
+              <OwnersDetail
+                owners_raw={trademark.owners_raw}
+                owners={trademark.owners}
+                owner_name={trademark.owner_name}
+              />
+            </div>
 
-          <div>
-            <InfoRow label="(531) Vienna Classes" value={trademark.vienna_class || ""} leftCol={true} />
-          </div>
+            <div>
+              <AgenciesDetail
+                agencies_raw={trademark.agencies_raw}
+                agencies={trademark.agencies}
+                agency_name={trademark.agency_name}
+              />
+            </div>
 
-          {/* Applicant - Full Width */}
-          <div>
-            <InfoRow
-              label="(730) Chủ đơn"
-              value={trademark?.owner_name || ""}
-              leftCol={true}
-            />
-          </div>
+            <div>
+              <InfoRow label="Đặc điểm nhãn hiệu" value={"Combined"} leftCol={true} />
+            </div>
+          </TabsContent>
 
-          <div>
-            <InfoRow
-              label="(740) Đại diện"
-              value={trademark?.agency_name || ""}
-              leftCol={true}
-            />
-          </div>
+          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4">
+            <WipoProcess wipo_process={trademark.wipo_process} />
+          </TabsContent>
 
-          <div>
-            <InfoRow label="(550) Đặc điểm nhãn hiệu" value={"Combined"} leftCol={true} />
-          </div>
-        </div>
+          <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">
+            <IpDocument documents={trademark.documents} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   )

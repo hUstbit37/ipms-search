@@ -77,7 +77,7 @@ export default function IndustrialDesignsSearchPage() {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
-
+  console.log(industrialDesignsData);
   useEffect(() => {
     refetchDesigns();
   }, [searchParams, refetchDesigns]);
@@ -628,15 +628,15 @@ export default function IndustrialDesignsSearchPage() {
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                          { item.owner_name || "-" }
+                          { item.owners?.[0]?.name || item.owner_name || "-" }
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell>
                         {item.wipo_status ? (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
+                          <span className="text-xs py-1 rounded font-bold">
                             {item.wipo_status}
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
+                          <span className="text-xs py-1 rounded font-bold">
                             {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
                           </span>
                         )}
@@ -684,7 +684,7 @@ export default function IndustrialDesignsSearchPage() {
                     </p>
                     <p>
                       <span className="font-medium">Chủ đơn:</span>{ " " }
-                      { item.owner_name ?? "-"}
+                      { item.owners?.[0]?.name || item.owner_name || "-" }
                     </p>
                     <p>
                       <span className="font-medium">Ngày nộp:</span>{ " " }
@@ -700,7 +700,7 @@ export default function IndustrialDesignsSearchPage() {
                     </p>
                     <p>
                       <span className="font-medium">Tác giả:</span>{ " " }
-                      { item.authors ?? "-"}
+                      { item.authors_raw ? item.authors_raw.join(", ") : item.authors || "-" }
                     </p>
                     <p>
                       <span className="font-medium">Trạng thái:</span>{ " " }

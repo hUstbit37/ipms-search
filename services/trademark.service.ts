@@ -42,33 +42,87 @@ export interface TrademarkParams {
   agency_name?: string;
 }
 
+type TrademarkParty = {
+  id: number | null;
+  name: string | null;
+  short_name: string | null;
+  organization_type: string | null;
+};
+
 export interface TrademarkResponse {
+  id: number;
+  application_type: string | null;
   code: string | null;
   name: string | null;
+  name_upper_ascii: string | null;
   description: string | null;
-  application_number: string | null;
-  application_date: string | null;
+  ip_family_id: number | null;
+  international_reg_no: string | null;
+  basic_application_number: string | null;
   certificate_number: string | null;
   certificate_date: string | null;
   expiry_date: string | null;
+  renewal_date: string | null;
+  renewal_count: number | null;
+  declaration_date: string | null;
+  application_number: string | null;
+  application_date: string | null;
+  publication_number: string | null;
+  publication_date: string | null;
+  certificate_publication_date: string | null;
+  gazette_number: string | null;
+  internal_link: string | null;
+  image_urls: string[] | null;
+  trademark_type: string | null;
+  color_claim: string | null;
+  owner_ids: number[] | null;
+  agency_ids: number[] | null;
+  owners_raw: string[] | null;
+  agencies_raw: string[] | null;
+  vienna_class_list_raw: string[] | null;
+  nice_class_list_raw: string[] | null;
+  nice_class_list: string[] | null;
+  nice_class_text: string | null;
+  trademark_normal: string | null;
+  owners: TrademarkParty[] | null;
+  agencies: TrademarkParty[] | null;
+  document_count: number | null;
+  formal_refuse_info: string | null;
+  content_refuse_info: string | null;
+  content_refuse_date: string | null;
+  note: string | null;
+  folder_name: string | null;
+  declaration_file_name: string | null;
+  certificate_file_name: string | null;
+  search_report_file_name: string | null;
+  content_refuse_file_name: string | null;
+  pyc_no: string | null;
+  disclaimed_elements: string | null;
   country_code: string | null;
+  origin_country_code: string | null;
   status: string | null;
-  id: string;
-  owner_id: string | null;
-  agency_id: string | null;
+  wipo_status: string | null;
+  wipo_process: Array<Record<string, string | null>> | null;
+  commercial_status: string | null;
+  search_status: string | null;
+  risk_status: string | null;
+  source: string | null;
+  workflow_status: string | null;
+  review_note: string | null;
+  sync_status: string | null;
+  synced_data_buffer: Record<string, unknown> | null;
   created_by: string | null;
   created_at: string | null;
   updated_at: string | null;
-  image_url: string | null;
-  wipo_status: string | null;
-  nice_class_text: string | null;
-  publication_date: string | null;
-  publication_number: string | null;
-  color_claim: string | null;
-  vienna_class: string | null;
+  documents: Array<Record<string, unknown>> | null;
+  owner_id: number | null;
+  organization_id: number | null;
   owner_name: string | null;
-  agency_name: string | null;
-  image_urls: string[] | null;
+  organization_name: string | null;
+  // Legacy fields to avoid breakage in older UI pieces
+  image_url?: string | null;
+  agency_name?: string | null;
+  vienna_class?: string | null;
 }
 
 export const trademarkService = {
