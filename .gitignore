@@ -51,3 +51,4 @@ k8s/
 # lib/api/
 package.json
 yarn.lock
+docs/

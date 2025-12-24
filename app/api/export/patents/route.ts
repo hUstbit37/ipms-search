@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
         certificate_date: item.certificate_date
           ? moment(item.certificate_date).format(FORMAT_DATE)
           : '-',
-        owner: item.owner_name || item.owner || '-',
+        owner: item.owners?.[0]?.name || item.owner_name || item.owner || '-',
         ipc_list: Array.isArray(item.ipc_list)
           ? item.ipc_list.join(', ')
           : item.ipc_list || '-',

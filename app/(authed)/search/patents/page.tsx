@@ -616,7 +616,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
                       <TableCell className="text-sm">
-                          { item.owner_name || item.owner || "-" }
+                          { item.owners?.[0]?.name || item.owner_name || "-" }
                       </TableCell>
                       <TableCell className="text-sm">
                         { item.ipc_list ? (Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-')) : "-" }
@@ -675,7 +675,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     </p>
                     <p>
                       <span className="font-medium">Chủ đơn:</span>{ " " }
-                      { item.owner_name || item.owner || "-" }
+                      { item.owners?.[0]?.name || item.owner_name || "-" }
                     </p>
                     <p>
                       <span className="font-medium">Ngày nộp:</span>{ " " }

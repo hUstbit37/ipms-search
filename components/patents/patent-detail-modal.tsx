@@ -12,6 +12,43 @@ interface PatentDetailModalProps {
   companyMap: Record<string, string>;
 }
 
+const formatAuthorsRaw = (authorsRaw: unknown): string => {
+  if (Array.isArray(authorsRaw)) {
+    return authorsRaw.filter(Boolean).join("; ");
+  }
+  if (typeof authorsRaw === "string") return authorsRaw;
+  return "";
+};
+
+const formatOwnersRaw = (ownersRaw: unknown): string => {
+  if (Array.isArray(ownersRaw)) {
+    return ownersRaw
+      .map((entry) => {
+        if (typeof entry !== "string") return "";
+        return entry.trim();
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof ownersRaw === "string") {
+    return ownersRaw.trim();
+  }
+  return "";
+};
+
+const formatAgenciesRaw = (agenciesRaw: unknown): string => {
+  if (Array.isArray(agenciesRaw)) {
+    return agenciesRaw
+      .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof agenciesRaw === "string") {
+    return agenciesRaw.trim();
+  }
+  return "";
+};
+
 export default function PatentDetailModal({
   open,
   onOpenChange,
@@ -73,7 +110,7 @@ export default function PatentDetailModal({
               />
               <InfoField 
               label="Ngày công bố" 
-              value={patent.publication_date ? moment(patent.publication_date).format("DD/MM/YYYY") : ""}
+              value={(patent.publication_date ? moment(patent.publication_date).format("DD/MM/YYYY") : "") + (patent.publication_number ? `  ${patent.publication_number}` : "")}
               />
               <InfoField 
               label="Ngày hết hạn" 
@@ -95,15 +132,15 @@ export default function PatentDetailModal({
               </div>
               <InfoField 
               label="Tác giả" 
-              value={patent?.authors || ""}
+              value={formatAuthorsRaw(patent?.authors_raw) || patent?.authors || ""}
               />
               <InfoField 
               label="Chủ đơn" 
-              value={patent?.owner_name || patent.owner || ""}
+              value={formatOwnersRaw(patent?.owners_raw) || patent?.owner_name || patent.owner || ""}
               />
               <InfoField 
               label="Đại diện" 
-              value={patent?.agency_name || ""}
+              value={formatAgenciesRaw(patent?.agencies_raw) || patent?.agency_name || ""}
               />
             </div>
 
