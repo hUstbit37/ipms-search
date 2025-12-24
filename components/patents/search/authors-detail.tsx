@@ -29,7 +29,7 @@ export default function AuthorsDetail({ authors_raw, authors }: AuthorsDetailPro
       if (typeof authors[0] === "string") {
         return authors
           .filter((entry: unknown) => typeof entry === "string" && entry.trim().length > 0)
-          .map((entry: string) => entry.trim());
+          .map((entry: unknown) => typeof entry === "string" ? entry.trim() : "");
       }
     }
     // Nếu authors là string
