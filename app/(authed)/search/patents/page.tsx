@@ -398,7 +398,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
             <Search className="w-5 h-5 text-gray-400 shrink-0"/>
             <input
               type="text"
-              placeholder="Nhập tìm kiếm theo tên sáng chế, số đơn, chủ đơn..."
+              placeholder="Nhập tìm kiếm theo tên sáng chế/số đơn"
               value={ searchQuery }
               onChange={ (e) => setSearchQuery(e.target.value) }
               onKeyDown={ (e) => {
