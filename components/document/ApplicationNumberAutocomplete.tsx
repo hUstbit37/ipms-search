@@ -194,11 +194,11 @@ export function ApplicationNumberAutocomplete({
         {isOpen && suggestions.length > 0 && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-[300px] overflow-y-auto">
             {suggestions.map((app, index) => {
-              const applicationNumber = app.application_number || (app as any).application_no || value
-              const moduleName = app.module_name || (app as any).name || ''
-              const companyShortName = app.company_short_name || app.company?.short_name || ''
+              const applicationNumber = app.application_number || (app as any).ip_application_number || (app as any).application_no || value
+              const moduleName = app.module_name || (app as any).ip_name || (app as any).name || ''
+              const companyShortName = app.company_short_name || app.company_name || app.company?.short_name || app.company?.name || ''
               const applicationType = app.module_type || app.application_type || 'trademark'
-              const keyId = app.module_id || app.application_id || index
+              const keyId = app.module_id || app.application_id || (app as any).id || index
               
               return (
                 <div
