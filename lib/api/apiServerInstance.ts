@@ -12,11 +12,15 @@ const apiServerInstance = axios.create({
   },
 });
 
-// Add request interceptor to remove Content-Type for blob requests
+// Add request interceptor to handle blob requests properly
 apiServerInstance.interceptors.request.use((config) => {
-  // Don't set Content-Type for blob responses
+  // For blob responses, set proper Accept header and remove Content-Type
   if (config.responseType === 'blob') {
     delete config.headers['Content-Type'];
+    // Set Accept header if not already set
+    if (!config.headers['Accept']) {
+      config.headers['Accept'] = 'application/octet-stream, application/pdf, */*';
+    }
   }
   return config;
 });

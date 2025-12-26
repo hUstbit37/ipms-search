@@ -359,6 +359,9 @@ export const downloadFileDirect = async (fileId: number): Promise<Blob> => {
     method: 'GET',
     url: `/v1/file-management/files/${fileId}/download`,
     responseType: 'blob',
+    headers: {
+      'Accept': 'application/octet-stream, application/pdf, image/*, */*',
+    },
   })
 }
 
@@ -375,6 +378,7 @@ export const downloadMultipleFiles = async (fileIds: number[]): Promise<Blob> =>
     responseType: 'blob',
     headers: {
       'Content-Type': 'multipart/form-data',
+      'Accept': 'application/octet-stream, application/zip, */*',
     },
   })
 }
