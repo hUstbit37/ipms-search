@@ -2,15 +2,51 @@ import ExcelJS from 'exceljs';
 import moment from 'moment';
 import { FORMAT_DATE } from '@/constants';
 
+// Helper function to add image to cell
+const addImageToCell = async (
+  workbook: ExcelJS.Workbook,
+  worksheet: ExcelJS.Worksheet,
+  imageUrl: string | null | undefined,
+  rowIndex: number,
+  colIndex: number
+) => {
+  if (!imageUrl) return;
+
+  try {
+    // Fetch image as blob
+    const response = await fetch(imageUrl);
+    if (!response.ok) return;
+    
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    // Add image to workbook
+    const imageId = workbook.addImage({
+      buffer: uint8Array as any,
+      extension: 'png',
+    });
+
+    // Add image to worksheet with specific position and size
+    worksheet.addImage(imageId, {
+      tl: { col: colIndex, row: rowIndex } as any,
+      br: { col: colIndex + 0.95, row: rowIndex + 0.95 } as any,
+      editAs: 'oneCell',
+    });
+  } catch (error) {
+    console.error('Error adding image to Excel:', error);
+  }
+};
+
 const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
   worksheet.getRow(1).eachCell((cell) => {
-    cell.font = { bold: true, size: 11 };
+    cell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFC4D79B' },
+      fgColor: { argb: 'FF808080' }, // Gray background
     };
-    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
   });
 
 
@@ -58,6 +94,7 @@ export const exportTrademarksToExcel = async (data: any[], companyMap: Record<st
   const worksheet = workbook.addWorksheet('Nhãn hiệu');
 
   worksheet.columns = [
+    { header: 'Hình ảnh', key: 'image', width: 15 },
     { header: 'Nhãn hiệu', key: 'name' },
     { header: 'Số đơn', key: 'code' },
     { header: 'Ngày nộp đơn', key: 'application_date' },
@@ -69,8 +106,15 @@ export const exportTrademarksToExcel = async (data: any[], companyMap: Record<st
     { header: 'Trạng thái', key: 'status' },
   ];
 
-  data.forEach((item) => {
+  // Set row height for better image display
+  worksheet.getRow(1).height = 20;
+
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
+    const rowIndex = i + 2; // Row 1 is header
+    
     worksheet.addRow({
+      image: '', // Empty cell for image
       name: item.name || '-',
       code: item.code || '-',
       application_date: item.application_date ? moment(item.application_date).format(FORMAT_DATE) : '-',
@@ -81,7 +125,15 @@ export const exportTrademarksToExcel = async (data: any[], companyMap: Record<st
       nice_class_text: (item as any).nice_class_text || '-',
       status: item.wipo_status || (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
     });
-  });
+
+    // Set row height for image
+    worksheet.getRow(rowIndex).height = 60;
+
+    // Add image if exists
+    if (item.image_url) {
+      await addImageToCell(workbook, worksheet, item.image_url, rowIndex - 1, 0);
+    }
+  }
 
   applyHeaderStyle(worksheet);
 
@@ -101,6 +153,7 @@ export const exportIndustrialDesignsToExcel = async (data: any[], companyMap: Re
   const worksheet = workbook.addWorksheet('Kiểu dáng công nghiệp');
 
   worksheet.columns = [
+    { header: 'Hình ảnh', key: 'image', width: 15 },
     { header: 'Tên', key: 'name' },
     { header: 'Số đơn', key: 'application_number' },
     { header: 'Ngày nộp đơn', key: 'application_date' },
@@ -111,8 +164,15 @@ export const exportIndustrialDesignsToExcel = async (data: any[], companyMap: Re
     { header: 'Trạng thái', key: 'status' },
   ];
 
-  data.forEach((item) => {
+  // Set row height for better image display
+  worksheet.getRow(1).height = 20;
+
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
+    const rowIndex = i + 2;
+    
     worksheet.addRow({
+      image: '',
       name: item.name || '-',
       application_number: item.application_number || '-',
       application_date: item.application_date ? moment(item.application_date).format(FORMAT_DATE) : '-',
@@ -122,7 +182,15 @@ export const exportIndustrialDesignsToExcel = async (data: any[], companyMap: Re
       owner: item.owner_name || '-',
       status: item.wipo_status || (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
     });
-  });
+
+    // Set row height for image
+    worksheet.getRow(rowIndex).height = 60;
+
+    // Add image if exists
+    if (item.image_url) {
+      await addImageToCell(workbook, worksheet, item.image_url, rowIndex - 1, 0);
+    }
+  }
 
   applyHeaderStyle(worksheet);
 
@@ -142,6 +210,7 @@ export const exportPatentsToExcel = async (data: any[], companyMap: Record<strin
   const worksheet = workbook.addWorksheet('Sáng chế');
 
   worksheet.columns = [
+    { header: 'Hình ảnh', key: 'image', width: 15 },
     { header: 'Tên sáng chế', key: 'name' },
     { header: 'Số đơn', key: 'application_number' },
     { header: 'Ngày nộp đơn', key: 'application_date' },
@@ -153,8 +222,15 @@ export const exportPatentsToExcel = async (data: any[], companyMap: Record<strin
     { header: 'Trạng thái', key: 'status' },
   ];
 
-  data.forEach((item) => {
+  // Set row height for better image display
+  worksheet.getRow(1).height = 20;
+
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
+    const rowIndex = i + 2;
+    
     worksheet.addRow({
+      image: '',
       name: item.name || '-',
       application_number: item.application_number || '-',
       application_date: item.application_date ? moment(item.application_date).format(FORMAT_DATE) : '-',
@@ -165,7 +241,15 @@ export const exportPatentsToExcel = async (data: any[], companyMap: Record<strin
       ipc_list: Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-'),
       status: item.wipo_status || (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
     });
-  });
+
+    // Set row height for image
+    worksheet.getRow(rowIndex).height = 60;
+
+    // Add image if exists
+    if (item.image_url) {
+      await addImageToCell(workbook, worksheet, item.image_url, rowIndex - 1, 0);
+    }
+  }
 
   applyHeaderStyle(worksheet);
 

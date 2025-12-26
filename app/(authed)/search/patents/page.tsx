@@ -16,6 +16,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import PatentDetailModal from "@/components/patents/patent-detail-modal";
 import { FileDown } from "lucide-react";
 import ImageShow from "@/components/common/image/image-show";
+import { StatusBadge } from "@/components/common/StatusBadge";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -82,8 +83,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
   // }, {} as Record<string, string>) || {};
 
   const companyMap = {};
-  
-  console.log(patentsData);
   
   const handleExportAllPatents = async () => {
     setIsExporting(true);
@@ -622,15 +621,9 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                         { item.ipc_list ? (Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-')) : "-" }
                       </TableCell>
                       <TableCell className="text-center">
-                        {item.wipo_status ? (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
-                            {item.wipo_status}
-                          </span>
-                        ) : (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
-                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
-                          </span>
-                        )}
+                        <StatusBadge 
+                          status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
+                        />
                       </TableCell>
                     </TableRow>
                   ))

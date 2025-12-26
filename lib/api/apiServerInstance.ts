@@ -12,4 +12,13 @@ const apiServerInstance = axios.create({
   },
 });
 
+// Add request interceptor to remove Content-Type for blob requests
+apiServerInstance.interceptors.request.use((config) => {
+  // Don't set Content-Type for blob responses
+  if (config.responseType === 'blob') {
+    delete config.headers['Content-Type'];
+  }
+  return config;
+});
+
 export default apiServerInstance;

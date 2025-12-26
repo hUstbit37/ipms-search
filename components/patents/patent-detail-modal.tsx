@@ -156,13 +156,14 @@ export default function PatentDetailModal({
                        <ImageShow 
                          src={imageUrl || ""} 
                          alt={`${patent.name || "Patent image"} ${index + 1}`} 
-                         size="xxxl" 
+                         size="xxxl"
+                         enableModal={true}
                        />
                      </div>
                    ))
                  ) : (
                    <div className="flex-shrink-0">
-                     <ImageShow src="" alt={patent.name || " image"} size="xxl" />
+                     <ImageShow src="" alt={patent.name || " image"} size="xxl" enableModal={true} />
                    </div>
                  )}
                </div>

@@ -17,7 +17,6 @@ if (!interceptorsInitialized && typeof window !== 'undefined') {
       if (token && token.token) {
         config.headers.Authorization = `Bearer ${ token.token }`;
         config.headers['x-token'] = token.token; // Gửi cả x-token để đảm bảo
-        console.log('[apiClient] Adding token to request:', config.url);
       } else {
         console.warn('[apiClient] No token available for request:', config.url);
       }
