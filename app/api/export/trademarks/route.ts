@@ -22,11 +22,11 @@ type TrademarkItem = {
 
 const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
   worksheet.getRow(1).eachCell((cell) => {
-    cell.font = { bold: true, size: 11 };
+    cell.font = { bold: true, size: 12 };
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFC4D79B' },
+      fgColor: { argb: '2b5aeb' },
     };
     cell.alignment = { vertical: 'middle', horizontal: 'left' };
   });
@@ -43,7 +43,8 @@ const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
         }
       });
 
-      column.width = isEmpty ? 13.33 : 20;
+      // column.width = isEmpty ? 13.33 : 40;
+      if (isEmpty) column.width = 13.33
     }
   });
 
@@ -93,16 +94,21 @@ export async function POST(req: NextRequest) {
     const worksheet = workbook.addWorksheet('Nhãn hiệu');
 
     worksheet.columns = [
-      { header: 'Mẫu nhãn', key: 'image', width: 35 },
-      { header: 'Nhãn hiệu', key: 'name' },
-      { header: 'Số đơn', key: 'code' },
-      { header: 'Ngày nộp đơn', key: 'application_date' },
-      { header: 'Ngày công bố', key: 'publication_date' },
-      { header: 'Số bằng', key: 'certificate_number' },
-      { header: 'Ngày cấp', key: 'certificate_date' },
-      { header: 'Chủ đơn/Chủ bằng', key: 'owner' },
-      { header: 'Nhóm sản phẩm/Dịch vụ', key: 'nice_class_text' },
-      { header: 'Trạng thái', key: 'status' },
+      { header: 'Mẫu nhãn', key: 'image', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Nhãn hiệu', key: 'name', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Loại nhãn hiệu', key: 'trademark_type', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Loại TSTT', key: 'ip_type', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Chủ sở hữu', key: 'owner', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Số đơn', key: 'application_number', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Ngày nộp đơn', key: 'application_date', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Ngày công bố', key: 'publication_date', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Số bằng', key: 'certificate_number', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Ngày cấp', key: 'certificate_date', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Nhóm sản phẩm/Dịch vụ', key: 'nice_class_text', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Trạng thái', key: 'status', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Đại diện', key: 'agency', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Ghi chú nội bộ', key: 'note', width: 50, style: { alignment: { vertical: 'middle' } } },
+
     ];
 
     // Start from row 2 because row 1 is header
@@ -114,7 +120,10 @@ export async function POST(req: NextRequest) {
       const row = worksheet.addRow({
         image: '',
         name: item.name || '-',
-        code: item.code || '-',
+        trademark_type: item.trademark_type || 'Combined',
+        ip_type: 'NH',
+        owner: item.owner_name || item.owners?.[0]?.name || '',
+        application_number: item.application_number || '-',
         application_date: item.application_date
           ? moment(item.application_date).format(FORMAT_DATE)
           : '-',
@@ -125,11 +134,13 @@ export async function POST(req: NextRequest) {
         certificate_date: item.certificate_date
           ? moment(item.certificate_date).format(FORMAT_DATE)
           : '-',
-        owner: item.owner_name || '-',
-        nice_class_text: (item as any).nice_class_text || '-',
+        
+        nice_class_text: (item.nice_class_list_raw?.join(", ")) || item.nice_class_list?.join(", ") || item.nice_class_text || '', // ưu tiên nice_class_raw, nếu không có thì dùng nice_class_list, rồi nice_class_text
         status:
           item.wipo_status ||
           (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
+        agency: item.agencies_raw?.join(", ") || item.agencies?.join(", ") || item.agency_name || '',
+        note: item.note || '',
       });
 
       // Set row height for image

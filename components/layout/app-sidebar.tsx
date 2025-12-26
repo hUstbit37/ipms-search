@@ -23,12 +23,27 @@ import {
   ArrowRightLeft,
   Settings,
   Workflow,
+  Home,
+  Building,
+  TrendingUp,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Menu data for ipms-search
 const data = {
   navMain: [
+    {
+      title: "Dashboard",
+      items: [
+        { title: "Tổng quan", url: "/dashboard", icon: Home },
+        { title: "Thống kê theo đơn vị", url: "/dashboard/company-analysis", icon: Building },
+        { title: "Phân tích tăng trưởng", url: "/dashboard/growth-analysis", icon: TrendingUp },
+        { title: "Phân bổ quốc gia", url: "/dashboard/geo-distribution", icon: Globe },
+        { title: "Cơ cấu ngành hàng", url: "/dashboard/sector-analysis", icon: Package },
+      ],
+
+    },
     {
       title: "Tra cứu",
       items: [

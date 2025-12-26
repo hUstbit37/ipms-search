@@ -4,13 +4,19 @@ import apiClient from '../api-client'
 export type TreeNode = {
   key: string
   title: string
-  type: 'site' | 'country' | 'ip_type' | 'ip_folder' | 'procedure' | 'document' | 'folder'
+  type: 'site' | 'country' | 'ip_type' | 'ip_folder' | 'procedure' | 'document' | 'folder' | 'file'
   id?: number | null
-  children?: TreeNode[]
+  children?: TreeNode[] | null
   document_count?: number
+  is_leaf?: boolean
   metadata?: {
     level: number
     path?: string
+    file_count?: number
+    folder_count?: number
+    size?: number
+    mime_type?: string
+    last_modified?: string
   }
 }
 
@@ -482,31 +488,62 @@ export const searchByApplicationNumber = async (
     params,
   })
   
-  // Handle new response structure
-  if (Array.isArray(data)) {
-    return data
+  // Handle new response structure with results array
+  if (data?.results && Array.isArray(data.results)) {
+    return data.results.map((item: any) => {
+      // Get first company name from company_names array
+      const firstCompanyName = item.company_names && item.company_names.length > 0 
+        ? item.company_names[0] 
+        : ''
+      
+      return {
+        application_number: item.ip_application_number || item.application_number || '',
+        normalized_application_number: item.normalized || item.normalized_application_number,
+        module_type: item.module_type,
+        module_id: item.module_id,
+        module_name: item.ip_name || item.module_name || '',
+        company_id: item.company_id,
+        company_name: firstCompanyName,
+        company_short_name: firstCompanyName, // Use first company name as short name
+        // Backward compatibility
+        application_id: item.module_id,
+        application_type: item.module_type,
+        name: item.ip_name || item.module_name || '',
+        company: item.company_id ? {
+          id: item.company_id,
+          name: firstCompanyName,
+          short_name: firstCompanyName,
+        } : undefined,
+      }
+    })
   }
   
-  if (data?.results && Array.isArray(data.results)) {
-    return data.results.map((item: any) => ({
-      application_number: item.application_number,
-      normalized_application_number: item.normalized_application_number,
-      module_type: item.module_type,
-      module_id: item.module_id,
-      module_name: item.module_name,
-      company_id: item.company_id,
-      company_name: item.company_name,
-      company_short_name: item.company_short_name,
-      // Backward compatibility
-      application_id: item.module_id,
-      application_type: item.module_type,
-      name: item.module_name,
-      company: {
-        id: item.company_id,
-        name: item.company_name,
-        short_name: item.company_short_name,
-      },
-    }))
+  // Handle old response structure (direct array)
+  if (Array.isArray(data)) {
+    return data.map((item: any) => {
+      const firstCompanyName = item.company_names && item.company_names.length > 0 
+        ? item.company_names[0] 
+        : (item.company_name || '')
+      
+      return {
+        application_number: item.application_number || item.ip_application_number || '',
+        normalized_application_number: item.normalized_application_number || item.normalized,
+        module_type: item.module_type,
+        module_id: item.module_id,
+        module_name: item.module_name || item.ip_name || '',
+        company_id: item.company_id,
+        company_name: firstCompanyName,
+        company_short_name: item.company_short_name || firstCompanyName,
+        application_id: item.module_id,
+        application_type: item.module_type,
+        name: item.module_name || item.ip_name || '',
+        company: item.company_id ? {
+          id: item.company_id,
+          name: firstCompanyName,
+          short_name: item.company_short_name || firstCompanyName,
+        } : undefined,
+      }
+    })
   }
   
   return []
@@ -544,8 +581,99 @@ export const searchCompanies = async (
   
   return await apiClient<CompanySearchResult>({
     method: 'GET',
-    url: `/companies`,
+    url: `/v1/organizations`,
     params,
+  })
+}
+
+// --------------------------
+// File Management Search
+// --------------------------
+
+export type FileSearchItem = {
+  id: number
+  display_name: string
+  file_name: string
+  blob_path: string
+  file_size: number
+  mime_type: string
+  module_type?: string
+  module_id?: number
+  procedure_group?: string
+  document_code?: string
+  official_date?: string
+  official_no?: string
+  is_valid?: boolean
+  created_at?: string
+  created_by?: number
+  matched_fields?: string[]
+}
+
+export type FolderSearchItem = {
+  path: string
+  name: string
+  level: number
+  file_count: number
+  folder_count: number
+  total_size: number
+  total_size_mb: number
+  matched_path: string
+}
+
+export type FileSearchResponse = {
+  items: FileSearchItem[]
+  total: number
+  page: number
+  page_size: number
+  pages: number
+}
+
+export type FolderSearchResponse = {
+  items: FolderSearchItem[]
+  total: number
+  page: number
+  page_size: number
+  pages: number
+}
+
+export type FileManagementSearchRequest = {
+  query: string
+  module_type?: string
+  module_id?: number
+  document_code?: string
+  procedure_group?: string
+  country_code?: string
+  storage_scope?: string
+  is_valid?: boolean
+  date_from?: string
+  date_to?: string
+  search_in_files?: boolean
+  search_in_folders?: boolean
+  search_in_path?: boolean
+  search_in_content?: boolean
+  files_page?: number
+  files_page_size?: number
+  files_sort_by?: string
+  files_sort_order?: "asc" | "desc"
+  folders_page?: number
+  folders_page_size?: number
+  folders_sort_by?: string
+  folders_sort_order?: "asc" | "desc"
+}
+
+export type FileManagementSearchResponse = {
+  query: string
+  files: FileSearchResponse
+  folders: FolderSearchResponse
+}
+
+export const searchFiles = async (
+  request: FileManagementSearchRequest
+): Promise<FileManagementSearchResponse> => {
+  return await apiClient<FileManagementSearchResponse>({
+    method: 'POST',
+    url: '/v1/file-management/search',
+    data: request,
   })
 }
 

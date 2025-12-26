@@ -39,8 +39,10 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold">IPMS</h1>
               <p className="text-xs text-muted-foreground mt-1">Tra cứu Sở hữu Trí tuệ</p>
             </div>
-            <CardTitle>Đăng nhập</CardTitle>
-            <CardDescription>Nhập thông tin tài khoản của bạn để tiếp tục</CardDescription>
+            <CardTitle>Đăng nhập IPMS Search</CardTitle>
+            <CardDescription>
+              Tra cứu thông tin nhanh chóng và dễ dàng.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <LoginForm />

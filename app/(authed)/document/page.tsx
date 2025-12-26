@@ -5,7 +5,7 @@ import { DocumentSidebar } from "@/components/document/DocumentSidebar"
 import { DocumentHeader } from "@/components/document/DocumentHeader"
 import { DocumentContentView } from "@/components/document/DocumentContentView"
 import { DocumentPageHeader } from "@/components/document/DocumentPageHeader"
-import { getTree, TreeNode, listFiles, FileListItem, deleteFiles, deleteFolder, getDownloadUrl, downloadFileDirect, downloadMultipleFiles } from "@/lib/api/documentApi"
+import { getTree, TreeNode, listFiles, FileListItem, deleteFiles, deleteFolder, getDownloadUrl, downloadFileDirect, downloadMultipleFiles, searchFiles, FileSearchItem } from "@/lib/api/documentApi"
 import { DocumentUploadModal } from "@/components/document/DocumentUploadModal"
 import { DocumentCreateFolderModal } from "@/components/document/DocumentCreateFolderModal"
 import { DocumentExportModal } from "@/components/document/DocumentExportModal"
@@ -90,6 +90,21 @@ const mapFile = (item: FileListItem): UiFileItem => {
     modifiedDate,
     updatedBy: item.updated_by_name || "",
     fileUrl: item.file_url,
+    blob_path: item.blob_path,
+  }
+}
+
+const mapSearchFile = (item: FileSearchItem): UiFileItem => {
+  const dateStr = item.created_at
+  const modifiedDate = dateStr ? format(new Date(dateStr), "dd/MM/yyyy") : "-"
+  return {
+    id: item.id,
+    name: item.display_name || item.file_name || "Chưa có tên",
+    size: formatSize(item.file_size),
+    type: detectType(item.mime_type),
+    modifiedDate,
+    updatedBy: "", // Search API doesn't provide updated_by_name
+    fileUrl: item.blob_path, // Use blob_path as fileUrl
     blob_path: item.blob_path,
   }
 }
@@ -196,64 +211,91 @@ export default function DocumentPage() {
       
       const normalizedCurrentPath = normalizePath(path)
 
-      // Load tree for this specific path to get immediate child folders.
-      // IMPORTANT: Use TreeNode children (has `type`) before transforming.
-      // Filter out files: only include actual folder types, exclude documents
+      // Load tree for this specific path to get immediate child folders and files
       const treeData = await getTree(normalizedCurrentPath || undefined)
+      
+      // Extract folders from tree response
       const folderNodes = (treeData.children || [])
         .filter((child) => {
-          // Only include actual folder types, exclude documents (files)
+          // Only include actual folder types, exclude files
           // Valid folder types: 'site', 'country', 'ip_type', 'ip_folder', 'procedure', 'folder'
-          // Exclude: 'document' (which represents files)
-          const isFolderType = child.type === "folder" || 
-                              child.type === "ip_folder" || 
-                              child.type === "site" || 
-                              child.type === "country" || 
-                              child.type === "ip_type" || 
-                              child.type === "procedure"
-          return isFolderType && child.type !== "document"
+          // Exclude: 'document' and 'file' (which represent files)
+          return child.type === "folder" || 
+                 child.type === "ip_folder" || 
+                 child.type === "site" || 
+                 child.type === "country" || 
+                 child.type === "ip_type" || 
+                 child.type === "procedure"
         })
         .map(transformTreeNode)
       setContentFolders(folderNodes)
       
-      // Load files from listFiles API
-      const res = await listFiles({
-        path: normalizedCurrentPath || undefined,
-        keyword: searchValue || undefined,
-        page: 1,
-        page_size: 50,
-      })
-      const mapped = (res.items || []).map(mapFile)
-
-      // The API can return files recursively under `path`.
-      // For File Explorer UX: when NOT searching, show only immediate children of the current folder.
-      const finalFiles =
-        searchValue.trim().length > 0
-          ? mapped
-          : mapped.filter((f) => {
-              if (!f.blob_path) return false
-              // Get parent directory from blob_path (e.g., "01 IPMS/01 MSC" from "01 IPMS/01 MSC/file.pdf")
-              const parentDir = getParentDirFromBlobPath(f.blob_path)
-              // Normalize both paths for comparison (remove leading/trailing slashes)
-              const normalizedParent = normalizePath(parentDir)
-              const normalizedCurrent = normalizePath(normalizedCurrentPath)
-              
-              // Show files that are directly in current folder
-              if (normalizedParent === normalizedCurrent) {
-                return true
-              }
-              
-              // Also show files that are in subfolders within current path
-              // e.g., if current path is "test" and file is at "test/folder/file.pdf"
-              // parentDir will be "test/folder", which starts with "test/"
-              if (normalizedCurrent && normalizedParent.startsWith(normalizedCurrent + "/")) {
-                return true
-              }
-              
-              return false
-            })
-
-      setFiles(finalFiles)
+      // If searching, use search API; otherwise use tree API
+      if (searchValue.trim().length > 0) {
+        // Use search API for search
+        const searchResponse = await searchFiles({
+          query: searchValue,
+          search_in_files: true,
+          search_in_folders: true,
+          search_in_path: true,
+          search_in_content: true,
+          files_page: 1,
+          files_page_size: 50,
+          folders_page: 1,
+          folders_page_size: 50,
+        })
+        
+        // Map search files to UiFileItem
+        const mappedFiles = (searchResponse.files.items || []).map(mapSearchFile)
+        setFiles(mappedFiles)
+        
+        // Also update folders from search results if any
+        if (searchResponse.folders.items && searchResponse.folders.items.length > 0) {
+          const searchFolders = searchResponse.folders.items.map((folder) => ({
+            id: folder.path,
+            name: folder.name,
+            fileCount: folder.file_count,
+            path: folder.path,
+            children: undefined,
+          } as FolderNode))
+          // Merge with existing folders or replace
+          setContentFolders([...folderNodes, ...searchFolders])
+        }
+      } else {
+        // Use tree API for normal browsing
+        const filesFromTree = (treeData.children || [])
+          .filter((child) => child.type === "file" || child.type === "document")
+          .map((fileNode) => {
+            // Transform tree file node to UiFileItem format
+            const metadata = fileNode.metadata
+            const dateStr = metadata?.last_modified
+            const modifiedDate = dateStr ? format(new Date(dateStr), "dd/MM/yyyy") : "-"
+            
+            // Extract file ID from key or use a hash if no ID
+            let fileId = fileNode.id || 0
+            if (!fileId && fileNode.key) {
+              // Generate a simple hash from key for ID
+              fileId = fileNode.key.split('').reduce((acc, char) => {
+                const hash = ((acc << 5) - acc) + char.charCodeAt(0)
+                return hash & hash
+              }, 0)
+            }
+            
+            return {
+              id: Math.abs(fileId), // Ensure positive ID
+              name: fileNode.title || "Chưa có tên",
+              size: formatSize(metadata?.size),
+              type: detectType(metadata?.mime_type),
+              modifiedDate,
+              updatedBy: "", // Tree API doesn't provide this
+              fileUrl: fileNode.key, // Use key as file path/URL
+              blob_path: fileNode.key, // Use key as blob_path
+            } as UiFileItem
+          })
+        
+        // Files from tree are direct children of current folder, so always show them
+        setFiles(filesFromTree)
+      }
       setSelectedFiles([])
     } catch (err: unknown) {
       console.error("Failed to load folder content:", err)

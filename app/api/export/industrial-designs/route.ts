@@ -21,11 +21,11 @@ type IndustrialDesignItem = {
 
 const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
   worksheet.getRow(1).eachCell((cell) => {
-    cell.font = { bold: true, size: 11 };
+    cell.font = { bold: true, size: 12 };
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFC4D79B' },
+      fgColor: { argb: '2b5aeb' },
     };
     cell.alignment = { vertical: 'middle', horizontal: 'left' };
   });
@@ -42,7 +42,8 @@ const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
         }
       });
 
-      column.width = isEmpty ? 13.33 : 20;
+      // column.width = isEmpty ? 13.33 : 20;
+      if (isEmpty) column.width = 13.33
     }
   });
 
@@ -82,6 +83,50 @@ const getImageExtension = (url: string): 'png' | 'jpeg' => {
   return 'png';
 };
 
+const formatLocarnoList = (item: any): string => {
+  // Prefer locarno_list_raw
+  if (Array.isArray(item?.locarno_list_raw) && item.locarno_list_raw.length > 0) {
+    return item.locarno_list_raw
+      .filter((entry: unknown) => typeof entry === 'string' && entry.trim().length > 0)
+      .map((entry: string) => entry.trim())
+      .join(', ');
+  }
+  if (typeof item?.locarno_list_raw === 'string' && item.locarno_list_raw.trim().length > 0) {
+    return item.locarno_list_raw.trim();
+  }
+
+  // Handle locarno_list
+  if (Array.isArray(item?.locarno_list) && item.locarno_list.length > 0) {
+    const firstItem = item.locarno_list[0];
+    // array of objects with subclass and class_number
+    if (typeof firstItem === 'object' && firstItem !== null && !Array.isArray(firstItem)) {
+      return (item.locarno_list as Array<{ subclass?: string | null; class_number?: string | null }>)
+        .map((it: any) => {
+          const classNum = it.class_number || '';
+          const subclass = it.subclass || '';
+          if (classNum && subclass) return `${classNum}-${subclass}`;
+          return classNum || subclass || '';
+        })
+        .filter((s: string) => s.trim().length > 0)
+        .join(', ');
+    }
+    // array of strings
+    if (typeof firstItem === 'string') {
+      return (item.locarno_list as string[])
+        .filter((entry) => typeof entry === 'string' && entry.trim().length > 0)
+        .map((entry) => entry.trim())
+        .join(', ');
+    }
+  }
+
+  // string
+  if (typeof item?.locarno_list === 'string' && item.locarno_list.trim().length > 0) {
+    return item.locarno_list.trim();
+  }
+
+  return '-';
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -91,15 +136,20 @@ export async function POST(req: NextRequest) {
     const worksheet = workbook.addWorksheet('Kiểu dáng công nghiệp');
 
     worksheet.columns = [
-      { header: 'Hình ảnh', key: 'image', width: 35 },
-      { header: 'Tên', key: 'name' },
-      { header: 'Số đơn', key: 'application_number' },
-      { header: 'Ngày nộp đơn', key: 'application_date' },
-      { header: 'Ngày công bố', key: 'publication_date' },
-      { header: 'Số bằng', key: 'certificate_number' },
-      { header: 'Ngày cấp', key: 'certificate_date' },
-      { header: 'Chủ đơn/Chủ bằng', key: 'owner' },
-      { header: 'Trạng thái', key: 'status' },
+      { header: 'Hình ảnh', key: 'image', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Tên', key: 'name', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Loại TSTT', key: 'ip_type', width: 10, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Số đơn', key: 'application_number', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Ngày nộp đơn', key: 'application_date', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Ngày công bố', key: 'publication_date', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Số bằng', key: 'certificate_number', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Ngày cấp', key: 'certificate_date', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Phân loại Locarno', key: 'locarno_list', width: 30, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Chủ đơn/Chủ bằng', key: 'owner', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Trạng thái', key: 'status', width: 20, style: { alignment: { vertical: 'middle' } } },
+      { header: 'Tác giả', key: 'authors', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Đại diện', key: 'agency', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
+      { header: 'Ghi chú nội bộ', key: 'note', width: 50, style: { alignment: { vertical: 'middle' } } },
     ];
 
     // Start from row 2 because row 1 is header
@@ -111,6 +161,7 @@ export async function POST(req: NextRequest) {
       const row = worksheet.addRow({
         image: '',
         name: item.name || '-',
+        ip_type: 'KD',
         application_number: item.application_number || '-',
         application_date: item.application_date
           ? moment(item.application_date).format(FORMAT_DATE)
@@ -122,10 +173,14 @@ export async function POST(req: NextRequest) {
         certificate_date: item.certificate_date
           ? moment(item.certificate_date).format(FORMAT_DATE)
           : '-',
-        owner: item.owner_name || '-',
+        locarno_list: formatLocarnoList(item),
+        owner: item.owner_name || item.owners?.[0]?.name || item?.owner || '-',
         status:
           item.wipo_status ||
           (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
+        authors: item.authors_raw?.join(", ") || item.authors?.join(", ") || item.authors || '-',
+        agency: item.agencies_raw?.join(", ") || item.agencies?.join(", ") || item.agency_name || '',
+        note: item.note || '',
       });
 
       // Set row height for image

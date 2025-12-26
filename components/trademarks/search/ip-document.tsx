@@ -3,7 +3,7 @@
 interface Document {
   document_type?: string | null;
   display_name?: string | null;
-  blob_path?: string | null;
+  file_path?: string | null;
   file_size?: number | null;
   file_type?: string | null;
 }
@@ -51,9 +51,9 @@ export default function IpDocument({ documents }: IpDocumentProps) {
                 <td className="px-4 py-2 text-sm text-gray-700">{doc.file_type || ""}</td>
                 <td className="px-4 py-2 text-sm text-gray-700">{formatFileSize(doc.file_size)}</td>
                 <td className="px-4 py-2 text-sm text-gray-700">
-                  {doc.blob_path ? (
+                  {doc.file_path ? (
                     <a
-                      href={doc.blob_path}
+                      href={doc.file_path}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
