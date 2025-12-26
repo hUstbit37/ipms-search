@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ImageIcon } from 'lucide-react';
+import { ImageModal } from './image-modal';
 
 interface ImageShowProps {
   src?: string | null;
@@ -7,6 +8,8 @@ interface ImageShowProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xxxl';
   className?: string;
   fallbackSrc?: string;
+  modalTitle?: string;
+  enableModal?: boolean;
 }
 
 const ImageShow: React.FC<ImageShowProps> = ({
@@ -14,10 +17,13 @@ const ImageShow: React.FC<ImageShowProps> = ({
   alt = "Image",
   size = 'md',
   className = '',
-  fallbackSrc = '/no-image.jpg'
+  fallbackSrc = '/no-image.jpg',
+  modalTitle = 'Xem ảnh',
+  enableModal = false
 }) => {
   const [imageError, setImageError] = useState(false);
   const [fallbackError, setFallbackError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const sizeClasses = {
     sm: 'w-[40px] h-[40px] min-w-[40px] min-h-[40px]',
@@ -56,29 +62,57 @@ const ImageShow: React.FC<ImageShowProps> = ({
   // Nếu src chính lỗi, hiển thị fallback
   if (imageError && !fallbackError) {
     return (
-      <div className={`flex items-center justify-center border rounded overflow-hidden ${sizeClasses[size]} ${className}`}>
-        <img
-          loading="lazy"
-          className="w-full h-full object-contain"
-          src={fallbackSrc}
-          alt="Fallback"
-          onError={() => setFallbackError(true)}
-        />
-      </div>
+      <>
+        <div 
+          className={`flex items-center justify-center border rounded overflow-visible relative ${enableModal ? 'cursor-pointer' : ''} ${sizeClasses[size]} ${className}`}
+          onClick={enableModal ? () => setIsModalOpen(true) : undefined}
+        >
+          <img
+            loading="lazy"
+            className="w-full h-full object-contain transition-transform duration-300 hover:scale-150 hover:z-50 hover:border hover:border-gray-300 hover:shadow-lg hover:bg-white relative rounded"
+            src={fallbackSrc}
+            alt="Fallback"
+            onError={() => setFallbackError(true)}
+          />
+        </div>
+        {enableModal && (
+          <ImageModal
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            src={fallbackSrc}
+            alt="Fallback"
+            title={modalTitle}
+          />
+        )}
+      </>
     );
   }
 
   // Hiển thị ảnh chính
   return (
-    <div className={`flex items-center justify-center border rounded overflow-hidden ${sizeClasses[size]} ${className}`}>
-      <img
-        loading="lazy"
-        className="w-full h-full object-contain"
-        src={src}
-        alt={alt}
-        onError={() => setImageError(true)}
-      />
-    </div>
+    <>
+      <div 
+        className={`flex items-center justify-center border rounded overflow-visible relative ${enableModal ? 'cursor-pointer' : ''} ${sizeClasses[size]} ${className}`}
+        onClick={enableModal ? () => setIsModalOpen(true) : undefined}
+      >
+        <img
+          loading="lazy"
+          className="w-full h-full object-contain transition-transform duration-300 hover:scale-150 hover:z-50 hover:border hover:border-gray-300 hover:shadow-lg hover:bg-white relative rounded"
+          src={src}
+          alt={alt}
+          onError={() => setImageError(true)}
+        />
+      </div>
+      {enableModal && (
+        <ImageModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          src={src}
+          alt={alt}
+          title={modalTitle}
+        />
+      )}
+    </>
   );
 };
 
