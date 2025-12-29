@@ -602,7 +602,7 @@ export default function IndustrialDesignsSearchPage() {
                         setShowDetailModal(true);
                       }}
                     >
-                      <TableCell>
+                      <TableCell className="overflow-visible">
                         <ImageShow
                           src={item.image_urls?.[0] || ""} 
                           alt={item.name || "Industrial design image"} 

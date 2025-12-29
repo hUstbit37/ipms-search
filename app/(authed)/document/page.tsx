@@ -5,14 +5,17 @@ import { DocumentSidebar } from "@/components/document/DocumentSidebar"
 import { DocumentHeader } from "@/components/document/DocumentHeader"
 import { DocumentContentView } from "@/components/document/DocumentContentView"
 import { DocumentPageHeader } from "@/components/document/DocumentPageHeader"
-import { getTree, TreeNode, listFiles, FileListItem, deleteFiles, deleteFolder, downloadFileDirect, downloadMultipleFiles, searchFiles, FileSearchItem } from "@/lib/api/documentApi"
+import { getTree, TreeNode, listFiles, FileListItem, deleteFiles, deleteFolder, searchFiles, FileSearchItem } from "@/lib/api/documentApi"
 import { DocumentUploadModal } from "@/components/document/DocumentUploadModal"
 import { DocumentCreateFolderModal } from "@/components/document/DocumentCreateFolderModal"
 import { DocumentExportModal } from "@/components/document/DocumentExportModal"
 import { DocumentMoveModal } from "@/components/document/DocumentMoveModal"
 import { format } from "date-fns"
-// import toast from "react-hot-toast"
 import { toast } from "react-toastify";
+import { getDefaultStore } from "@/lib/jotai";
+import { authContextAtom } from "@/providers/auth/AuthProvider";
+
+const store = getDefaultStore();
 
 type FolderNode = {
   id: string | number
@@ -490,16 +493,54 @@ export default function DocumentPage() {
     try {
       setIsDownloading(true)
       
-      // Direct download via /files/{file_id}/download
-      const blob = await downloadFileDirect(fileId)
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `file_${fileId}`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
+      // Get token from store
+      const authContext = store.get(authContextAtom);
+      const token = authContext?.token;
+      
+      if (!token) {
+        toast.error("Vui lòng đăng nhập lại");
+        return;
+      }
+
+      // Download trực tiếp bằng fetch với headers đúng
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://20.205.246.175/api';
+      const response = await fetch(
+        `${BACKEND_URL}/v1/file-management/files/${fileId}/download`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/octet-stream, application/pdf, image/*, */*',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Lấy filename từ Content-Disposition header hoặc dùng default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `file_${fileId}`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+
+      // Convert response to blob và trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
       toast.success("Đã tải file thành công")
     } catch (err: unknown) {
       console.error("Download failed:", err)
@@ -516,24 +557,43 @@ export default function DocumentPage() {
     
     try {
       setIsDownloading(true)
-      const blob = await downloadMultipleFiles(selectedFiles)
       
-      // Get filename from blob or use default
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `files_${Date.now()}.zip`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
+      const authContext = store.get(authContextAtom);
+      const token = authContext?.token;
       
-      toast.success(`Đã tải ${selectedFiles.length} file thành công`)
-      setSelectedFiles([])
+      if (!token) {
+        toast.error("Vui lòng đăng nhập lại");
+        return;
+      }
+
+      const response = await fetch('/api/file-download/bulk', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          file_ids: selectedFiles,
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `files_${Date.now()}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        toast.success(`Đã tải ${selectedFiles.length} file thành công`);
+        setSelectedFiles([]);
+      }
     } catch (err: unknown) {
+      // Ignore error - IDM có thể tự động tải file
       console.error("Bulk download failed:", err)
-      const errorMessage = getErrorMessage(err, "Không thể tải files. Vui lòng thử lại.")
-      toast.error(errorMessage)
     } finally {
       setIsDownloading(false)
     }

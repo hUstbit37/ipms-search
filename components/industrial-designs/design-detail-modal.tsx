@@ -163,12 +163,13 @@ export default function DesignDetailModal({
                          alt={`${design.name || "Design image"} ${index + 1}`} 
                          size="xxxl"
                          enableModal={true}
+                         disableHover={true}
                        />
                      </div>
                    ))
                  ) : (
                    <div className="flex-shrink-0">
-                     <ImageShow src="" alt={design.name || "Design image"} size="xxl" enableModal={true} />
+                     <ImageShow src="" alt={design.name || "Design image"} size="xxl" enableModal={true} disableHover={true} />
                    </div>
                  )}
                </div>

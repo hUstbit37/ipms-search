@@ -158,12 +158,13 @@ export default function PatentDetailModal({
                          alt={`${patent.name || "Patent image"} ${index + 1}`} 
                          size="xxxl"
                          enableModal={true}
+                         disableHover={true}
                        />
                      </div>
                    ))
                  ) : (
                    <div className="flex-shrink-0">
-                     <ImageShow src="" alt={patent.name || " image"} size="xxl" enableModal={true} />
+                     <ImageShow src="" alt={patent.name || " image"} size="xxl" enableModal={true} disableHover={true} />
                    </div>
                  )}
                </div>

@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react";
-import { FileDown, Loader2, Download } from "lucide-react";
+import { Download, Loader2, Eye } from "lucide-react";
 import { toast } from "react-toastify";
 import { getDefaultStore } from "@/lib/jotai";
 import { authContextAtom } from "@/providers/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
 
 const store = getDefaultStore();
 
@@ -58,9 +59,7 @@ export default function IpDocument({ documents }: IpDocumentProps) {
         return;
       }
 
-      // Download trực tiếp bằng fetch với headers đúng
-      // Call trực tiếp đến backend để tránh Next.js proxy làm corrupt binary data
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://20.205.246.175/api';
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://20.205.246.175/api';
       const response = await fetch(
         `${BACKEND_URL}/v1/file-management/files/${doc.id}/download`,
         {
@@ -244,33 +243,39 @@ export default function IpDocument({ documents }: IpDocumentProps) {
                 <td className="px-4 py-2 text-sm text-gray-700">{doc.file_type || ""}</td>
                 <td className="px-4 py-2 text-sm text-gray-700">{formatFileSize(doc.file_size)}</td>
                 <td className="px-4 py-2 text-sm text-gray-700">
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-1">
                     {doc.file_path && (
-                      <a
-                        href={doc.file_path}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-xs"
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(doc.file_path || '', '_blank');
+                        }}
+                        title="Xem file"
                       >
-                        Xem
-                      </a>
+                        <Eye className="h-4 w-4" />
+                      </Button>
                     )}
                     {doc.id && (
-                      <button
-                        onClick={() => handleDownload(doc)}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(doc);
+                        }}
                         disabled={downloadingId === doc.id}
-                        className="text-green-600 hover:text-green-700 disabled:opacity-50"
                         title="Tải xuống"
                       >
                         {downloadingId === doc.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <FileDown className="w-4 h-4" />
+                          <Download className="h-4 w-4" />
                         )}
-                      </button>
-                    )}
-                    {!doc.file_path && !doc.id && (
-                      <span className="text-gray-400">-</span>
+                      </Button>
                     )}
                   </div>
                 </td>
