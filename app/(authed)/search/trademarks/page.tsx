@@ -462,6 +462,7 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
 
   return (
     <div className="space-y-4">
+      {/* Search Section */}
       <div className="bg-white dark:bg-zinc-900 border rounded-lg p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
           <div className="flex-1 flex items-center border rounded-lg px-4 py-2 gap-2">
@@ -500,48 +501,50 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
               onClick={ () => setShowAdvancedFilter(true) }
               variant="outline"
               size="sm"
-              className="text-sm font-medium"
+              className="text-sm font-medium flex items-center gap-2"
             >
-              Truy vấn nâng cao
+              <List className="w-4 h-4" />
+              Nâng cao
             </Button>
           </div>
         </div>
+
+        {/* Filters */ }
+        {Object.keys(activeFilters).length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap mt-3">
+            { Object.entries(activeFilters).map(([key, value]) => (
+              <Badge key={ key } variant="secondary" className="rounded-full text-xs sm:text-sm">
+                <span className="truncate">{ key }:</span>
+                <span className="ml-1 truncate">{ value }</span>
+                <div
+                  onClick={ () => removeFilter(key) }
+                  className="ml-2 cursor-pointer hover:text-red-600 flex-shrink-0"
+                >
+                  <XIcon size={ 15 } color="#FF0000"/>
+                </div>
+              </Badge>
+            )) }
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={ () => {
+                handleResetFilters()
+              } }
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 text-xs sm:text-sm"
+            >
+              Xóa bộ lọc
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Filters and Controls */ }
-      <div className="bg-white dark:bg-zinc-900 border rounded-lg p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            {/* Filters */ }
-            <div className="flex items-center gap-2 flex-wrap">
-              { Object.entries(activeFilters).map(([key, value]) => (
-                <Badge key={ key } variant="secondary" className="rounded-full text-xs sm:text-sm">
-                  <span className="truncate">{ key }:</span>
-                  <span className="ml-1 truncate">{ value }</span>
-                  <div
-                    onClick={ () => removeFilter(key) }
-                    className="ml-2 cursor-pointer hover:text-red-600 flex-shrink-0"
-                  >
-                    <XIcon size={ 15 } color="#FF0000"/>
-                  </div>
-                </Badge>
-              )) }
-              { Object.keys(activeFilters).length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={ () => {
-                    handleResetFilters()
-                  } }
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 text-xs sm:text-sm"
-                >
-                  Xóa bộ lọc
-                </Button>
-              ) }
-            </div>
-
-            <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
-                <Button
+      {/* Controls */ }
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Tổng số: <span className="font-semibold">{(trademarksData?.total ?? 0).toLocaleString()}</span> bản ghi
+        </div>
+        <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
+          <Button
                   variant="outline"
                   size="sm"
                   onClick={ handleExportAllTrademarks }
@@ -554,8 +557,8 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                     <FileDown className="w-4 h-4" />
                   ) }
                   { isExporting ? "Đang xuất..." : "Xuất Excel" }
-                </Button>
-                <select 
+          </Button>
+          <select 
                   className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
                   value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
                   onChange={(e) => {
@@ -581,8 +584,8 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                   <option value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</option>
                   <option value="name-asc">Tên nhãn hiệu: A → Z</option>
                   <option value="name-desc">Tên nhãn hiệu: Z → A</option>
-                </select>
-                <button
+          </select>
+          <button
                   onClick={ () => setViewType("table") }
                   className={ `p-2 rounded flex-shrink-0 ${
                     viewType === "table"
@@ -592,8 +595,8 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                   title="Table view"
                 >
                   <List className="w-4 h-4"/>
-                </button>
-                <button
+          </button>
+          <button
                   onClick={ () => setViewType("grid") }
                   className={ `p-2 rounded flex-shrink-0 ${
                     viewType === "grid"
@@ -603,10 +606,8 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                   title="Grid view"
                 >
                   <LayoutGrid className="w-4 h-4"/>
-                </button>
-              </div>
-            </div>
-          </div>
+          </button>
+        </div>
       </div>
 
       {/* Results Table */ }
