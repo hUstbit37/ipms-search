@@ -657,7 +657,7 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                         setShowQuickView(true);
                       }}
                     >
-                      <TableCell>
+                      <TableCell className="overflow-visible">
                         <ImageShow
                           src={item.image_urls?.[0] || ""} 
                           alt={item.name || "Trademark image"} 

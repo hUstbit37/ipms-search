@@ -10,6 +10,7 @@ interface ImageShowProps {
   fallbackSrc?: string;
   modalTitle?: string;
   enableModal?: boolean;
+  disableHover?: boolean;
 }
 
 const ImageShow: React.FC<ImageShowProps> = ({
@@ -19,7 +20,8 @@ const ImageShow: React.FC<ImageShowProps> = ({
   className = '',
   fallbackSrc = '/no-image.jpg',
   modalTitle = 'Xem ảnh',
-  enableModal = false
+  enableModal = false,
+  disableHover = false
 }) => {
   const [imageError, setImageError] = useState(false);
   const [fallbackError, setFallbackError] = useState(false);
@@ -69,7 +71,11 @@ const ImageShow: React.FC<ImageShowProps> = ({
         >
           <img
             loading="lazy"
-            className="w-full h-full object-contain transition-transform duration-300 hover:scale-150 hover:z-50 hover:border hover:border-gray-300 hover:shadow-lg hover:bg-white relative rounded"
+            className={`w-full h-full object-contain rounded ${
+              disableHover 
+                ? '' 
+                : 'transition-transform duration-300 hover:scale-150 hover:z-[9999] hover:border hover:border-gray-300 hover:shadow-lg hover:bg-white relative'
+            }`}
             src={fallbackSrc}
             alt="Fallback"
             onError={() => setFallbackError(true)}
@@ -97,7 +103,11 @@ const ImageShow: React.FC<ImageShowProps> = ({
       >
         <img
           loading="lazy"
-          className="w-full h-full object-contain transition-transform duration-300 hover:scale-150 hover:z-50 hover:border hover:border-gray-300 hover:shadow-lg hover:bg-white relative rounded"
+          className={`w-full h-full object-contain rounded ${
+            disableHover 
+              ? '' 
+              : 'transition-transform duration-300 hover:scale-150 hover:z-[9999] hover:border hover:border-gray-300 hover:shadow-lg hover:bg-white relative'
+          }`}
           src={src}
           alt={alt}
           onError={() => setImageError(true)}

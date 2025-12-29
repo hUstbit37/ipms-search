@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call backend API
-    const BACKEND_URL = process.env.BACKEND_API_URL || 'http://20.205.246.175/api';
+    const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://20.205.246.175/api';
     const response = await fetch(
       `${BACKEND_URL}/v1/file-management/files/bulk-download`,
       {
