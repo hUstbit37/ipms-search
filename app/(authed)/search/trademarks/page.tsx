@@ -17,6 +17,7 @@ import moment from "moment";
 import { queryClient } from "@/lib/react-query";
 import { exportTrademarksToExcel } from "@/utils/excel-export";
 import ImageShow from "@/components/common/image/image-show";
+import { StatusBadge } from "@/components/common/StatusBadge";
 
 const initialAdvancedSearchState = {
   ownerCountry: "",
@@ -389,7 +390,6 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
   useEffect(() => {
     refetchTrademarks();
   }, [searchParams, refetchTrademarks]);
-console.log('trade', trademarksData);
 
   const companyMap = {};
 
@@ -691,15 +691,9 @@ console.log('trade', trademarksData);
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
-                        {item.wipo_status ? (
-                          <span className="text-xs py-1 rounded font-bold">
-                            {item.wipo_status}
-                          </span>
-                        ) : (
-                          <span className="text-xs py-1 rounded font-bold">
-                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
-                          </span>
-                        )}
+                        <StatusBadge 
+                          status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
+                        />
                       </TableCell>
                     </TableRow>
                   ))

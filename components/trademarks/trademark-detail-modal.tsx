@@ -87,6 +87,7 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
                     src={trademark.image_urls?.[0] || ""} 
                     alt={'image'} 
                     size="xxl"
+                    enableModal={true}
                   />
                 {/* {trademark.image_urls && trademark.image_urls.length > 0 ? (
                   trademark.image_urls.map((imageUrl: string, index: number) => (

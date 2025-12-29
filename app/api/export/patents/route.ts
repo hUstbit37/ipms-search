@@ -23,13 +23,13 @@ type PatentItem = {
 
 const applyHeaderStyle = (worksheet: ExcelJS.Worksheet) => {
   worksheet.getRow(1).eachCell((cell) => {
-    cell.font = { bold: true, size: 12 };
+    cell.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: '2b5aeb' },
+      fgColor: { argb: 'FF808080' }, // Gray background
     };
-    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
   });
 
   worksheet.columns.forEach((column, colIndex) => {

@@ -16,6 +16,7 @@ import moment from "moment";
 import DesignDetailModal from "@/components/industrial-designs/design-detail-modal";
 import { FileDown } from "lucide-react";
 import ImageShow from "@/components/common/image/image-show";
+import { StatusBadge } from "@/components/common/StatusBadge";
 
 const initialAdvancedSearch = {
   ownerCountry: "",
@@ -77,7 +78,6 @@ export default function IndustrialDesignsSearchPage() {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   })
-  console.log(industrialDesignsData);
   useEffect(() => {
     refetchDesigns();
   }, [searchParams, refetchDesigns]);
@@ -631,15 +631,9 @@ export default function IndustrialDesignsSearchPage() {
                           { item.owners?.[0]?.name || item.owner_name || "-" }
                       </TableCell>
                       <TableCell>
-                        {item.wipo_status ? (
-                          <span className="text-xs py-1 rounded font-bold">
-                            {item.wipo_status}
-                          </span>
-                        ) : (
-                          <span className="text-xs py-1 rounded font-bold">
-                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
-                          </span>
-                        )}
+                        <StatusBadge 
+                          status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
+                        />
                       </TableCell>
                     </TableRow>
                   ))
@@ -704,15 +698,9 @@ export default function IndustrialDesignsSearchPage() {
                     </p>
                     <p>
                       <span className="font-medium">Trạng thái:</span>{ " " }
-                      {item.wipo_status ? (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
-                            {item.wipo_status}
-                          </span>
-                        ) : (
-                          <span className="text-xs px-2 py-1 rounded font-bold">
-                            {item.certificate_number ? "Cấp bằng" : "Đang giải quyết"}
-                          </span>
-                        )}
+                      <StatusBadge 
+                        status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
+                      />
                     </p>
                   </div>
                 </div>

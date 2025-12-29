@@ -5,7 +5,7 @@ import { DocumentSidebar } from "@/components/document/DocumentSidebar"
 import { DocumentHeader } from "@/components/document/DocumentHeader"
 import { DocumentContentView } from "@/components/document/DocumentContentView"
 import { DocumentPageHeader } from "@/components/document/DocumentPageHeader"
-import { getTree, TreeNode, listFiles, FileListItem, deleteFiles, deleteFolder, getDownloadUrl, downloadFileDirect, downloadMultipleFiles, searchFiles, FileSearchItem } from "@/lib/api/documentApi"
+import { getTree, TreeNode, listFiles, FileListItem, deleteFiles, deleteFolder, downloadFileDirect, downloadMultipleFiles, searchFiles, FileSearchItem } from "@/lib/api/documentApi"
 import { DocumentUploadModal } from "@/components/document/DocumentUploadModal"
 import { DocumentCreateFolderModal } from "@/components/document/DocumentCreateFolderModal"
 import { DocumentExportModal } from "@/components/document/DocumentExportModal"
@@ -489,25 +489,8 @@ export default function DocumentPage() {
   const handleDownload = async (fileId: number) => {
     try {
       setIsDownloading(true)
-      // Try getDownloadUrl first (better for large files)
-      try {
-        const urlResponse = await getDownloadUrl(fileId, 7200)
-        if (urlResponse.success && urlResponse.download_url) {
-          // Create download link
-          const a = document.createElement('a')
-          a.href = urlResponse.download_url
-          a.download = urlResponse.file_name || `file_${fileId}`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          toast.success("Đang tải file...")
-          return
-        }
-      } catch (urlError) {
-        console.log("Download URL failed, trying direct download:", urlError)
-      }
       
-      // Fallback: direct download
+      // Direct download via /files/{file_id}/download
       const blob = await downloadFileDirect(fileId)
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
