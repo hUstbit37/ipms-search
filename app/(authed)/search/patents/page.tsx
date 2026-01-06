@@ -5,6 +5,7 @@ import { LayoutGrid, List, Search, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
@@ -485,33 +486,35 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                   ) }
                   { isExporting ? "Đang xuất..." : "Xuất Excel" }
           </Button>
-          <select 
-                  className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
-                  value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value) {
-                      const [field, order] = value.split('-');
-                      setSearchParams(prev => ({
-                        ...prev,
-                        sort_by: field,
-                        sort_order: order as 'asc' | 'desc'
-                      }));
-                      setSortTrigger(prev => prev + 1);
-                    } else {
-                      setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
-                      setSortTrigger(prev => prev + 1);
-                    }
-                  }}
-                >
-                  <option value="">Sắp xếp theo</option>
-                  <option value="application_date-asc">Ngày đơn đăng ký: Cũ → Mới</option>
-                  <option value="application_date-desc">Ngày đơn đăng ký: Mới → Cũ</option>
-                  <option value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</option>
-                  <option value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</option>
-                  <option value="name-asc">Tiêu đề: A → Z</option>
-                  <option value="name-desc">Tiêu đề: Z → A</option>
-          </select>
+          <Select
+            value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
+            onValueChange={(value) => {
+              if (value) {
+                const [field, order] = value.split('-');
+                setSearchParams(prev => ({
+                  ...prev,
+                  sort_by: field,
+                  sort_order: order as 'asc' | 'desc'
+                }));
+                setSortTrigger(prev => prev + 1);
+              } else {
+                setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
+                setSortTrigger(prev => prev + 1);
+              }
+            }}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Sắp xếp theo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="application_date-asc">Ngày đơn đăng ký: Cũ → Mới</SelectItem>
+              <SelectItem value="application_date-desc">Ngày đơn đăng ký: Mới → Cũ</SelectItem>
+              <SelectItem value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</SelectItem>
+              <SelectItem value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</SelectItem>
+              <SelectItem value="name-asc">Tiêu đề: A → Z</SelectItem>
+              <SelectItem value="name-desc">Tiêu đề: Z → A</SelectItem>
+            </SelectContent>
+          </Select>
           <button
                   onClick={ () => setViewType("table") }
                   className={ `p-2 rounded flex-shrink-0 ${
