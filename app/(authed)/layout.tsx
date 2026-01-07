@@ -192,7 +192,7 @@ export default function AuthedLayout({
             </DropdownMenu>
           </div>
         </header>
-        <main className="p-4 bg-background">{children}</main>
+        <main className="p-4 bg-background min-w-0 overflow-x-hidden">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -50,7 +50,7 @@ export function IPExportDialog({
     link.click();
     document.body.removeChild(link);
 
-    toast.success(`Export thành công! Đã tải xuống ${totalItems} bản ghi.`);
+    toast.success(`Xuất thành công! Đã tải xuống ${totalItems} bản ghi.`);
     setExportStatus("completed");
     onOpenChange(false);
   };
@@ -72,7 +72,7 @@ export function IPExportDialog({
           clearInterval(interval);
           setPollingInterval(null);
           setExportStatus("failed");
-          toast.error("Export thất bại. Vui lòng thử lại.");
+          toast.error("Xuất thất bại. Vui lòng thử lại.");
         }
         // Nếu vẫn pending/processing → tiếp tục poll
       } catch (error: any) {
@@ -81,7 +81,7 @@ export function IPExportDialog({
           clearInterval(interval);
           setPollingInterval(null);
           setExportStatus("failed");
-          toast.warning("Không thể kiểm tra trạng thái export. Vui lòng thử lại sau vài phút.");
+          toast.warning("Không thể kiểm tra trạng thái xuất. Vui lòng thử lại sau vài phút.");
         } else {
           console.error("Polling error:", error);
           // Tiếp tục poll nếu là lỗi khác
@@ -97,7 +97,7 @@ export function IPExportDialog({
         clearInterval(interval);
         setPollingInterval(null);
         setExportStatus("failed");
-        toast.warning("Export đang mất quá nhiều thời gian. Vui lòng thử lại sau.");
+        toast.warning("Xuất đang mất quá nhiều thời gian. Vui lòng thử lại sau.");
       }
     }, 600000); // 10 phút
   };
@@ -138,7 +138,7 @@ export function IPExportDialog({
         if (response.job_id) {
           startPolling(response.job_id);
         } else {
-          toast.warning("Export đang được xử lý. Vui lòng thử lại sau vài phút.");
+          toast.warning("Xuất đang được xử lý. Vui lòng thử lại sau vài phút.");
           setExportStatus("failed");
         }
       } else if (response.status === "failed") {
@@ -151,9 +151,9 @@ export function IPExportDialog({
       
       // Xử lý timeout
       if (error?.code === "ECONNABORTED" || error?.message?.includes("timeout")) {
-        toast.warning("Export đang mất quá nhiều thời gian. Vui lòng thử lại với bộ lọc nhỏ hơn hoặc thử lại sau.");
+        toast.warning("Xuất đang mất quá nhiều thời gian. Vui lòng thử lại với bộ lọc nhỏ hơn hoặc thử lại sau.");
       } else {
-        toast.error(error?.message || "Export thất bại. Vui lòng thử lại.");
+        toast.error(error?.message || "Xuất thất bại. Vui lòng thử lại.");
       }
     },
   });
@@ -270,12 +270,12 @@ export function IPExportDialog({
   
   const getExportStatusText = () => {
     if (exportStatus === "exporting") {
-      return "Đang tạo export...";
+      return "Đang tạo file...";
     }
     if (exportStatus === "polling") {
-      return "Đang xử lý export...";
+      return "Đang xử lý...";
     }
-    return "Export";
+    return "Xuất";
   };
 
   return (
@@ -358,7 +358,7 @@ export function IPExportDialog({
                   <div className="flex items-start gap-2">
                     <Loader2 className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0 animate-spin" />
                     <div className="text-xs text-yellow-800 dark:text-yellow-300">
-                      <p className="font-medium mb-1">Đang xử lý export...</p>
+                      <p className="font-medium mb-1">Đang xử lý xuất...</p>
                       <p>Quá trình này có thể mất vài phút. Vui lòng đợi trong khi hệ thống xử lý.</p>
                     </div>
                   </div>
@@ -371,8 +371,8 @@ export function IPExportDialog({
                     <Download className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                     <div className="text-xs text-blue-800 dark:text-blue-300">
                       <p className="font-medium mb-1">Lưu ý:</p>
-                      <p>File sẽ được export dưới dạng ZIP bao gồm metadata Excel và các tài liệu đã chọn.</p>
-                      <p className="mt-1 text-blue-700 dark:text-blue-400">Quá trình export có thể mất vài phút tùy thuộc vào số lượng dữ liệu.</p>
+                      <p>File sẽ được xuất dưới dạng ZIP bao gồm metadata Excel và các tài liệu đã chọn.</p>
+                      <p className="mt-1 text-blue-700 dark:text-blue-400">Quá trình xuất có thể mất vài phút tùy thuộc vào số lượng dữ liệu.</p>
                     </div>
                   </div>
                 </div>
@@ -401,7 +401,7 @@ export function IPExportDialog({
             ) : (
               <>
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                Xuất
               </>
             )}
           </Button>
