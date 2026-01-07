@@ -2,20 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2, Settings2, ChevronDown } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2, Settings2, ChevronDown, Settings } from "lucide-react";
 import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
 import CustomFieldsModal from "@/components/common/CustomFieldsModal";
+import AddCustomFieldValueModal from "@/components/trademarks/AddCustomFieldValueModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -86,10 +86,10 @@ export default function TrademarksSearchPage() {
   const [selectedTrademark, setSelectedTrademark] = useState<any>(null);
   const [sortTrigger, setSortTrigger] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
   const [bulkUpdateValue, setBulkUpdateValue] = useState("");
+  const [showAddCustomFieldValueModal, setShowAddCustomFieldValueModal] = useState(false);
 
   const { data: customFieldsData } = useQuery({
     queryKey: ["custom-fields", "trademark"],
@@ -118,36 +118,32 @@ export default function TrademarksSearchPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trademarks"] });
       setShowBulkUpdateModal(false);
-      setSelectedRows([]);
       setBulkUpdateField(null);
       setBulkUpdateValue("");
     },
   });
 
+  const addCustomFieldValueMutation = useMutation({
+    mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string }) =>
+      customFieldsService.updateCustomFieldValues({
+        ip_type: "trademark",
+        custom_field_id: data.custom_field_id,
+        application_numbers: data.application_numbers,
+        value: data.value,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trademarks"] });
+      setShowAddCustomFieldValueModal(false);
+    },
+  });
+
   const handleBulkUpdate = () => {
-    if (bulkUpdateField && selectedRows.length > 0) {
+    if (bulkUpdateField) {
       bulkUpdateMutation.mutate({
         custom_field_id: bulkUpdateField,
-        application_numbers: selectedRows,
+        application_numbers: [],
         value: bulkUpdateValue || null
       });
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    const currentPageIds = trademarksData?.items?.map((item: any) => item.application_number) || [];
-    if (checked) {
-      setSelectedRows(prev => [...new Set([...prev, ...currentPageIds])]);
-    } else {
-      setSelectedRows(prev => prev.filter(id => !currentPageIds.includes(id)));
-    }
-  };
-
-  const handleSelectRow = (applicationNumber: string, checked: boolean) => {
-    if (checked) {
-      setSelectedRows(prev => [...prev, applicationNumber]);
-    } else {
-      setSelectedRows(prev => prev.filter(id => id !== applicationNumber));
     }
   };
 
@@ -624,21 +620,6 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
       {/* Controls */ }
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          {selectedRows.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline">
-                  Hành động ({selectedRows.length})
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setShowBulkUpdateModal(true)}>
-                  Cập nhật Trường nội bộ
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
           <div className="text-sm text-gray-600 dark:text-gray-400">
             Tổng số: <span className="font-semibold">{(trademarksData?.total ?? 0).toLocaleString()}</span> bản ghi
           </div>
@@ -709,13 +690,24 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                 >
                   <LayoutGrid className="w-4 h-4"/>
           </button>
-          <button
-                  onClick={ () => setShowCustomFieldsModal(true) }
-                  className="p-2 rounded flex-shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800"
-                  title="Trường nội bộ"
-                >
-                  <Settings2 className="w-4 h-4"/>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-2 rounded flex-shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800"
+                title="Trường nội bộ"
+              >
+                <Settings className="w-4 h-4 cursor-pointer"/>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowCustomFieldsModal(true)}>
+                Trường nội bộ
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowAddCustomFieldValueModal(true)}>
+                Thêm giá trị trường nội bộ
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -726,15 +718,6 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[50px]">
-                      <Checkbox
-                        checked={
-                          (trademarksData?.items?.length ?? 0) > 0 && 
-                          trademarksData?.items?.every((item: any) => selectedRows.includes(item.application_number))
-                        }
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">MẪU NHÃN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NHÃN HIỆU</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
@@ -781,12 +764,6 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                         setShowQuickView(true);
                       }}
                     >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={item.application_number ? selectedRows.includes(item.application_number) : false}
-                          onCheckedChange={(checked) => item.application_number && handleSelectRow(item.application_number, checked as boolean)}
-                        />
-                      </TableCell>
                       <TableCell className="overflow-visible">
                         <ImageShow
                             src={item.image_urls?.[0] || ""} 
@@ -949,6 +926,15 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
         ipType="trademark"
       />
 
+      <AddCustomFieldValueModal
+        open={showAddCustomFieldValueModal}
+        onOpenChange={setShowAddCustomFieldValueModal}
+        customFields={activeCustomFields}
+        onSubmit={async (data) => {
+          await addCustomFieldValueMutation.mutateAsync(data);
+        }}
+      />
+
       <Dialog open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -984,13 +970,6 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                 onChange={(e) => setBulkUpdateValue(e.target.value)}
                 placeholder="Nhập giá trị..."
               />
-            </div>
-            <div className="bg-gray-50 dark:bg-zinc-800 p-3 rounded text-sm">
-              <p className="font-medium mb-1">Sẽ cập nhật cho {selectedRows.length} records:</p>
-              <div className="max-h-32 overflow-y-auto text-xs text-gray-600 dark:text-gray-400">
-                {selectedRows.slice(0, 10).join(", ")}
-                {selectedRows.length > 10 && ` và ${selectedRows.length - 10} records khác...`}
-              </div>
             </div>
           </div>
           <DialogFooter>
