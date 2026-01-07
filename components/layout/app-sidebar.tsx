@@ -103,7 +103,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const isActive = pathname === item.url;
+                  // Kiểm tra active: pathname phải khớp chính xác hoặc bắt đầu với item.url
+                  // Ví dụ: /search/trademarks/470147 sẽ active với /search/trademarks
+                  const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
                   const Icon = item.icon;
 
                   return (

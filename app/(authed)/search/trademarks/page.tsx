@@ -739,6 +739,7 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
               <Table className="min-w-full">
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap text-center"></TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">MẪU NHÃN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap min-w-[150px]">NHÃN HIỆU</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">SỐ ĐƠN</TableHead>
@@ -760,7 +761,7 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                 <TableBody>
                   {isTrademarksPending ? (
                     <TableRow>
-                      <TableCell colSpan={11 + activeCustomFields.length} className="h-40">
+                      <TableCell colSpan={12 + activeCustomFields.length} className="h-40">
                         <div className="flex items-center justify-center gap-2 text-gray-500">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           <span>Đang tải dữ liệu...</span>
@@ -769,7 +770,7 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                     </TableRow>
                   ) : trademarksData?.items?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={11 + activeCustomFields.length} className="h-64">
+                      <TableCell colSpan={12 + activeCustomFields.length} className="h-64">
                         <div className="flex flex-col items-center justify-center h-full text-gray-500">
                           <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
                           <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
@@ -780,48 +781,118 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                     trademarksData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
-                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                      onClick={() => {
-                        setSelectedTrademark(item);
-                        setShowQuickView(true);
-                      }}
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
                     >
-                      <TableCell className="overflow-visible whitespace-nowrap">
+                      <TableCell className="text-center whitespace-nowrap">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/search/trademarks/${item.id}`);
+                          }}
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                      <TableCell 
+                        className="overflow-visible whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         <ImageShow
                             src={item.image_urls?.[0] || ""} 
                             alt={item.name || "Trademark image"} 
                             size="lg"
                           />
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell 
+                        className="whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         <div className="font-semibold text-wrap" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell 
+                        className="text-sm whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         { item.application_number }
                       </TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell 
+                        className="text-sm whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell 
+                        className="text-sm whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell 
+                        className="text-sm whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         { item.certificate_number || "-" }
                       </TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell 
+                        className="text-sm whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm whitespace-nowrap">
+                      <TableCell 
+                        className="text-sm whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                           <div className="max-w-[150px] truncate" title={item.owner_name || item.owners?.[0]?.name || "-"}>
                             { item.owner_name || item.owners?.[0]?.name || "-" }
                           </div>
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         <div className="line-clamp-2 max-w-[180px]" title={(item as any).nice_class_text || "-"}>
                         { item.nice_class_text || item.nice_class_list?.join(", ") || "-" }
                         </div>
                       </TableCell>
-                      <TableCell className="text-center whitespace-nowrap">
+                      <TableCell 
+                        className="text-center whitespace-nowrap cursor-pointer"
+                        onClick={() => {
+                          setSelectedTrademark(item);
+                          setShowQuickView(true);
+                        }}
+                      >
                         <StatusBadge 
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
@@ -884,21 +955,36 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                 trademarksData?.items?.map((item) => (
                 <div
                   key={ item.id }
-                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
-                  onClick={() => {
-                    setSelectedTrademark(item);
-                    setShowQuickView(true);
-                  }}
+                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <ImageShow
-                      src={item.image_urls?.[0] || ""} 
-                      alt={item.name || "Trademark image"} 
-                      size="xxxl"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                        onClick={() => {
+                          router.push(`/search/trademarks/${item.id}`);
+                        }}
+                        title="Xem chi tiết"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <ImageShow
+                        src={item.image_urls?.[0] || ""} 
+                        alt={item.name || "Trademark image"} 
+                        size="xxxl"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1 text-sm text-muted-foreground">
+                  <div 
+                    className="space-y-1 text-sm text-muted-foreground cursor-pointer"
+                    onClick={() => {
+                      setSelectedTrademark(item);
+                      setShowQuickView(true);
+                    }}
+                  >
                     <p>
                       <span className="font-medium">Số đơn:</span>{ " " }
                       { item.application_number || "-" }

@@ -136,4 +136,16 @@ export const patentService = {
       }
     );
   },
+
+  // Lấy chi tiết sáng chế theo ID từ API public
+  getById: async (id: string, signal?: AbortSignal) => {
+    return await apiClient<any>(
+      {
+        url: `/v1/public/patents/${id}`,
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        signal,
+      }
+    );
+  },
 };

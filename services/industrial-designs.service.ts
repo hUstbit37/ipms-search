@@ -134,4 +134,16 @@ export const industrialDesignsService = {
       }
     );
   },
+
+  // Lấy chi tiết kiểu dáng công nghiệp theo ID từ API public
+  getById: async (id: string, signal?: AbortSignal) => {
+    return await apiClient<any>(
+      {
+        url: `/v1/public/industrial-designs/${id}`,
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        signal,
+      }
+    );
+  },
 };

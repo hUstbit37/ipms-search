@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, FolderDown, Settings, SquarePen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, FolderDown, Settings, SquarePen, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -71,6 +72,7 @@ const initialAdvancedSearch = {
 const queryKey = "industrial-designs"
 
 export default function IndustrialDesignsSearchPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
   const [showCustomFieldsModal, setShowCustomFieldsModal] = useState(false);
@@ -661,6 +663,7 @@ export default function IndustrialDesignsSearchPage() {
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold text-center"></TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">HÌNH ẢNH</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TÊN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
@@ -681,7 +684,7 @@ export default function IndustrialDesignsSearchPage() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={11 + activeCustomFields.length} className="h-40">
+                      <TableCell colSpan={12 + activeCustomFields.length} className="h-40">
                         <div className="flex items-center justify-center gap-2 text-gray-500">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           <span>Đang tải dữ liệu...</span>
@@ -690,7 +693,7 @@ export default function IndustrialDesignsSearchPage() {
                     </TableRow>
                   ) : industrialDesignsData?.items?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={11 + activeCustomFields.length} className="h-64 text-center">
+                      <TableCell colSpan={12 + activeCustomFields.length} className="h-64 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-500">
                           <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
                           <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
@@ -701,13 +704,29 @@ export default function IndustrialDesignsSearchPage() {
                     industrialDesignsData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
-                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                      onClick={() => {
-                        setSelectedDesign(item);
-                        setShowDetailModal(true);
-                      }}
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
                     >
-                      <TableCell className="overflow-visible">
+                      <TableCell className="text-center whitespace-nowrap">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/search/industrial-designs/${item.id}`);
+                          }}
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                      <TableCell 
+                        className="overflow-visible cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         <div
                           className="cursor-pointer"
                           onClick={() => {
@@ -722,28 +741,76 @@ export default function IndustrialDesignsSearchPage() {
                           />
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell 
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.application_number }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.certificate_number || "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                           { item.owners?.[0]?.name || item.owner_name || "-" }
                       </TableCell>
-                      <TableCell>
+                      <TableCell 
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         <StatusBadge 
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
@@ -810,19 +877,40 @@ export default function IndustrialDesignsSearchPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <div
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setSelectedDesign(item);
-                        setShowDetailModal(true);
-                      }}
-                    >
-                      <ImageShow
-                        src={item.image_urls?.[0] || ""} 
-                        alt={item.name || "Industrial design image"} 
-                        size="xxxl"
-                    />                    </div>                  </div>
-                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                        onClick={() => {
+                          router.push(`/search/industrial-designs/${item.id}`);
+                        }}
+                        title="Xem chi tiết"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedDesign(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
+                        <ImageShow
+                          src={item.image_urls?.[0] || ""} 
+                          alt={item.name || "Industrial design image"} 
+                          size="xxxl"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div 
+                    className="space-y-1 text-sm text-muted-foreground cursor-pointer"
+                    onClick={() => {
+                      setSelectedDesign(item);
+                      setShowDetailModal(true);
+                    }}
+                  >
                     <p>
                       <span className="font-medium">Số đơn:</span>{ " " }
                       { item.application_number ?? "-" }
