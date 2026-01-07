@@ -712,24 +712,24 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
       </div>
 
       {/* Results Table */ }
-      <div>
+      <div className="w-full min-w-0">
           { viewType === "table" ? (
-            <div className="rounded-lg border overflow-x-auto">
-              <Table>
+            <div className="rounded-lg border overflow-x-auto w-full">
+              <Table className="min-w-full">
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">MẪU NHÃN</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NHÃN HIỆU</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY NỘP ĐƠN</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY CÔNG BỐ</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ BẰNG</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NGÀY CẤP</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">CHỦ ĐƠN/CHỦ BẰNG</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NHÓM SẢN PHẨM/DỊCH VỤ</TableHead>
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TRẠNG THÁI</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">MẪU NHÃN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap min-w-[150px]">NHÃN HIỆU</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">SỐ ĐƠN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">NGÀY NỘP ĐƠN</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">NGÀY CÔNG BỐ</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">SỐ BẰNG</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">NGÀY CẤP</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">CHỦ ĐƠN/CHỦ BẰNG</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap min-w-[150px]">NHÓM SẢN PHẨM/DỊCH VỤ</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap ">TRẠNG THÁI</TableHead>
                     {activeCustomFields.map((field) => (
-                      <TableHead key={field.id} className="text-gray-700 dark:text-gray-200 font-semibold">
+                      <TableHead key={field.id} className="text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap min-w-[120px]">
                         {field.alias_name.toUpperCase()}
                       </TableHead>
                     ))}
@@ -764,47 +764,51 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                         setShowQuickView(true);
                       }}
                     >
-                      <TableCell className="overflow-visible">
+                      <TableCell className="overflow-visible whitespace-nowrap">
                         <ImageShow
                             src={item.image_urls?.[0] || ""} 
                             alt={item.name || "Trademark image"} 
                             size="lg"
                           />
                       </TableCell>
-                      <TableCell>
-                        <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
+                      <TableCell className="whitespace-nowrap">
+                        <div className="font-semibold text-wrap" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm whitespace-nowrap">
                         { item.application_number }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm whitespace-nowrap">
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm whitespace-nowrap">
                         { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm whitespace-nowrap">
                         { item.certificate_number || "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm whitespace-nowrap">
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
-                          { item.owner_name || item.owners?.[0]?.name || "-" }
+                      <TableCell className="text-sm whitespace-nowrap">
+                          <div className="max-w-[150px] truncate" title={item.owner_name || item.owners?.[0]?.name || "-"}>
+                            { item.owner_name || item.owners?.[0]?.name || "-" }
+                          </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div className="line-clamp-2" title={(item as any).nice_class_text || "-"}>
+                        <div className="line-clamp-2 max-w-[180px]" title={(item as any).nice_class_text || "-"}>
                         { item.nice_class_text || item.nice_class_list?.join(", ") || "-" }
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center whitespace-nowrap">
                         <StatusBadge 
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
                       </TableCell>
                       {activeCustomFields.map((field) => (
-                        <TableCell key={field.id} className="text-sm">
-                          {(item as any).custom_fields?.[field.alias_name] || "-"}
+                        <TableCell key={field.id} className="text-sm whitespace-nowrap">
+                          <div className="max-w-[120px] truncate" title={(item as any).custom_fields?.[field.alias_name] || "-"}>
+                            {(item as any).custom_fields?.[field.alias_name] || "-"}
+                          </div>
                         </TableCell>
                       ))}
                     </TableRow>
