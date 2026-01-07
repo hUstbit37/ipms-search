@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, Settings, SquarePen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, Settings, SquarePen, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ const initialAdvancedSearch = {
 }
 
 export default function PatentsSearchPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
   const [showCustomFieldsModal, setShowCustomFieldsModal] = useState(false);
@@ -634,6 +636,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold text-center"></TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">HÌNH ẢNH</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TÊN SÁNG CHẾ</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
@@ -654,7 +657,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                 <TableBody>
                   {isPatentsPending ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="h-40">
+                      <TableCell colSpan={11} className="h-40">
                         <div className="flex items-center justify-center gap-2 text-gray-500">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           <span>Đang tải dữ liệu...</span>
@@ -663,7 +666,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     </TableRow>
                   ) : patentsData?.items?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="h-64 text-center">
+                      <TableCell colSpan={11} className="h-64 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-500">
                           <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
                           <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
@@ -674,13 +677,29 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     patentsData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
-                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                      onClick={() => {
-                        setSelectedPatent(item);
-                        setShowDetailModal(true);
-                      }}
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
                     >
-                      <TableCell className="overflow-visible">
+                      <TableCell className="text-center whitespace-nowrap">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/search/patents/${item.id}`);
+                          }}
+                          title="Xem chi tiết"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                      <TableCell 
+                        className="overflow-visible cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         <div
                           className="cursor-pointer"
                           onClick={() => {
@@ -695,33 +714,87 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>
                           { item.name ?? "-" }
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.application_number ?? "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.application_date ? moment(item.application_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.publication_date ? moment(item.publication_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.certificate_number || "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.certificate_date ? moment(item.certificate_date).format(FORMAT_DATE) : "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                           { item.owners?.[0]?.name || item.owner_name || "-" }
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell 
+                        className="text-sm cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         { item.ipc_list ? (Array.isArray(item.ipc_list) ? item.ipc_list.join(', ') : (item.ipc_list || '-')) : "-" }
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell 
+                        className="text-center cursor-pointer"
+                        onClick={() => {
+                          setSelectedPatent(item);
+                          setShowDetailModal(true);
+                        }}
+                      >
                         <StatusBadge 
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
@@ -774,21 +847,36 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                 patentsData?.items?.map((item) => (
                 <div
                   key={ item.id }
-                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 cursor-pointer"
-                  onClick={() => {
-                    setSelectedPatent(item);
-                    setShowDetailModal(true);
-                  }}
+                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-xs flex-1">{ item.name }</h3>
-                    <ImageShow
-                      src={item.image_urls?.[0] || ""} 
-                      alt={item.name || "Patent image"} 
-                      size="xxxl"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+                        onClick={() => {
+                          router.push(`/search/patents/${item.id}`);
+                        }}
+                        title="Xem chi tiết"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <ImageShow
+                        src={item.image_urls?.[0] || ""} 
+                        alt={item.name || "Patent image"} 
+                        size="xxxl"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2 text-xs text-muted-foreground">
+                  <div 
+                    className="space-y-2 text-xs text-muted-foreground cursor-pointer"
+                    onClick={() => {
+                      setSelectedPatent(item);
+                      setShowDetailModal(true);
+                    }}
+                  >
                     <p>
                       <span className="font-medium">Số đơn:</span>{ " " }
                       { item.application_number || "-" }
