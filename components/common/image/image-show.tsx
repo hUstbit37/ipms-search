@@ -82,13 +82,46 @@ const ImageShow: React.FC<ImageShowProps> = ({
   const HoverOverlay = ({ imgSrc }: { imgSrc: string }) => {
     if (disableHover || !isHovering) return null;
     const hoverSize = hoverSizes[size];
+    
+    // Calculate position to keep overlay within viewport
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
+    
+    let finalTop = hoverPosition.top;
+    let finalLeft = hoverPosition.left;
+    let transformX = '-50%';
+    let transformY = '-50%';
+    
+    // Check if overlay would overflow right edge
+    if (hoverPosition.left + hoverSize.width / 2 > viewportWidth - 20) {
+      // Position to the left of the image
+      finalLeft = hoverPosition.left - hoverSize.width / 2 - 20;
+      transformX = '0%';
+    }
+    // Check if overlay would overflow left edge
+    else if (hoverPosition.left - hoverSize.width / 2 < 20) {
+      finalLeft = hoverPosition.left + hoverSize.width / 2 + 20;
+      transformX = '-100%';
+    }
+    
+    // Check if overlay would overflow bottom edge
+    if (hoverPosition.top + hoverSize.height / 2 > viewportHeight - 20) {
+      finalTop = viewportHeight - hoverSize.height - 20;
+      transformY = '0%';
+    }
+    // Check if overlay would overflow top edge
+    else if (hoverPosition.top - hoverSize.height / 2 < 20) {
+      finalTop = 20;
+      transformY = '0%';
+    }
+    
     return (
       <div
         className="fixed z-[9999] pointer-events-none"
         style={{
-          top: hoverPosition.top,
-          left: hoverPosition.left,
-          transform: 'translate(-50%, -50%)'
+          top: finalTop,
+          left: finalLeft,
+          transform: `translate(${transformX}, ${transformY})`
         }}
       >
         <img

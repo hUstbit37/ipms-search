@@ -790,7 +790,7 @@ export default function IndustrialDesignsSearchPage() {
                       <ImageShow
                         src={item.image_urls?.[0] || ""} 
                         alt={item.name || "Industrial design image"} 
-                        size="xl"
+                        size="xxxl"
                     />                    </div>                  </div>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>

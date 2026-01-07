@@ -863,7 +863,7 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                     <ImageShow
                       src={item.image_urls?.[0] || ""} 
                       alt={item.name || "Trademark image"} 
-                      size="xl"
+                      size="xxxl"
                     />
                   </div>
                   <div className="space-y-1 text-sm text-muted-foreground">

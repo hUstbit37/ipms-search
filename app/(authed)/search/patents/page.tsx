@@ -778,7 +778,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     <ImageShow
                       src={item.image_urls?.[0] || ""} 
                       alt={item.name || "Patent image"} 
-                      size="xl"
+                      size="xxxl"
                     />
                   </div>
                   <div className="space-y-2 text-xs text-muted-foreground">
