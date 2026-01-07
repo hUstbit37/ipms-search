@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import moment from "moment"
 import ImageShow from "@/components/common/image/image-show";
+import { ImageSlideModal } from "@/components/common/image/image-slide-modal";
 import OwnersDetail from "@/components/trademarks/search/owners-detail";
 import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
 import NiceDetail from "@/components/trademarks/search/nice-detail";
@@ -56,7 +58,17 @@ const formatAgenciesRaw = (agenciesRaw: unknown): string => {
 };
 
 export default function TrademarkDetailModal({ open, onOpenChange, trademark, companyMap, selectedCustomFields = [] }: TrademarkDetailModalProps) {
+  const [showImageSlide, setShowImageSlide] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
   if (!trademark) return null
+
+  const imageUrls = trademark.image_urls || [];
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setShowImageSlide(true);
+  };
 
   const InfoRow = ({ label, value, leftCol = false }: { label: string; value?: string | null; leftCol?: boolean }) => (
     <div className="py-2 flex items-start gap-4">
@@ -87,29 +99,29 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <div className="mb-2 pb-2">
               <div className="font-semibold text-sm text-gray-900">Hình ảnh</div>
               <div className="flex flex-wrap gap-2 mt-2">
-                <ImageShow
-                    src={trademark.image_urls?.[0] || ""} 
-                    alt={'image'} 
-                    size="xxl"
-                    enableModal={true}
-                    disableHover={true}
-                  />
-                {/* {trademark.image_urls && trademark.image_urls.length > 0 ? (
-                  trademark.image_urls.map((imageUrl: string, index: number) => (
-                    <ImageShow
-                      key={index}
-                      src={imageUrl || ""} 
-                      alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
-                      size="xxl"
-                    />
+                {imageUrls.length > 0 ? (
+                  imageUrls.map((imageUrl: string, index: number) => (
+                    <div 
+                      key={index} 
+                      className="cursor-pointer" 
+                      onClick={() => handleImageClick(index)}
+                    >
+                      <ImageShow
+                        src={imageUrl || ""} 
+                        alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
+                        size="xxl"
+                        disableHover={true}
+                      />
+                    </div>
                   ))
                 ) : (
                   <ImageShow
                     src="" 
                     alt={trademark.name || "Trademark image"} 
                     size="xxl"
+                    disableHover={true}
                   />
-                )} */}
+                )}
               </div>
             </div>
 
@@ -216,6 +228,14 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
           )}
         </Tabs>
       </DialogContent>
+
+      <ImageSlideModal
+        open={showImageSlide}
+        onOpenChange={setShowImageSlide}
+        images={imageUrls}
+        initialIndex={selectedImageIndex}
+        title="Xem ảnh nhãn hiệu"
+      />
     </Dialog>
   )
 }
