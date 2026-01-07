@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
 import CustomFieldsModal from "@/components/common/CustomFieldsModal";
+import AddCustomFieldValueModal from "@/components/patents/AddCustomFieldValueModal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
 import { customFieldsService } from "@/services/custom-fields.service";
@@ -56,6 +57,7 @@ export default function PatentsSearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
   const [showCustomFieldsModal, setShowCustomFieldsModal] = useState(false);
+  const [showAddCustomFieldValueModal, setShowAddCustomFieldValueModal] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState(initialAdvancedSearch);
@@ -99,6 +101,20 @@ export default function PatentsSearchPage() {
       setSelectedRows([]);
       setBulkUpdateField(null);
       setBulkUpdateValue("");
+    },
+  });
+
+  const addCustomFieldValueMutation = useMutation({
+    mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string }) =>
+      customFieldsService.updateCustomFieldValues({
+        ip_type: "patent",
+        custom_field_id: data.custom_field_id,
+        application_numbers: data.application_numbers,
+        value: data.value,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patents"] });
+      setShowAddCustomFieldValueModal(false);
     },
   });
 
@@ -616,13 +632,24 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                 >
                   <LayoutGrid className="w-4 h-4"/>
           </button>
-          <button
-                  onClick={ () => setShowCustomFieldsModal(true) }
-                  className="p-2 rounded flex-shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800"
-                  title="Trường nội bộ"
-                >
-                  <Settings2 className="w-4 h-4"/>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-2 rounded flex-shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800"
+                title="Trường nội bộ"
+              >
+                <Settings className="w-4 h-4 cursor-pointer"/>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowCustomFieldsModal(true)}>
+                Trường nội bộ
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowAddCustomFieldValueModal(true)}>
+                Thêm giá trị trường nội bộ
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -851,6 +878,15 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
         open={showCustomFieldsModal}
         onOpenChange={setShowCustomFieldsModal}
         ipType="patent"
+      />
+
+      <AddCustomFieldValueModal
+        open={showAddCustomFieldValueModal}
+        onOpenChange={setShowAddCustomFieldValueModal}
+        customFields={activeCustomFields}
+        onSubmit={async (data) => {
+          await addCustomFieldValueMutation.mutateAsync(data);
+        }}
       />
 
       <Dialog open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal}>
