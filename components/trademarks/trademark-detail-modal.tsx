@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import moment from "moment"
 import ImageShow from "@/components/common/image/image-show";
+import { ImageSlideModal } from "@/components/common/image/image-slide-modal";
 import OwnersDetail from "@/components/trademarks/search/owners-detail";
 import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
 import NiceDetail from "@/components/trademarks/search/nice-detail";
@@ -16,6 +18,7 @@ interface TrademarkDetailModalProps {
   onOpenChange: (open: boolean) => void
   trademark: any
   companyMap: Record<string, string>
+  selectedCustomFields?: string[]
 }
 const formatAuthorsRaw = (authorsRaw: unknown): string => {
   if (Array.isArray(authorsRaw)) {
@@ -54,8 +57,18 @@ const formatAgenciesRaw = (agenciesRaw: unknown): string => {
   return "";
 };
 
-export default function TrademarkDetailModal({ open, onOpenChange, trademark, companyMap }: TrademarkDetailModalProps) {
+export default function TrademarkDetailModal({ open, onOpenChange, trademark, companyMap, selectedCustomFields = [] }: TrademarkDetailModalProps) {
+  const [showImageSlide, setShowImageSlide] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
   if (!trademark) return null
+
+  const imageUrls = trademark.image_urls || [];
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setShowImageSlide(true);
+  };
 
   const InfoRow = ({ label, value, leftCol = false }: { label: string; value?: string | null; leftCol?: boolean }) => (
     <div className="py-2 flex items-start gap-4">
@@ -76,6 +89,9 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <TabsTrigger value="info" className="cursor-pointer">Thông tin</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
+            {selectedCustomFields.length > 0 && (
+              <TabsTrigger value="custom-fields" className="cursor-pointer">Trường nội bộ</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
@@ -83,29 +99,29 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <div className="mb-2 pb-2">
               <div className="font-semibold text-sm text-gray-900">Hình ảnh</div>
               <div className="flex flex-wrap gap-2 mt-2">
-                <ImageShow
-                    src={trademark.image_urls?.[0] || ""} 
-                    alt={'image'} 
-                    size="xxl"
-                    enableModal={true}
-                    disableHover={true}
-                  />
-                {/* {trademark.image_urls && trademark.image_urls.length > 0 ? (
-                  trademark.image_urls.map((imageUrl: string, index: number) => (
-                    <ImageShow
-                      key={index}
-                      src={imageUrl || ""} 
-                      alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
-                      size="xxl"
-                    />
+                {imageUrls.length > 0 ? (
+                  imageUrls.map((imageUrl: string, index: number) => (
+                    <div 
+                      key={index} 
+                      className="cursor-pointer" 
+                      onClick={() => handleImageClick(index)}
+                    >
+                      <ImageShow
+                        src={imageUrl || ""} 
+                        alt={`${trademark.name || "Trademark image"} ${index + 1}`} 
+                        size="xxl"
+                        disableHover={true}
+                      />
+                    </div>
                   ))
                 ) : (
                   <ImageShow
                     src="" 
                     alt={trademark.name || "Trademark image"} 
                     size="xxl"
+                    disableHover={true}
                   />
-                )} */}
+                )}
               </div>
             </div>
 
@@ -190,8 +206,36 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">
             <IpDocument documents={trademark.documents} />
           </TabsContent>
+
+          {selectedCustomFields.length > 0 && (
+            <TabsContent value="custom-fields" className="flex-1 overflow-y-auto px-4 mt-4">
+              <div className="space-y-3">
+                {selectedCustomFields.map((fieldName) => (
+                  <div key={fieldName} className="border-b pb-3">
+                    <InfoRow 
+                      label={fieldName} 
+                      value={trademark.custom_fields?.[fieldName] || "-"} 
+                    />
+                  </div>
+                ))}
+                {selectedCustomFields.length === 0 && (
+                  <div className="text-center text-gray-500 py-8">
+                    Chưa có trường nội bộ nào được chọn hiển thị
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
+
+      <ImageSlideModal
+        open={showImageSlide}
+        onOpenChange={setShowImageSlide}
+        images={imageUrls}
+        initialIndex={selectedImageIndex}
+        title="Xem ảnh nhãn hiệu"
+      />
     </Dialog>
   )
 }

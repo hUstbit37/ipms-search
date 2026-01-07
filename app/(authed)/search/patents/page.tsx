@@ -1,15 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2, Loader2 } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdvancedSearchModal from "@/components/patents/search/advanced-search-modal";
+import CustomFieldsModal from "@/components/common/CustomFieldsModal";
 import { useQuery } from "@tanstack/react-query";
 import { PatentParams, patentService } from "@/services/patent.service";
+import { customFieldsService } from "@/services/custom-fields.service";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
-import { queryClient } from "@/lib/react-query";
+import { queryClient, useMutation } from "@/lib/react-query";
 import PaginationComponent from "@/components/common/Pagination";
 import moment from "moment";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -43,6 +55,7 @@ const initialAdvancedSearch = {
 export default function PatentsSearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
+  const [showCustomFieldsModal, setShowCustomFieldsModal] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState(initialAdvancedSearch);
@@ -51,6 +64,70 @@ export default function PatentsSearchPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [sortTrigger, setSortTrigger] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
+  const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
+  const [bulkUpdateValue, setBulkUpdateValue] = useState("");
+
+  const { data: customFieldsData } = useQuery({
+    queryKey: ["custom-fields", "patent"],
+    queryFn: () => customFieldsService.getCustomFields({ ip_type: "patent", is_active: true, limit: 100 }),
+  });
+  
+  const activeCustomFields = customFieldsData?.items || [];
+
+  const updateCustomFieldMutation = useMutation({
+    mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string | null }) =>
+      customFieldsService.updateCustomFieldValues({
+        ip_type: "patent",
+        ...data
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patents"] });
+    },
+  });
+
+  const bulkUpdateMutation = useMutation({
+    mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string | null }) =>
+      customFieldsService.updateCustomFieldValues({
+        ip_type: "patent",
+        ...data
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patents"] });
+      setShowBulkUpdateModal(false);
+      setSelectedRows([]);
+      setBulkUpdateField(null);
+      setBulkUpdateValue("");
+    },
+  });
+
+  const handleBulkUpdate = () => {
+    if (bulkUpdateField && selectedRows.length > 0) {
+      bulkUpdateMutation.mutate({
+        custom_field_id: bulkUpdateField,
+        application_numbers: selectedRows,
+        value: bulkUpdateValue || null
+      });
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    const currentPageIds = patentsData?.items?.map((item: any) => item.application_number) || [];
+    if (checked) {
+      setSelectedRows(prev => [...new Set([...prev, ...currentPageIds])]);
+    } else {
+      setSelectedRows(prev => prev.filter(id => !currentPageIds.includes(id)));
+    }
+  };
+
+  const handleSelectRow = (applicationNumber: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRows(prev => [...prev, applicationNumber]);
+    } else {
+      setSelectedRows(prev => prev.filter(id => id !== applicationNumber));
+    }
+  };
 
   const {
     data: patentsData,
@@ -69,19 +146,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
     refetchPatents();
   }, [searchParams, refetchPatents]);
 
-  // const {
-  //   data: companiesData,
-  // } = useQuery({
-  //   queryFn: async () => await companyService.getAll({ limit: 500, datasource: "ALL" }),
-  //   queryKey: ["companies"],
-  // })
-
-  // Create a map for quick company lookup
-  // const companyMap = companiesData?.data?.items?.reduce((acc, company) => {
-  //   acc[company.id] = company.name;
-  //   return acc;
-  // }, {} as Record<string, string>) || {};
-
   const companyMap = {};
   
   const handleExportAllPatents = async () => {
@@ -99,7 +163,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
         (firstPage?.total && baseParams.page_size
           ? Math.ceil(firstPage.total / baseParams.page_size)
           : 1);
-      const totalPages = Math.min(totalPagesRaw || 1, 4); // tối đa 4 query ~ 2000 record
+      const totalPages = Math.min(totalPagesRaw || 1, 4);
 
       const allItems = [...(firstPage?.items || [])];
 
@@ -366,7 +430,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
 
     setSearchParams(newSearchParams);
 
-    // Re-run search with updated params
     await queryClient.invalidateQueries({
       queryKey: ["patents"]
     });
@@ -467,8 +530,25 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
 
       {/* Controls */ }
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          Tổng số: <span className="font-semibold">{(patentsData?.total ?? 0).toLocaleString()}</span> bản ghi
+        <div className="flex items-center gap-3">
+          {selectedRows.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline">
+                  Hành động ({selectedRows.length})
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setShowBulkUpdateModal(true)}>
+                  Cập nhật Trường nội bộ
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Tổng số: <span className="font-semibold">{(patentsData?.total ?? 0).toLocaleString()}</span> bản ghi
+          </div>
         </div>
         <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
           <Button
@@ -485,33 +565,35 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                   ) }
                   { isExporting ? "Đang xuất..." : "Xuất Excel" }
           </Button>
-          <select 
-                  className="text-xs sm:text-sm bg-transparent border rounded px-2 py-1"
-                  value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value) {
-                      const [field, order] = value.split('-');
-                      setSearchParams(prev => ({
-                        ...prev,
-                        sort_by: field,
-                        sort_order: order as 'asc' | 'desc'
-                      }));
-                      setSortTrigger(prev => prev + 1);
-                    } else {
-                      setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
-                      setSortTrigger(prev => prev + 1);
-                    }
-                  }}
-                >
-                  <option value="">Sắp xếp theo</option>
-                  <option value="application_date-asc">Ngày đơn đăng ký: Cũ → Mới</option>
-                  <option value="application_date-desc">Ngày đơn đăng ký: Mới → Cũ</option>
-                  <option value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</option>
-                  <option value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</option>
-                  <option value="name-asc">Tiêu đề: A → Z</option>
-                  <option value="name-desc">Tiêu đề: Z → A</option>
-          </select>
+          <Select
+            value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
+            onValueChange={(value) => {
+              if (value) {
+                const [field, order] = value.split('-');
+                setSearchParams(prev => ({
+                  ...prev,
+                  sort_by: field,
+                  sort_order: order as 'asc' | 'desc'
+                }));
+                setSortTrigger(prev => prev + 1);
+              } else {
+                setSearchParams(prev => ({ ...prev, sort_by: undefined, sort_order: undefined }));
+                setSortTrigger(prev => prev + 1);
+              }
+            }}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Sắp xếp theo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="application_date-asc">Ngày đơn đăng ký: Cũ → Mới</SelectItem>
+              <SelectItem value="application_date-desc">Ngày đơn đăng ký: Mới → Cũ</SelectItem>
+              <SelectItem value="certificate_date-asc">Ngày cấp bằng: Cũ → Mới</SelectItem>
+              <SelectItem value="certificate_date-desc">Ngày cấp bằng: Mới → Cũ</SelectItem>
+              <SelectItem value="name-asc">Tiêu đề: A → Z</SelectItem>
+              <SelectItem value="name-desc">Tiêu đề: Z → A</SelectItem>
+            </SelectContent>
+          </Select>
           <button
                   onClick={ () => setViewType("table") }
                   className={ `p-2 rounded flex-shrink-0 ${
@@ -534,16 +616,32 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                 >
                   <LayoutGrid className="w-4 h-4"/>
           </button>
+          <button
+                  onClick={ () => setShowCustomFieldsModal(true) }
+                  className="p-2 rounded flex-shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800"
+                  title="Trường nội bộ"
+                >
+                  <Settings2 className="w-4 h-4"/>
+          </button>
         </div>
       </div>
 
       {/* Results Table */ }
       <div>
           { viewType === "table" ? (
-            <div className="rounded-lg border">
+            <div className="rounded-lg border overflow-x-auto">
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[50px]">
+                      <Checkbox
+                        checked={
+                          (patentsData?.items?.length ?? 0) > 0 && 
+                          patentsData?.items?.every((item: any) => selectedRows.includes(item.application_number))
+                        }
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">HÌNH ẢNH</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TÊN SÁNG CHẾ</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
@@ -554,6 +652,11 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">CHỦ ĐƠN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">PHÂN LOẠI IPC</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TRẠNG THÁI</TableHead>
+                    {activeCustomFields.map((field) => (
+                      <TableHead key={field.id} className="text-gray-700 dark:text-gray-200 font-semibold">
+                        {field.alias_name.toUpperCase()}
+                      </TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -579,18 +682,32 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     patentsData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
-                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                       onClick={() => {
                         setSelectedPatent(item);
                         setShowDetailModal(true);
                       }}
                     >
-                      <TableCell className="overflow-visible">
-                        <ImageShow
-                          src={item.image_urls?.[0] || ""} 
-                          alt={item.name || "Patent image"} 
-                          size="lg"
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={item.application_number ? selectedRows.includes(item.application_number) : false}
+                          onCheckedChange={(checked) => item.application_number && handleSelectRow(item.application_number, checked as boolean)}
                         />
+                      </TableCell>
+                      <TableCell className="overflow-visible">
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedPatent(item);
+                            setShowDetailModal(true);
+                          }}
+                        >
+                          <ImageShow
+                            src={item.image_urls?.[0] || ""} 
+                            alt={item.name || "Patent image"} 
+                            size="lg"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>
@@ -623,6 +740,11 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
                       </TableCell>
+                      {activeCustomFields.map((field) => (
+                        <TableCell key={field.id} className="text-sm">
+                          {(item as any).custom_fields?.[field.alias_name] || "-"}
+                        </TableCell>
+                      ))}
                     </TableRow>
                   ))
                   )}
@@ -656,7 +778,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     <ImageShow
                       src={item.image_urls?.[0] || ""} 
                       alt={item.name || "Patent image"} 
-                      size="xl"
+                      size="xxxl"
                     />
                   </div>
                   <div className="space-y-2 text-xs text-muted-foreground">
@@ -722,7 +844,82 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
         onOpenChange={setShowDetailModal}
         patent={selectedPatent}
         companyMap={companyMap}
+        selectedCustomFields={activeCustomFields.map(f => f.alias_name)}
       />
+
+      <CustomFieldsModal
+        open={showCustomFieldsModal}
+        onOpenChange={setShowCustomFieldsModal}
+        ipType="patent"
+      />
+
+      <Dialog open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Cập nhật Trường nội bộ hàng loạt</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Chọn Trường nội bộ
+              </label>
+              <Select
+                value={bulkUpdateField?.toString()}
+                onValueChange={(value) => setBulkUpdateField(Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn field..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeCustomFields.map((field) => (
+                    <SelectItem key={field.id} value={field.id.toString()}>
+                      {field.alias_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Giá trị mới
+              </label>
+              <Input
+                value={bulkUpdateValue}
+                onChange={(e) => setBulkUpdateValue(e.target.value)}
+                placeholder="Nhập giá trị..."
+              />
+            </div>
+            <div className="bg-gray-50 dark:bg-zinc-800 p-3 rounded text-sm">
+              <p className="font-medium mb-1">Sẽ cập nhật cho {selectedRows.length} records:</p>
+              <div className="max-h-32 overflow-y-auto text-xs text-gray-600 dark:text-gray-400">
+                {selectedRows.slice(0, 10).join(", ")}
+                {selectedRows.length > 10 && ` và ${selectedRows.length - 10} records khác...`}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowBulkUpdateModal(false)}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleBulkUpdate}
+              disabled={!bulkUpdateField || bulkUpdateMutation.isPending}
+            >
+              {bulkUpdateMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang cập nhật...
+                </>
+              ) : (
+                'Cập nhật'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import moment from "moment";
@@ -8,6 +9,7 @@ import AuthorsDetail from "@/components/patents/search/authors-detail";
 import IpcDetail from "@/components/patents/search/ipc-detail";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import ImageShow from "@/components/common/image/image-show";
+import { ImageSlideModal } from "@/components/common/image/image-slide-modal";
 import OwnersDetail from "@/components/trademarks/search/owners-detail";
 import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
 import NiceDetail from "@/components/trademarks/search/nice-detail";
@@ -20,6 +22,7 @@ interface PatentDetailModalProps {
   onOpenChange: (open: boolean) => void;
   patent: any;
   companyMap: Record<string, string>;
+  selectedCustomFields?: string[];
 }
 
 export default function PatentDetailModal({
@@ -27,8 +30,19 @@ export default function PatentDetailModal({
   onOpenChange,
   patent,
   companyMap,
+  selectedCustomFields = [],
 }: PatentDetailModalProps) {
+  const [showImageSlide, setShowImageSlide] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
   if (!patent) return null;
+
+  const imageUrls = patent.image_urls || [];
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setShowImageSlide(true);
+  };
 
   const InfoField = ({ label, value }: { label: string; value?: string | null }) => (
     <div className="py-2 flex items-start gap-4">
@@ -49,6 +63,9 @@ export default function PatentDetailModal({
             <TabsTrigger value="images" className="cursor-pointer">Hình vẽ</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
+            {selectedCustomFields.length > 0 && (
+              <TabsTrigger value="custom-fields" className="cursor-pointer">Trường nội bộ</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
@@ -150,21 +167,24 @@ export default function PatentDetailModal({
              <div className="mb-2 pb-2">
                <div className="font-semibold text-sm text-gray-900 mb-2">Hình ảnh</div>
                <div className="flex flex-wrap gap-1">
-                 {patent.image_urls && patent.image_urls.length > 0 ? (
-                   patent.image_urls.map((imageUrl: string, index: number) => (
-                     <div key={index} className="flex-shrink-0">
+                 {imageUrls.length > 0 ? (
+                   imageUrls.map((imageUrl: string, index: number) => (
+                     <div 
+                       key={index} 
+                       className="flex-shrink-0 cursor-pointer"
+                       onClick={() => handleImageClick(index)}
+                     >
                        <ImageShow 
                          src={imageUrl || ""} 
                          alt={`${patent.name || "Patent image"} ${index + 1}`} 
                          size="xxxl"
-                         enableModal={true}
                          disableHover={true}
                        />
                      </div>
                    ))
                  ) : (
                    <div className="flex-shrink-0">
-                     <ImageShow src="" alt={patent.name || " image"} size="xxl" enableModal={true} disableHover={true} />
+                     <ImageShow src="" alt={patent.name || " image"} size="xxl" disableHover={true} />
                    </div>
                  )}
                </div>
@@ -178,8 +198,31 @@ export default function PatentDetailModal({
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">
             <IpDocument documents={patent.documents} />
           </TabsContent>
+
+          {selectedCustomFields.length > 0 && (
+            <TabsContent value="custom-fields" className="flex-1 overflow-y-auto px-4 mt-4">
+              <div className="space-y-3">
+                {selectedCustomFields.map((fieldName) => (
+                  <div key={fieldName} className="border-b pb-3">
+                    <InfoField 
+                      label={fieldName} 
+                      value={patent.custom_fields?.[fieldName] || "-"} 
+                    />
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
+
+      <ImageSlideModal
+        open={showImageSlide}
+        onOpenChange={setShowImageSlide}
+        images={imageUrls}
+        initialIndex={selectedImageIndex}
+        title="Xem ảnh sáng chế"
+      />
     </Dialog>
   );
 }
