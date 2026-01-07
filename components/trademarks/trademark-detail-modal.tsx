@@ -89,9 +89,9 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <TabsTrigger value="info" className="cursor-pointer">Thông tin</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
-            {selectedCustomFields.length > 0 && (
+            {/* {selectedCustomFields.length > 0 && (
               <TabsTrigger value="custom-fields" className="cursor-pointer">Trường nội bộ</TabsTrigger>
-            )}
+            )} */}
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
@@ -207,7 +207,7 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <IpDocument documents={trademark.documents} />
           </TabsContent>
 
-          {selectedCustomFields.length > 0 && (
+          {/* {selectedCustomFields.length > 0 && (
             <TabsContent value="custom-fields" className="flex-1 overflow-y-auto px-4 mt-4">
               <div className="space-y-3">
                 {selectedCustomFields.map((fieldName) => (
@@ -225,7 +225,7 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
                 )}
               </div>
             </TabsContent>
-          )}
+          )} */}
         </Tabs>
       </DialogContent>
 

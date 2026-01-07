@@ -63,9 +63,9 @@ export default function PatentDetailModal({
             <TabsTrigger value="images" className="cursor-pointer">Hình vẽ</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
-            {selectedCustomFields.length > 0 && (
+            {/* {selectedCustomFields.length > 0 && (
               <TabsTrigger value="custom-fields" className="cursor-pointer">Trường nội bộ</TabsTrigger>
-            )}
+            )} */}
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
@@ -199,7 +199,7 @@ export default function PatentDetailModal({
             <IpDocument documents={patent.documents} />
           </TabsContent>
 
-          {selectedCustomFields.length > 0 && (
+          {/* {selectedCustomFields.length > 0 && (
             <TabsContent value="custom-fields" className="flex-1 overflow-y-auto px-4 mt-4">
               <div className="space-y-3">
                 {selectedCustomFields.map((fieldName) => (
@@ -212,7 +212,7 @@ export default function PatentDetailModal({
                 ))}
               </div>
             </TabsContent>
-          )}
+          )} */}
         </Tabs>
       </DialogContent>
 
