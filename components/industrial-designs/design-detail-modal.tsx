@@ -14,6 +14,7 @@ import OwnersDetail from "@/components/trademarks/search/owners-detail";
 import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
 import WipoProcess from "@/components/trademarks/search/wipo-process";
 import IpDocument from "@/components/trademarks/search/ip-document";
+import { InternalProcessingStatusTable } from "@/components/common/InternalProcessingStatusTable";
 import { ImageSlideModal } from "@/components/common/image/image-slide-modal";
 
 interface DesignDetailModalProps {
@@ -198,8 +199,14 @@ export default function DesignDetailModal({
              </div>
            </TabsContent>
 
-          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4">
+          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4 space-y-6">
             <WipoProcess wipo_process={design.wipo_process} />
+            {design.application_number && (
+              <InternalProcessingStatusTable
+                ipType="industrial_design"
+                applicationNumber={design.application_number}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">

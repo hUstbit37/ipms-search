@@ -117,6 +117,11 @@ export interface PatentResponse {
   created_at: string | null;
   updated_at: string | null;
   documents: unknown[];
+  internal_processing_status?: Array<{
+    title: string;
+    deadline: string | null;
+    status: string;
+  }> | null;
 }
 
 export const patentService = {

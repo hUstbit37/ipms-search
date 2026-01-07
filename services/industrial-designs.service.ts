@@ -115,6 +115,11 @@ export interface IndustrialDesignResponse {
   // Kept for backward compatibility; not present in response but used elsewhere.
   image_url?: string | null;
   agency_name?: string | null;
+  internal_processing_status?: Array<{
+    title: string;
+    deadline: string | null;
+    status: string;
+  }> | null;
 }
 
 export const industrialDesignsService = {

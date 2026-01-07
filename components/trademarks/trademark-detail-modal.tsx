@@ -12,6 +12,7 @@ import NiceDetail from "@/components/trademarks/search/nice-detail";
 import ViennaDetail from "@/components/trademarks/search/vienna-detail";
 import WipoProcess from "@/components/trademarks/search/wipo-process";
 import IpDocument from "@/components/trademarks/search/ip-document";
+import { InternalProcessingStatusTable } from "@/components/common/InternalProcessingStatusTable";
 
 interface TrademarkDetailModalProps {
   open: boolean
@@ -199,8 +200,14 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             </div>
           </TabsContent>
 
-          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4">
+          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4 space-y-6">
             <WipoProcess wipo_process={trademark.wipo_process} />
+            {trademark.application_number && (
+              <InternalProcessingStatusTable
+                ipType="trademark"
+                applicationNumber={trademark.application_number}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">

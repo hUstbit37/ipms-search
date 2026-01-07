@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, FolderDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,6 +29,8 @@ import PatentDetailModal from "@/components/patents/patent-detail-modal";
 import { FileDown } from "lucide-react";
 import ImageShow from "@/components/common/image/image-show";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { InternalProcessingStatusCell } from "@/components/common/InternalProcessingStatusCell";
+import { IPExportDialog } from "@/components/common/IPExportDialog";
 
 const initialAdvancedSearch = {
   applicationNumber: "",
@@ -68,6 +70,7 @@ export default function PatentsSearchPage() {
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
   const [bulkUpdateValue, setBulkUpdateValue] = useState("");
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const { data: customFieldsData } = useQuery({
     queryKey: ["custom-fields", "patent"],
@@ -565,6 +568,15 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                   ) }
                   { isExporting ? "Đang xuất..." : "Xuất Excel" }
           </Button>
+          <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={ () => setShowExportDialog(true) }
+                  className="text-xs sm:text-sm flex items-center gap-2"
+                >
+                  <FolderDown className="w-4 h-4" />
+                  Xuất Files
+          </Button>
           <Select
             value={searchParams.sort_by && searchParams.sort_order ? `${searchParams.sort_by}-${searchParams.sort_order}` : ''}
             onValueChange={(value) => {
@@ -652,6 +664,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">CHỦ ĐƠN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">PHÂN LOẠI IPC</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TRẠNG THÁI</TableHead>
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TIẾN TRÌNH XỬ LÝ NỘI BỘ</TableHead>
                     {activeCustomFields.map((field) => (
                       <TableHead key={field.id} className="text-gray-700 dark:text-gray-200 font-semibold">
                         {field.alias_name.toUpperCase()}
@@ -662,7 +675,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                 <TableBody>
                   {isPatentsPending ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="h-40">
+                      <TableCell colSpan={11 + activeCustomFields.length} className="h-40">
                         <div className="flex items-center justify-center gap-2 text-gray-500">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           <span>Đang tải dữ liệu...</span>
@@ -671,7 +684,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                     </TableRow>
                   ) : patentsData?.items?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="h-64 text-center">
+                      <TableCell colSpan={11 + activeCustomFields.length} className="h-64 text-center">
                         <div className="flex flex-col items-center justify-center text-gray-500">
                           <p className="text-lg font-semibold mb-1">Không tìm thấy kết quả</p>
                           <p className="text-sm">Vui lòng thử tìm kiếm với từ khóa khác</p>
@@ -739,6 +752,16 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                         <StatusBadge 
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
+                      </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        {item.application_number ? (
+                          <InternalProcessingStatusCell
+                            ipType="patent"
+                            applicationNumber={item.application_number}
+                          />
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                       {activeCustomFields.map((field) => (
                         <TableCell key={field.id} className="text-sm">

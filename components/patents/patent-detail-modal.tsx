@@ -15,6 +15,7 @@ import AgenciesDetail from "@/components/trademarks/search/agencies-detail";
 import NiceDetail from "@/components/trademarks/search/nice-detail";
 import ViennaDetail from "@/components/trademarks/search/vienna-detail";
 import WipoProcess from "@/components/trademarks/search/wipo-process";
+import { InternalProcessingStatusTable } from "@/components/common/InternalProcessingStatusTable";
 import IpDocument from "@/components/trademarks/search/ip-document";
 
 interface PatentDetailModalProps {
@@ -191,8 +192,14 @@ export default function PatentDetailModal({
              </div>
            </TabsContent>
 
-          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4">
+          <TabsContent value="process" className="flex-1 overflow-y-auto px-4 mt-4 space-y-6">
             <WipoProcess wipo_process={patent.wipo_process} />
+            {patent.application_number && (
+              <InternalProcessingStatusTable
+                ipType="patent"
+                applicationNumber={patent.application_number}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">

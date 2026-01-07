@@ -123,6 +123,11 @@ export interface TrademarkResponse {
   image_url?: string | null;
   agency_name?: string | null;
   vienna_class?: string | null;
+  internal_processing_status?: Array<{
+    title: string;
+    deadline: string | null;
+    status: string;
+  }> | null;
 }
 
 export const trademarkService = {
