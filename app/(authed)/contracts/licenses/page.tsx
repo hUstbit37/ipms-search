@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ import {
 } from "@/components/contracts/licenses/advanced-search-modal";
 
 export default function LicensesPage() {
+  const router = useRouter();
   const { authContext } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAdvancedModal, setShowAdvancedModal] = useState(false);
@@ -416,7 +418,10 @@ export default function LicensesPage() {
           <div className="text-sm text-gray-600 dark:text-gray-400">
             Tổng số: <span className="font-semibold">{(licensesData?.total ?? 0).toLocaleString()}</span> bản ghi
           </div>
-          <Button className="flex items-center gap-2">
+          <Button
+            className="flex items-center gap-2"
+            onClick={() => router.push("/contracts/licenses/create")}
+          >
             <Plus className="w-4 h-4" />
             Thêm mới
           </Button>
