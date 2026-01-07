@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2, Settings2, ChevronDown, Settings } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2, Settings2, ChevronDown, Settings, Pencil, SquarePen } from "lucide-react";
 import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
 import CustomFieldsModal from "@/components/common/CustomFieldsModal";
 import AddCustomFieldValueModal from "@/components/trademarks/AddCustomFieldValueModal";
+import EditCustomFieldValueModal from "@/components/trademarks/EditCustomFieldValueModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -90,6 +91,8 @@ export default function TrademarksSearchPage() {
   const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
   const [bulkUpdateValue, setBulkUpdateValue] = useState("");
   const [showAddCustomFieldValueModal, setShowAddCustomFieldValueModal] = useState(false);
+  const [showEditCustomFieldModal, setShowEditCustomFieldModal] = useState(false);
+  const [editingCustomField, setEditingCustomField] = useState<{ field: any; item: any } | null>(null);
 
   const { data: customFieldsData } = useQuery({
     queryKey: ["custom-fields", "trademark"],
@@ -811,9 +814,28 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                         />
                       </TableCell>
                       {activeCustomFields.map((field) => (
-                        <TableCell key={field.id} className="text-sm whitespace-nowrap">
-                          <div className="max-w-[120px] truncate" title={(item as any).custom_fields?.[field.alias_name] || "-"}>
-                            {(item as any).custom_fields?.[field.alias_name] || "-"}
+                        <TableCell 
+                          key={field.id} 
+                          className="text-sm whitespace-nowrap"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="max-w-[120px] truncate " 
+                              title={(item as any).custom_fields?.[field.alias_name] || "-"}
+                            >
+                              {(item as any).custom_fields?.[field.alias_name] || "-"}
+                            </div>
+                            <button
+                              onClick={() => {
+                                setEditingCustomField({ field, item });
+                                setShowEditCustomFieldModal(true);
+                              }}
+                              className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded transition-colors flex-shrink-0 cursor-pointer"
+                              title="Chỉnh sửa giá trị"
+                            >
+                              <SquarePen className="w-3.5 h-3.5 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" />
+                            </button>
                           </div>
                         </TableCell>
                       ))}
@@ -943,6 +965,25 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
         onSubmit={async (data) => {
           await addCustomFieldValueMutation.mutateAsync(data);
         }}
+      />
+
+      <EditCustomFieldValueModal
+        open={showEditCustomFieldModal}
+        onOpenChange={(open) => {
+          setShowEditCustomFieldModal(open);
+          if (!open) {
+            setEditingCustomField(null);
+          }
+        }}
+        customField={editingCustomField?.field || null}
+        currentValue={(editingCustomField?.item as any)?.custom_fields?.[editingCustomField?.field?.alias_name] || null}
+        applicationNumber={editingCustomField?.item?.application_number || ""}
+        onUpdate={async (data) => {
+          await updateCustomFieldMutation.mutateAsync(data);
+          setShowEditCustomFieldModal(false);
+          setEditingCustomField(null);
+        }}
+        isUpdating={updateCustomFieldMutation.isPending}
       />
 
       <Dialog open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal}>
