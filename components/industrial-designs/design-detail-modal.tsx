@@ -19,6 +19,7 @@ interface DesignDetailModalProps {
   onOpenChange: (open: boolean) => void;
   design: any;
   companyMap: Record<string, string>;
+  selectedCustomFields?: string[];
 }
 
 export default function DesignDetailModal({
@@ -26,6 +27,7 @@ export default function DesignDetailModal({
   onOpenChange,
   design,
   companyMap,
+  selectedCustomFields = [],
 }: DesignDetailModalProps) {
   if (!design) return null;
 
@@ -48,6 +50,9 @@ export default function DesignDetailModal({
             <TabsTrigger value="images" className="cursor-pointer">Hình vẽ</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
+            {selectedCustomFields.length > 0 && (
+              <TabsTrigger value="custom-fields" className="cursor-pointer">Trường nội bộ</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
@@ -183,6 +188,21 @@ export default function DesignDetailModal({
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">
             <IpDocument documents={design.documents} />
           </TabsContent>
+
+          {selectedCustomFields.length > 0 && (
+            <TabsContent value="custom-fields" className="flex-1 overflow-y-auto px-4 mt-4">
+              <div className="space-y-3">
+                {selectedCustomFields.map((fieldName) => (
+                  <div key={fieldName} className="border-b pb-3">
+                    <InfoField 
+                      label={fieldName} 
+                      value={design.custom_fields?.[fieldName] || "-"} 
+                    />
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>

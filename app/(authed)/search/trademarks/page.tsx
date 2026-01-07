@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2 } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, XIcon, Eye, FileDown, Loader2, Settings2 } from "lucide-react";
 import TrademarkDetailModal from "@/components/trademarks/trademark-detail-modal";
+import CustomFieldsModal from "@/components/common/CustomFieldsModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -17,11 +21,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import AdvancedSearchModal from "@/components/trademarks/search/advanced-search-modal";
 import { useQuery } from "@tanstack/react-query";
 import { TrademarkParams, trademarkService } from "@/services/trademark.service";
+import { customFieldsService } from "@/services/custom-fields.service";
 import { useAuth } from "@/providers/auth/AuthProvider";
 import { DEFAULT_PAGINATION, FORMAT_DATE, initialSearchState } from "@/constants";
 import PaginationComponent from "@/components/common/Pagination";
+import { queryClient, useMutation } from "@/lib/react-query";
 import moment from "moment";
-import { queryClient } from "@/lib/react-query";
 import { exportTrademarksToExcel } from "@/utils/excel-export";
 import ImageShow from "@/components/common/image/image-show";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -66,6 +71,7 @@ export default function TrademarksSearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("table");
+  const [showCustomFieldsModal, setShowCustomFieldsModal] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [advancedFilters, setAdvancedFilters] = useState(initialAdvancedSearchState);
@@ -74,6 +80,98 @@ export default function TrademarksSearchPage() {
   const [selectedTrademark, setSelectedTrademark] = useState<any>(null);
   const [sortTrigger, setSortTrigger] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
+  const [editingCell, setEditingCell] = useState<{ applicationNumber: string; fieldId: number } | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
+  const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
+  const [bulkUpdateValue, setBulkUpdateValue] = useState("");
+
+  const { data: customFieldsData } = useQuery({
+    queryKey: ["custom-fields", "trademark"],
+    queryFn: () => customFieldsService.getCustomFields({ ip_type: "trademark", is_active: true, limit: 100 }),
+  });
+  
+  const activeCustomFields = customFieldsData?.items || [];
+
+  const updateCustomFieldMutation = useMutation({
+    mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string | null }) =>
+      customFieldsService.updateCustomFieldValues({
+        ip_type: "trademark",
+        ...data
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trademarks"] });
+      setEditingCell(null);
+      setEditValue("");
+    },
+  });
+
+  const bulkUpdateMutation = useMutation({
+    mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string | null }) =>
+      customFieldsService.updateCustomFieldValues({
+        ip_type: "trademark",
+        ...data
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trademarks"] });
+      setShowBulkUpdateModal(false);
+      setSelectedRows([]);
+      setBulkUpdateField(null);
+      setBulkUpdateValue("");
+    },
+  });
+
+  const handleBulkUpdate = () => {
+    if (bulkUpdateField && selectedRows.length > 0) {
+      bulkUpdateMutation.mutate({
+        custom_field_id: bulkUpdateField,
+        application_numbers: selectedRows,
+        value: bulkUpdateValue || null
+      });
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    const currentPageIds = trademarksData?.items?.map((item: any) => item.application_number) || [];
+    if (checked) {
+      setSelectedRows(prev => [...new Set([...prev, ...currentPageIds])]);
+    } else {
+      setSelectedRows(prev => prev.filter(id => !currentPageIds.includes(id)));
+    }
+  };
+
+  const handleSelectRow = (applicationNumber: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRows(prev => [...prev, applicationNumber]);
+    } else {
+      setSelectedRows(prev => prev.filter(id => id !== applicationNumber));
+    }
+  };
+
+  const handleCellClick = (item: any, field: any) => {
+    setEditingCell({ applicationNumber: item.application_number, fieldId: field.id });
+    setEditValue((item as any).custom_fields?.[field.alias_name] || "");
+  };
+
+  const handleCellBlur = () => {
+    if (editingCell) {
+      updateCustomFieldMutation.mutate({
+        custom_field_id: editingCell.fieldId,
+        application_numbers: [editingCell.applicationNumber],
+        value: editValue || null
+      });
+    }
+  };
+
+  const handleCellKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleCellBlur();
+    } else if (e.key === "Escape") {
+      setEditingCell(null);
+      setEditValue("");
+    }
+  };
 
   const handleSearch = async () => {
     setSearchParams({
@@ -616,16 +714,32 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                 >
                   <LayoutGrid className="w-4 h-4"/>
           </button>
+          <button
+                  onClick={ () => setShowCustomFieldsModal(true) }
+                  className="p-2 rounded flex-shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800"
+                  title="Trường nội bộ"
+                >
+                  <Settings2 className="w-4 h-4"/>
+          </button>
         </div>
       </div>
 
       {/* Results Table */ }
       <div>
           { viewType === "table" ? (
-            <div className="rounded-lg border">
+            <div className="rounded-lg border overflow-x-auto">
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[50px]">
+                      <Checkbox
+                        checked={
+                          (trademarksData?.items?.length ?? 0) > 0 && 
+                          trademarksData?.items?.every((item: any) => selectedRows.includes(item.application_number))
+                        }
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">MẪU NHÃN</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NHÃN HIỆU</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
@@ -636,6 +750,11 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">CHỦ ĐƠN/CHỦ BẰNG</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">NHÓM SẢN PHẨM/DỊCH VỤ</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TRẠNG THÁI</TableHead>
+                    {activeCustomFields.map((field) => (
+                      <TableHead key={field.id} className="text-gray-700 dark:text-gray-200 font-semibold">
+                        {field.alias_name.toUpperCase()}
+                      </TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -661,18 +780,28 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                     trademarksData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
-                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
-                      onClick={() => {
-                        setSelectedTrademark(item);
-                        setShowQuickView(true);
-                      }}
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
                     >
-                      <TableCell className="overflow-visible">
-                        <ImageShow
-                          src={item.image_urls?.[0] || ""} 
-                          alt={item.name || "Trademark image"} 
-                          size="lg"
+                      <TableCell>
+                        <Checkbox
+                          checked={item.application_number ? selectedRows.includes(item.application_number) : false}
+                          onCheckedChange={(checked) => item.application_number && handleSelectRow(item.application_number, checked as boolean)}
                         />
+                      </TableCell>
+                      <TableCell className="overflow-visible">
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedTrademark(item);
+                            setShowQuickView(true);
+                          }}
+                        >
+                          <ImageShow
+                            src={item.image_urls?.[0] || ""} 
+                            alt={item.name || "Trademark image"} 
+                            size="lg"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="font-semibold line-clamp-2" title={item.name ?? "-"}>{ item.name ?? "-" }</div>
@@ -705,6 +834,32 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
                       </TableCell>
+                      {activeCustomFields.map((field) => {
+                        const isEditing = editingCell?.applicationNumber === item.application_number && editingCell?.fieldId === field.id;
+                        return (
+                          <TableCell key={field.id} className="text-sm">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={handleCellBlur}
+                                onKeyDown={handleCellKeyDown}
+                                autoFocus
+                              />
+                            ) : (
+                              <div
+                                className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded min-h-[28px]"
+                                onClick={() => handleCellClick(item, field)}
+                                title="Click để chỉnh sửa"
+                              >
+                                {(item as any).custom_fields?.[field.alias_name] || "-"}
+                              </div>
+                            )}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))
                   )}
@@ -815,7 +970,107 @@ const isTrademarksPending = isTrademarksLoading || isTrademarksFetching;
         onOpenChange={ setShowQuickView }
         trademark={ selectedTrademark }
         companyMap={ companyMap }
+        selectedCustomFields={activeCustomFields.map(f => f.alias_name)}
       />
+
+      <CustomFieldsModal
+        open={showCustomFieldsModal}
+        onOpenChange={setShowCustomFieldsModal}
+        ipType="trademark"
+      />
+
+      {/* Floating Action Bar */}
+      {selectedRows.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-4 z-50">
+          <span className="font-medium">
+            Đã chọn {selectedRows.length} record{selectedRows.length > 1 ? 's' : ''}
+          </span>
+          <Button
+            onClick={() => setShowBulkUpdateModal(true)}
+            size="sm"
+            variant="secondary"
+          >
+            Cập nhật Trường nội bộ
+          </Button>
+          <Button
+            onClick={() => setSelectedRows([])}
+            size="sm"
+            variant="ghost"
+            className="text-white hover:text-white hover:bg-blue-700"
+          >
+            Hủy chọn
+          </Button>
+        </div>
+      )}
+
+      {/* Bulk Update Modal */}
+      <Dialog open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Cập nhật Trường nội bộ hàng loạt</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Chọn Trường nội bộ
+              </label>
+              <Select
+                value={bulkUpdateField?.toString()}
+                onValueChange={(value) => setBulkUpdateField(Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn field..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeCustomFields.map((field) => (
+                    <SelectItem key={field.id} value={field.id.toString()}>
+                      {field.alias_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Giá trị mới
+              </label>
+              <Input
+                value={bulkUpdateValue}
+                onChange={(e) => setBulkUpdateValue(e.target.value)}
+                placeholder="Nhập giá trị..."
+              />
+            </div>
+            <div className="bg-gray-50 dark:bg-zinc-800 p-3 rounded text-sm">
+              <p className="font-medium mb-1">Sẽ cập nhật cho {selectedRows.length} records:</p>
+              <div className="max-h-32 overflow-y-auto text-xs text-gray-600 dark:text-gray-400">
+                {selectedRows.slice(0, 10).join(", ")}
+                {selectedRows.length > 10 && ` và ${selectedRows.length - 10} records khác...`}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowBulkUpdateModal(false)}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleBulkUpdate}
+              disabled={!bulkUpdateField || bulkUpdateMutation.isPending}
+            >
+              {bulkUpdateMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang cập nhật...
+                </>
+              ) : (
+                'Cập nhật'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

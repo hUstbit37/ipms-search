@@ -16,6 +16,7 @@ interface TrademarkDetailModalProps {
   onOpenChange: (open: boolean) => void
   trademark: any
   companyMap: Record<string, string>
+  selectedCustomFields?: string[]
 }
 const formatAuthorsRaw = (authorsRaw: unknown): string => {
   if (Array.isArray(authorsRaw)) {
@@ -54,7 +55,7 @@ const formatAgenciesRaw = (agenciesRaw: unknown): string => {
   return "";
 };
 
-export default function TrademarkDetailModal({ open, onOpenChange, trademark, companyMap }: TrademarkDetailModalProps) {
+export default function TrademarkDetailModal({ open, onOpenChange, trademark, companyMap, selectedCustomFields = [] }: TrademarkDetailModalProps) {
   if (!trademark) return null
 
   const InfoRow = ({ label, value, leftCol = false }: { label: string; value?: string | null; leftCol?: boolean }) => (
@@ -76,6 +77,9 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
             <TabsTrigger value="info" className="cursor-pointer">Thông tin</TabsTrigger>
             <TabsTrigger value="process" className="cursor-pointer">Tiến trình</TabsTrigger>
             <TabsTrigger value="documents" className="cursor-pointer">Tài liệu</TabsTrigger>
+            {selectedCustomFields.length > 0 && (
+              <TabsTrigger value="custom-fields" className="cursor-pointer">Trường nội bộ</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto px-4 mt-1">
@@ -190,6 +194,26 @@ export default function TrademarkDetailModal({ open, onOpenChange, trademark, co
           <TabsContent value="documents" className="flex-1 overflow-y-auto px-4 mt-4">
             <IpDocument documents={trademark.documents} />
           </TabsContent>
+
+          {selectedCustomFields.length > 0 && (
+            <TabsContent value="custom-fields" className="flex-1 overflow-y-auto px-4 mt-4">
+              <div className="space-y-3">
+                {selectedCustomFields.map((fieldName) => (
+                  <div key={fieldName} className="border-b pb-3">
+                    <InfoRow 
+                      label={fieldName} 
+                      value={trademark.custom_fields?.[fieldName] || "-"} 
+                    />
+                  </div>
+                ))}
+                {selectedCustomFields.length === 0 && (
+                  <div className="text-center text-gray-500 py-8">
+                    Chưa có trường nội bộ nào được chọn hiển thị
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
