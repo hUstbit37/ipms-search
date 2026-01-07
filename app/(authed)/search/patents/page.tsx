@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
@@ -66,7 +65,6 @@ export default function PatentsSearchPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [sortTrigger, setSortTrigger] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
   const [bulkUpdateValue, setBulkUpdateValue] = useState("");
@@ -98,7 +96,6 @@ export default function PatentsSearchPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patents"] });
       setShowBulkUpdateModal(false);
-      setSelectedRows([]);
       setBulkUpdateField(null);
       setBulkUpdateValue("");
     },
@@ -119,29 +116,12 @@ export default function PatentsSearchPage() {
   });
 
   const handleBulkUpdate = () => {
-    if (bulkUpdateField && selectedRows.length > 0) {
+    if (bulkUpdateField) {
       bulkUpdateMutation.mutate({
         custom_field_id: bulkUpdateField,
-        application_numbers: selectedRows,
+        application_numbers: [],
         value: bulkUpdateValue || null
       });
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    const currentPageIds = patentsData?.items?.map((item: any) => item.application_number) || [];
-    if (checked) {
-      setSelectedRows(prev => [...new Set([...prev, ...currentPageIds])]);
-    } else {
-      setSelectedRows(prev => prev.filter(id => !currentPageIds.includes(id)));
-    }
-  };
-
-  const handleSelectRow = (applicationNumber: string, checked: boolean) => {
-    if (checked) {
-      setSelectedRows(prev => [...prev, applicationNumber]);
-    } else {
-      setSelectedRows(prev => prev.filter(id => id !== applicationNumber));
     }
   };
 
@@ -547,21 +527,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       {/* Controls */ }
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          {selectedRows.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline">
-                  Hành động ({selectedRows.length})
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setShowBulkUpdateModal(true)}>
-                  Cập nhật Trường nội bộ
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
           <div className="text-sm text-gray-600 dark:text-gray-400">
             Tổng số: <span className="font-semibold">{(patentsData?.total ?? 0).toLocaleString()}</span> bản ghi
           </div>
@@ -660,15 +625,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
               <Table>
                 <TableHeader className="bg-gray-100 dark:bg-zinc-800">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[50px]">
-                      <Checkbox
-                        checked={
-                          (patentsData?.items?.length ?? 0) > 0 && 
-                          patentsData?.items?.every((item: any) => selectedRows.includes(item.application_number))
-                        }
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">HÌNH ẢNH</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">TÊN SÁNG CHẾ</TableHead>
                     <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">SỐ ĐƠN</TableHead>
@@ -715,12 +671,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                         setShowDetailModal(true);
                       }}
                     >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={item.application_number ? selectedRows.includes(item.application_number) : false}
-                          onCheckedChange={(checked) => item.application_number && handleSelectRow(item.application_number, checked as boolean)}
-                        />
-                      </TableCell>
                       <TableCell className="overflow-visible">
                         <div
                           className="cursor-pointer"
@@ -925,13 +875,6 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
                 placeholder="Nhập giá trị..."
               />
             </div>
-            <div className="bg-gray-50 dark:bg-zinc-800 p-3 rounded text-sm">
-              <p className="font-medium mb-1">Sẽ cập nhật cho {selectedRows.length} records:</p>
-              <div className="max-h-32 overflow-y-auto text-xs text-gray-600 dark:text-gray-400">
-                {selectedRows.slice(0, 10).join(", ")}
-                {selectedRows.length > 10 && ` và ${selectedRows.length - 10} records khác...`}
-              </div>
-            </div>
           </div>
           <DialogFooter>
             <Button
@@ -942,7 +885,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
             </Button>
             <Button
               onClick={handleBulkUpdate}
-              disabled={!bulkUpdateField || bulkUpdateMutation.isPending}
+              disabled={!bulkUpdateField || !bulkUpdateValue.trim() || bulkUpdateMutation.isPending}
             >
               {bulkUpdateMutation.isPending ? (
                 <>
