@@ -85,6 +85,43 @@ const getImageExtension = (url: string): 'png' | 'jpeg' => {
   return 'png';
 };
 
+/**
+ * Format agency data theo logic từ AgenciesDetail component
+ * Ưu tiên: agencies_raw (array hoặc string) -> agencies (array) -> agency_name
+ */
+const formatAgency = (item: TrademarkItem): string => {
+  // Ưu tiên agencies_raw
+  if (Array.isArray(item.agencies_raw) && item.agencies_raw.length > 0) {
+    const agencyLines = item.agencies_raw
+      .filter((entry: unknown) => typeof entry === "string" && entry.trim().length > 0)
+      .map((entry: string) => entry.trim());
+    if (agencyLines.length > 0) {
+      return agencyLines.join(", ");
+    }
+  }
+  if (typeof item.agencies_raw === "string" && item.agencies_raw.trim().length > 0) {
+    return item.agencies_raw.trim();
+  }
+  
+  // Fallback về agencies
+  if (Array.isArray(item.agencies) && item.agencies.length > 0) {
+    const agencyLines = item.agencies
+      .map((agency: { name?: string | null }) => agency?.name)
+      .filter((name: string | null | undefined): name is string => Boolean(name && name.trim()))
+      .map((name: string) => name.trim());
+    if (agencyLines.length > 0) {
+      return agencyLines.join(", ");
+    }
+  }
+  
+  // Fallback về agency_name
+  if (item.agency_name) {
+    return item.agency_name;
+  }
+  
+  return '';
+};
+
 type CustomField = {
   id: number;
   alias_name: string;
@@ -154,7 +191,7 @@ export async function POST(req: NextRequest) {
         status:
           item.wipo_status ||
           (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
-        agency: item.agencies_raw?.join(", ") || item.agencies?.join(", ") || item.agency_name || '',
+        agency: formatAgency(item),
         note: item.note || '',
       };
 
