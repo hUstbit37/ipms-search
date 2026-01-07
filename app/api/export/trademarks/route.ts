@@ -85,39 +85,55 @@ const getImageExtension = (url: string): 'png' | 'jpeg' => {
   return 'png';
 };
 
+type CustomField = {
+  id: number;
+  alias_name: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const items: TrademarkItem[] = body?.items || [];
+    const customFields: CustomField[] = body?.customFields || [];
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Nhãn hiệu');
 
-    worksheet.columns = [
-      { header: 'Mẫu nhãn', key: 'image', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Nhãn hiệu', key: 'name', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Loại nhãn hiệu', key: 'trademark_type', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Loại TSTT', key: 'ip_type', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Chủ sở hữu', key: 'owner', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
-      { header: 'Số đơn', key: 'application_number', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Ngày nộp đơn', key: 'application_date', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Ngày công bố', key: 'publication_date', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Số bằng', key: 'certificate_number', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Ngày cấp', key: 'certificate_date', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Nhóm sản phẩm/Dịch vụ', key: 'nice_class_text', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
-      { header: 'Trạng thái', key: 'status', width: 20, style: { alignment: { vertical: 'middle' } } },
-      { header: 'Đại diện', key: 'agency', width: 50, style: { alignment: { vertical: 'middle', wrapText: true } } },
-      { header: 'Ghi chú nội bộ', key: 'note', width: 50, style: { alignment: { vertical: 'middle' } } },
-
+    // Tạo mảng columns với các cột cơ bản
+    const baseColumns = [
+      { header: 'Mẫu nhãn', key: 'image', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Nhãn hiệu', key: 'name', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Loại nhãn hiệu', key: 'trademark_type', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Loại TSTT', key: 'ip_type', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Chủ sở hữu', key: 'owner', width: 50, style: { alignment: { vertical: 'middle' as const, wrapText: true } } },
+      { header: 'Số đơn', key: 'application_number', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Ngày nộp đơn', key: 'application_date', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Ngày công bố', key: 'publication_date', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Số bằng', key: 'certificate_number', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Ngày cấp', key: 'certificate_date', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Nhóm sản phẩm/Dịch vụ', key: 'nice_class_text', width: 50, style: { alignment: { vertical: 'middle' as const, wrapText: true } } },
+      { header: 'Trạng thái', key: 'status', width: 20, style: { alignment: { vertical: 'middle' as const } } },
+      { header: 'Đại diện', key: 'agency', width: 50, style: { alignment: { vertical: 'middle' as const, wrapText: true } } },
+      { header: 'Ghi chú nội bộ', key: 'note', width: 50, style: { alignment: { vertical: 'middle' as const } } },
     ];
+
+    // Thêm các cột custom fields vào cuối danh sách columns
+    const customFieldColumns = customFields.map((field) => ({
+      header: field.alias_name.toUpperCase(),
+      key: `custom_field_${field.alias_name}`,
+      width: 30,
+      style: { alignment: { vertical: 'middle' as const, wrapText: true } },
+    }));
+
+    worksheet.columns = [...baseColumns, ...customFieldColumns];
 
     // Start from row 2 because row 1 is header
     for (let index = 0; index < items.length; index++) {
       const item = items[index];
       const rowNumber = index + 2;
 
-      // Add row with all data first
-      const row = worksheet.addRow({
+      // Tạo object dữ liệu cho row với các cột cơ bản
+      const rowData: Record<string, any> = {
         image: '',
         name: item.name || '-',
         trademark_type: item.trademark_type || 'Combined',
@@ -134,14 +150,22 @@ export async function POST(req: NextRequest) {
         certificate_date: item.certificate_date
           ? moment(item.certificate_date).format(FORMAT_DATE)
           : '-',
-        
         nice_class_text: (item.nice_class_list_raw?.join(", ")) || item.nice_class_list?.join(", ") || item.nice_class_text || '', // ưu tiên nice_class_raw, nếu không có thì dùng nice_class_list, rồi nice_class_text
         status:
           item.wipo_status ||
           (item.certificate_number ? 'Cấp bằng' : 'Đang giải quyết'),
         agency: item.agencies_raw?.join(", ") || item.agencies?.join(", ") || item.agency_name || '',
         note: item.note || '',
+      };
+
+      // Thêm dữ liệu custom fields vào rowData
+      customFields.forEach((field) => {
+        const customFieldKey = `custom_field_${field.alias_name}`;
+        rowData[customFieldKey] = (item as any).custom_fields?.[field.alias_name] || '-';
       });
+
+      // Add row with all data
+      const row = worksheet.addRow(rowData);
 
       // Set row height for image
       row.height = 100;

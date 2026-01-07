@@ -210,7 +210,13 @@ export default function IndustrialDesignsSearchPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ items: allItems }),
+        body: JSON.stringify({ 
+          items: allItems,
+          customFields: activeCustomFields.map(field => ({
+            id: field.id,
+            alias_name: field.alias_name
+          }))
+        }),
       });
 
       if (!response.ok) {
