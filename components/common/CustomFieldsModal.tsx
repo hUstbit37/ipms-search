@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import React from "react";
-import { Settings2, Plus, Trash2, Loader2, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
+import { Settings2, Plus, Loader2, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -74,13 +74,6 @@ export default function CustomFieldsModal({
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (customFieldId: number) => customFieldsService.deleteCustomField(customFieldId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["custom-fields", ipType] });
-    },
-  });
-
   const handleFieldToggle = (field: CustomField, checked: boolean) => {
     updateMutation.mutate({ id: field.id, is_active: checked });
   };
@@ -88,12 +81,6 @@ export default function CustomFieldsModal({
   const handleCreateField = () => {
     if (newFieldName.trim()) {
       createMutation.mutate(newFieldName.trim());
-    }
-  };
-
-  const handleDeleteField = (field: CustomField) => {
-    if (confirm(`Bạn có chắc muốn xóa trường "${field.alias_name}"?`)) {
-      deleteMutation.mutate(field.id);
     }
   };
 
@@ -167,14 +154,6 @@ export default function CustomFieldsModal({
                         <span className="text-xs text-gray-400 flex-shrink-0">(Đã ẩn)</span>
                       )}
                     </div>
-                    <button
-                      onClick={() => handleDeleteField(field)}
-                      disabled={deleteMutation.isPending}
-                      className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-500"
-                      title="Xóa trường"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
                 ))}
               </div>

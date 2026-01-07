@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, Search, Trash2, Loader2, Settings2 } from "lucide-react";
+import { LayoutGrid, List, Search, Trash2, Loader2, Settings2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdvancedSearchModal from "@/components/industrial-designs/search/advanced-search-modal";
@@ -72,8 +78,6 @@ export default function IndustrialDesignsSearchPage() {
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [editingCell, setEditingCell] = useState<{ applicationNumber: string; fieldId: number } | null>(null);
-  const [editValue, setEditValue] = useState("");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [bulkUpdateField, setBulkUpdateField] = useState<number | null>(null);
@@ -94,34 +98,8 @@ export default function IndustrialDesignsSearchPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["industrial-designs"] });
-      setEditingCell(null);
-      setEditValue("");
     },
   });
-
-  const handleCellClick = (item: any, field: any) => {
-    setEditingCell({ applicationNumber: item.application_number, fieldId: field.id });
-    setEditValue((item as any).custom_fields?.[field.alias_name] || "");
-  };
-
-  const handleCellBlur = () => {
-    if (editingCell) {
-      updateCustomFieldMutation.mutate({
-        custom_field_id: editingCell.fieldId,
-        application_numbers: [editingCell.applicationNumber],
-        value: editValue || null
-      });
-    }
-  };
-
-  const handleCellKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleCellBlur();
-    } else if (e.key === "Escape") {
-      setEditingCell(null);
-      setEditValue("");
-    }
-  };
 
   const bulkUpdateMutation = useMutation({
     mutationFn: (data: { custom_field_id: number; application_numbers: string[]; value: string | null }) =>
@@ -569,8 +547,25 @@ export default function IndustrialDesignsSearchPage() {
 
       {/* Controls */ }
       <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          Tổng số: <span className="font-semibold">{(industrialDesignsData?.total ?? 0).toLocaleString()}</span> bản ghi
+        <div className="flex items-center gap-3">
+          {selectedRows.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline">
+                  Hành động ({selectedRows.length})
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setShowBulkUpdateModal(true)}>
+                  Cập nhật Trường nội bộ
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Tổng số: <span className="font-semibold">{(industrialDesignsData?.total ?? 0).toLocaleString()}</span> bản ghi
+          </div>
         </div>
         <div className="flex items-center gap-2 border-t sm:border-t-0 sm:border-l pt-2 sm:pt-0 sm:pl-2">
           <Button
@@ -701,9 +696,13 @@ export default function IndustrialDesignsSearchPage() {
                     industrialDesignsData?.items?.map((item) => (
                     <TableRow 
                       key={ item.id } 
-                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                      className="hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedDesign(item);
+                        setShowDetailModal(true);
+                      }}
                     >
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={item.application_number ? selectedRows.includes(item.application_number) : false}
                           onCheckedChange={(checked) => item.application_number && handleSelectRow(item.application_number, checked as boolean)}
@@ -750,32 +749,11 @@ export default function IndustrialDesignsSearchPage() {
                           status={item.wipo_status || (item.certificate_number ? "Cấp bằng" : "Đang giải quyết")}
                         />
                       </TableCell>
-                      {activeCustomFields.map((field) => {
-                        const isEditing = editingCell?.applicationNumber === item.application_number && editingCell?.fieldId === field.id;
-                        return (
-                          <TableCell key={field.id} className="text-sm">
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                onBlur={handleCellBlur}
-                                onKeyDown={handleCellKeyDown}
-                                autoFocus
-                              />
-                            ) : (
-                              <div
-                                className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded min-h-[28px]"
-                                onClick={() => handleCellClick(item, field)}
-                                title="Click để chỉnh sửa"
-                              >
-                                {(item as any).custom_fields?.[field.alias_name] || "-"}
-                              </div>
-                            )}
-                          </TableCell>
-                        );
-                      })}
+                      {activeCustomFields.map((field) => (
+                        <TableCell key={field.id} className="text-sm">
+                          {(item as any).custom_fields?.[field.alias_name] || "-"}
+                        </TableCell>
+                      ))}
                     </TableRow>
                   ))
                   )}
@@ -892,31 +870,6 @@ export default function IndustrialDesignsSearchPage() {
         ipType="industrial_design"
       />
 
-      {/* Floating Action Bar */}
-      {selectedRows.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-4 z-50">
-          <span className="font-medium">
-            Đã chọn {selectedRows.length} record{selectedRows.length > 1 ? 's' : ''}
-          </span>
-          <Button
-            onClick={() => setShowBulkUpdateModal(true)}
-            size="sm"
-            variant="secondary"
-          >
-            Cập nhật Trường nội bộ
-          </Button>
-          <Button
-            onClick={() => setSelectedRows([])}
-            size="sm"
-            variant="ghost"
-            className="text-white hover:text-white hover:bg-blue-700"
-          >
-            Hủy chọn
-          </Button>
-        </div>
-      )}
-
-      {/* Bulk Update Modal */}
       <Dialog open={showBulkUpdateModal} onOpenChange={setShowBulkUpdateModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
