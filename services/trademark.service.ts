@@ -23,6 +23,7 @@ export interface TrademarkParams {
   productCategory?: string;
   viennaClass?: string;
   applicant?: string;
+  old_owner?: string;
   representative?: string;
   basicApplicationNumber?: string;
   priority_number?: string;

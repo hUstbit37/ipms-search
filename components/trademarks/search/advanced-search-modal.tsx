@@ -24,6 +24,7 @@ interface AdvancedFilters {
   expiryDateTo: string; //ngày hết hạn đến
   priorityDate: string; //ngày ưu tiên
   applicant: string; //chủ đơn/chủ bằng
+  oldOwner: string; //chủ đơn cũ
   representative: string; //đại diện sở hữu công nghiệp
   certificateNumber: string; //số bằng
   applicationNumber: string; //số đơn
@@ -305,7 +306,7 @@ export default function AdvancedSearchModal({
               <span>▶</span>
               <span>Chủ đơn/Đại diện</span>
             </button>
-            <div data-group="owner" className="ml-4 mt-2 flex items-center flex-wrap justify-between">
+            <div data-group="owner" className="ml-4 mt-2 flex items-center flex-wrap justify-between gap-4">
               <div className="w-[49%]">
                 <label className="text-xs font-medium block mb-1">Chủ đơn/Chủ bằng</label>
                 <Input
@@ -316,6 +317,20 @@ export default function AdvancedSearchModal({
                     onFiltersChange({
                       ...advancedFilters,
                       applicant: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="w-[49%]">
+                <label className="text-xs font-medium block mb-1">Chủ đơn cũ</label>
+                <Input
+                  placeholder="Nhập tên chủ đơn cũ..."
+                  className="text-sm"
+                  value={advancedFilters.oldOwner}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...advancedFilters,
+                      oldOwner: e.target.value,
                     })
                   }
                 />

@@ -22,6 +22,7 @@ interface AdvancedFilters {
   expiryDateFrom: string;
   expiryDateTo: string;
   applicant: string;
+  oldOwner: string;
   representative: string;
   certificateNumber: string;
   applicationNumber: string;
@@ -243,6 +244,20 @@ export default function AdvancedSearchModal({
                     onFiltersChange({
                       ...advancedFilters,
                       applicant: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="w-[49%]">
+                <label className="text-xs font-medium block mb-1">Chủ đơn cũ</label>
+                <Input
+                  placeholder="Nhập tên chủ đơn cũ..."
+                  className="text-sm"
+                  value={advancedFilters.oldOwner}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...advancedFilters,
+                      oldOwner: e.target.value,
                     })
                   }
                 />

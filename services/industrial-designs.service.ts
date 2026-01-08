@@ -21,6 +21,7 @@ export interface IndustrialDesignParams {
   niceClass?: string;
   productCategory?: string;
   applicant?: string;
+  old_owner?: string;
   representative?: string;
   name?: string;
   basicApplicationNumber?: string;

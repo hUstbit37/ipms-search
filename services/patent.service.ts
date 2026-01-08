@@ -19,6 +19,7 @@ export interface PatentParams {
   niceClass?: string;
   productCategory?: string;
   applicant?: string;
+  old_owner?: string;
   representative?: string;
   name?: string;
   page: number;

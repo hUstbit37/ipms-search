@@ -33,6 +33,7 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 const initialAdvancedSearch = {
   applicationNumber: "",
   applicant: "",
+  oldOwner: "",
   representative: "",
   name: "",
   niceClass: "",
@@ -243,6 +244,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       priorityCountry: advancedFilters?.priorityCountry || undefined,
       niceClass: advancedFilters?.niceClass || undefined,
       applicant: advancedFilters?.applicant || undefined,
+      old_owner: advancedFilters?.oldOwner || undefined,
       representative: advancedFilters?.representative || undefined,
       name: advancedFilters?.name || undefined,
     })
@@ -321,6 +323,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
     setAdvancedFilters({
       applicationNumber: "",
       applicant: "",
+      oldOwner: "",
       representative: "",
       name: "",
       niceClass: "",

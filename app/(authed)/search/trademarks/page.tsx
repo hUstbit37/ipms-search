@@ -58,6 +58,7 @@ const initialAdvancedSearchState = {
   priorityDate: "",
   // Tên người
   applicant: "",
+  oldOwner: "",
   representative: "",
   // Số
   certificateNumber: "",
@@ -195,6 +196,7 @@ export default function TrademarksSearchPage() {
       productCategory: advancedFilters?.productCategory || undefined,
       viennaClass: advancedFilters?.viennaClass || undefined,
       applicant: advancedFilters?.applicant || undefined,
+      old_owner: advancedFilters?.oldOwner || undefined,
       representative: advancedFilters?.representative || undefined,
       basicApplicationNumber: advancedFilters?.basicApplicationNumber || undefined,
       priority_number: advancedFilters?.priorityNumber || undefined,
@@ -321,6 +323,7 @@ export default function TrademarksSearchPage() {
       expiryDateTo: "",
       priorityDate: "",
       applicant: "",
+      oldOwner: "",
       representative: "",
       certificateNumber: "",
       applicationNumber: "",

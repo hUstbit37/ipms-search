@@ -50,6 +50,7 @@ const initialAdvancedSearch = {
   expiryDateTo: "",
   // Tên người
   applicant: "",
+  oldOwner: "",
   representative: "",
   // Số
   certificateNumber: "",
@@ -254,6 +255,7 @@ export default function IndustrialDesignsSearchPage() {
       niceClass: advancedFilters?.niceClass || undefined,
       productCategory: advancedFilters?.productCategory || undefined,
       applicant: advancedFilters?.applicant || undefined,
+      old_owner: advancedFilters?.oldOwner || undefined,
       representative: advancedFilters?.representative || undefined,
       name: advancedFilters?.designName || undefined,
       basicApplicationNumber: advancedFilters?.basicApplicationNumber || undefined,
