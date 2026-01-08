@@ -21,7 +21,6 @@ import {
 } from "@/services/industrial-designs.service";
 import { toast } from "react-toastify";
 
-// Kiểu dữ liệu IP được chọn dùng chung giữa form và modal
 export type SelectedIpItem = {
   id: number;
   ip_type: IpType;
@@ -30,6 +29,9 @@ export type SelectedIpItem = {
   certificate_number: string | null;
   group: string | null;
   status: string | null;
+  nice_class_list_raw?: string[] | null;
+  nice_class_list?: string[] | null;
+  products?: Array<{ goods_name: string | null; group: string | null }> | null;
 };
 
 type IpSearchModalProps = {
@@ -55,7 +57,60 @@ const normalizeTrademark = (item: TrademarkResponse): SelectedIpItem => ({
   status:
     item.wipo_status ||
     (item.certificate_number ? "Cấp bằng" : "Đang giải quyết"),
+  nice_class_list_raw: item.nice_class_list_raw || null,
+  nice_class_list: item.nice_class_list || null,
+  products: null,
 });
+
+// Hàm helper xử lý locarno_list theo logic từ locarno-detail.tsx
+// Trả về chuỗi đã join hoặc null
+const processLocarnoList = (
+  locarno_list?: Array<{ subclass?: string | null; class_number?: string | null }> | string[] | string | null,
+  locarno_list_raw?: string[] | string | null
+): string | null => {
+  const locarnoLines: string[] = (() => {
+    // Ưu tiên locarno_list_raw
+    if (Array.isArray(locarno_list_raw) && locarno_list_raw.length > 0) {
+      return locarno_list_raw
+        .filter((entry: unknown) => typeof entry === "string" && entry.trim().length > 0)
+        .map((entry: string) => entry.trim());
+    }
+    if (typeof locarno_list_raw === "string" && locarno_list_raw.trim().length > 0) {
+      return [locarno_list_raw.trim()];
+    }
+    // Xử lý locarno_list
+    if (Array.isArray(locarno_list) && locarno_list.length > 0) {
+      // Kiểm tra xem có phải là mảng object không
+      const firstItem = locarno_list[0];
+      if (typeof firstItem === "object" && firstItem !== null && !Array.isArray(firstItem)) {
+        // Nếu là object có subclass và class_number
+        return (locarno_list as Array<{ subclass?: string | null; class_number?: string | null }>)
+          .map((item) => {
+            const classNum = item.class_number || "";
+            const subclass = item.subclass || "";
+            if (classNum && subclass) {
+              return `${classNum}-${subclass}`;
+            }
+            return classNum || subclass || "";
+          })
+          .filter((item: string) => item.trim().length > 0);
+      }
+      // Nếu là mảng string
+      if (typeof firstItem === "string") {
+        return (locarno_list as string[])
+          .filter((entry) => typeof entry === "string" && entry.trim().length > 0)
+          .map((entry) => entry.trim());
+      }
+    }
+    // Nếu locarno_list là string
+    if (typeof locarno_list === "string" && locarno_list.trim().length > 0) {
+      return [locarno_list.trim()];
+    }
+    return [];
+  })();
+
+  return locarnoLines.length > 0 ? locarnoLines.join(", ") : null;
+};
 
 // Chuẩn hóa dữ liệu kiểu dáng công nghiệp về dạng SelectedIpItem
 const normalizeIndustrialDesign = (
@@ -66,12 +121,11 @@ const normalizeIndustrialDesign = (
   name: item.name,
   application_number: item.application_number,
   certificate_number: item.certificate_number,
-  group: Array.isArray(item.locarno_list)
-    ? item.locarno_list.join(", ")
-    : item.locarno_list || null,
+  group: processLocarnoList(item.locarno_list, item.locarno_list_raw),
   status:
     item.wipo_status ||
     (item.certificate_number ? "Cấp bằng" : "Đang giải quyết"),
+  products: null,
 });
 
 // Modal tìm kiếm và chọn IP với debounce khi nhập từ khóa
@@ -248,11 +302,11 @@ export default function IpSearchModal({
                           .join(", ") ||
                         null;
                     } else if ("locarno_list" in item) {
-                      const locarno = (item as IndustrialDesignResponse)
-                        .locarno_list;
-                      group = Array.isArray(locarno)
-                        ? locarno.join(", ")
-                        : locarno || null;
+                      const industrialDesignItem = item as IndustrialDesignResponse;
+                      group = processLocarnoList(
+                        industrialDesignItem.locarno_list,
+                        industrialDesignItem.locarno_list_raw
+                      );
                     }
 
                     const status =

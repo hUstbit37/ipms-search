@@ -6,10 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "react-toastify";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import BaseSelect, { type SelectOption } from "@/components/common/select/base-select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAllCompanies } from "@/hooks/useCompanyQuery";
 import {
   IP_TYPES,
@@ -19,6 +26,8 @@ import {
 import IpSearchModal, {
   type SelectedIpItem,
 } from "@/components/contracts/licenses/IpSearchModal";
+import ProductListDialog from "./ProductListDialog";
+import { MoreVertical, Eye, List, Trash2 } from "lucide-react";
 
 const partnersSchema = z.object({
   licensor_id: z.string().min(1, "Vui lòng chọn bên cấp quyền"),
@@ -39,6 +48,17 @@ const partnersSchema = z.object({
         certificate_number: z.string().nullable().optional(),
         group: z.string().nullable().optional(),
         status: z.string().nullable().optional(),
+        nice_class_list_raw: z.array(z.string()).nullable().optional(),
+        nice_class_list: z.array(z.string()).nullable().optional(),
+        products: z
+          .array(
+            z.object({
+              goods_name: z.string().nullable(),
+              group: z.string().nullable(),
+            })
+          )
+          .nullable()
+          .optional(),
       })
     )
     .default([]),
@@ -53,9 +73,12 @@ type PartnersStepFormProps = {
 
 // Form chọn các bên tham gia và danh mục IP áp dụng cho hợp đồng cấp quyền
 export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormProps) {
+  const router = useRouter();
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const { companies, isLoading: isLoadingCompanies } = useAllCompanies();
   const [isIpModalOpen, setIsIpModalOpen] = useState(false);
+  const [selectedIpForProducts, setSelectedIpForProducts] = useState<SelectedIpItem | null>(null);
+  const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false);
 
   const companyOptions: SelectOption[] = useMemo(
     () =>
@@ -153,6 +176,43 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
     toast.success("Đã lưu thông tin IP & Đối tác");
     onNext();
   });
+
+  // Xử lý xem chi tiết IP - redirect sang trang mới
+  const handleViewIpDetail = (ip: SelectedIpItem) => {
+    if (ip.ip_type === IP_TYPES.TRADEMARK) {
+      router.push(`/search/trademarks/${ip.id}`);
+    } else if (ip.ip_type === IP_TYPES.INDUSTRIAL_DESIGN) {
+      router.push(`/search/industrial-designs/${ip.id}`);
+    }
+  };
+
+  // Xử lý xem danh sách sản phẩm
+  const handleViewProducts = (ip: SelectedIpItem) => {
+    setSelectedIpForProducts(ip);
+    setIsProductsDialogOpen(true);
+  };
+
+  // Lưu danh sách sản phẩm cho IP
+  const handleSaveProducts = (
+    ipId: number,
+    products: Array<{ goods_name: string | null; group: string | null }> | null
+  ) => {
+    const updated = (selectedIps || []).map((item) =>
+      item.id === ipId ? { ...item, products } : item
+    );
+    setValue("ip_items", updated, { shouldDirty: true });
+    toast.success("Đã lưu danh sách sản phẩm");
+  };
+
+  // Xử lý xóa IP
+  const handleDeleteIp = (ip: SelectedIpItem) => {
+    setValue(
+      "ip_items",
+      selectedIps.filter((item) => item.id !== ip.id),
+      { shouldDirty: true }
+    );
+    toast.success("Đã xóa IP khỏi danh sách");
+  };
 
 
   return (
@@ -298,13 +358,10 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
         </div>
 
         {selectedIps && selectedIps.length > 0 && (
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-lg overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium text-gray-700">
-                    ID
-                  </th>
                   <th className="px-4 py-2 text-left font-medium text-gray-700">
                     Tên IP
                   </th>
@@ -314,6 +371,11 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
                   <th className="px-4 py-2 text-left font-medium text-gray-700">
                     Số bằng
                   </th>
+                  {currentIpType === IP_TYPES.TRADEMARK && (
+                    <th className="px-4 py-2 text-left font-medium text-gray-700">
+                      Sản phẩm
+                    </th>
+                  )}
                   <th className="px-4 py-2 text-left font-medium text-gray-700">
                     Nhóm / Phân loại
                   </th>
@@ -328,33 +390,67 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
               <tbody>
                 {selectedIps.map((ip) => (
                   <tr key={ip.id} className="border-t">
-                    <td className="px-4 py-2">{ip.id}</td>
-                    <td className="px-4 py-2">{ip.name || "-"}</td>
+                    <td className="px-4 py-2 ">{ip.name || "-"}</td>
                     <td className="px-4 py-2">
                       {ip.application_number || "-"}
                     </td>
                     <td className="px-4 py-2">
                       {ip.certificate_number || "-"}
                     </td>
+                    {currentIpType === IP_TYPES.TRADEMARK && (
+                      <td className="px-4 py-2">
+                        {ip.products && ip.products.length > 0
+                          ? ip.products
+                              .map((p) => p.goods_name)
+                              .filter((name): name is string => Boolean(name && name.trim().length > 0))
+                              .join(", ")
+                          : ip.nice_class_list_raw && ip.nice_class_list_raw.length > 0
+                            ? ip.nice_class_list_raw.join(", ")
+                            : "-"}
+                      </td>
+                    )}
                     <td className="px-4 py-2 max-w-xs truncate">
                       {ip.group || "-"}
                     </td>
                     <td className="px-4 py-2">{ip.status || "-"}</td>
                     <td className="px-4 py-2 text-right">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setValue(
-                            "ip_items",
-                            selectedIps.filter((item) => item.id !== ip.id),
-                            { shouldDirty: true }
-                          )
-                        }
-                      >
-                        Xóa
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleViewIpDetail(ip)}
+                            className="cursor-pointer"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Xem chi tiết IP
+                          </DropdownMenuItem>
+                          {ip.ip_type === IP_TYPES.TRADEMARK && (
+                            <DropdownMenuItem
+                              onClick={() => handleViewProducts(ip)}
+                              className="cursor-pointer"
+                            >
+                              <List className="mr-2 h-4 w-4" />
+                              Danh sách sản phẩm
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteIp(ip)}
+                            className="cursor-pointer text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Xóa IP
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -393,6 +489,14 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
             shouldDirty: true,
           })
         }
+      />
+
+      {/* Dialog danh sách sản phẩm */}
+      <ProductListDialog
+        open={isProductsDialogOpen}
+        onOpenChange={setIsProductsDialogOpen}
+        ip={selectedIpForProducts}
+        onSaveProducts={handleSaveProducts}
       />
     </form>
   );
