@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Plus, Loader2 } from "lucide-react";
+import { Search, Plus, Loader2, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,7 @@ export default function LicensesPage() {
   const [showAdvancedModal, setShowAdvancedModal] = useState(false);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [showChips, setShowChips] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [searchParams, setSearchParams] = useState<LicenseParams>({
     ...initialSearchState,
     page: 1,
@@ -179,6 +180,7 @@ export default function LicensesPage() {
     data: licensesData,
     isLoading: isLicensesLoading,
     isFetching: isLicensesFetching,
+    refetch: refetchLicenses,
   } = useQuery({
     queryFn: async () => await licenseService.search(searchParams),
     queryKey: ["licenses", searchParams],
@@ -323,6 +325,27 @@ export default function LicensesPage() {
     }
   };
 
+  const handleDeleteLicense = async (id: number) => {
+    console.log("Deleting license id:", id, typeof id);
+    if (typeof window !== "undefined") {
+      const confirmDelete = window.confirm(
+        "Bạn có chắc chắn muốn xóa license này? Hành động này không thể hoàn tác.",
+      );
+      if (!confirmDelete) {
+        return;
+      }
+    }
+
+    try {
+      setDeletingId(id);
+      await licenseService.deleteById(id);
+      // Sau khi xóa thành công, refetch lại danh sách license
+      await refetchLicenses();
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Search and Filter Section */}
@@ -420,7 +443,7 @@ export default function LicensesPage() {
           </div>
           <Button
             className="flex items-center gap-2"
-            onClick={() => router.push("/contracts/licenses/create")}
+            onClick={() => router.push("/contracts/licenses/create?step=1")}
           >
             <Plus className="w-4 h-4" />
             Thêm mới
@@ -463,12 +486,15 @@ export default function LicensesPage() {
                 <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">
                   Ngày ký
                 </TableHead>
+                <TableHead className="text-gray-700 dark:text-gray-200 font-semibold text-right">
+                  Thao tác
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLicensesPending ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-40">
+                  <TableCell colSpan={9} className="h-40">
                     <div className="flex items-center justify-center gap-2 text-gray-500">
                       <Loader2 className="h-5 w-5 animate-spin" />
                       <span>Đang tải dữ liệu...</span>
@@ -477,7 +503,7 @@ export default function LicensesPage() {
                 </TableRow>
               ) : licensesData?.items?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-16">
+                  <TableCell colSpan={9} className="h-16">
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <p className="text-lg font-semibold mb-1">Không tìm thấy bản ghi</p>
                     </div>
@@ -515,6 +541,29 @@ export default function LicensesPage() {
                       {item.sign_date
                         ? moment(item.sign_date).format(FORMAT_DATE)
                         : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => router.push(`/contracts/licenses/${item.id}/edit`)}
+                          aria-label="Chỉnh sửa license"
+                        >
+                          <Pencil className="w-4 h-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteLicense(item.id)}
+                          disabled={deletingId === item.id}
+                          aria-label="Xóa license"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

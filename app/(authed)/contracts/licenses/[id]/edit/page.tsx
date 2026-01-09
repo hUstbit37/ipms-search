@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { SelectOption } from "@/components/common/select/base-select";
@@ -17,6 +19,8 @@ import {
 } from "@/components/contracts/licenses";
 import { LICENSE_STATUS_OPTIONS } from "@/constants/license";
 import { useMe } from "@/providers/auth/MeProvider";
+import { licenseService, LicenseResponse } from "@/services/license.service";
+import { useAuth } from "@/providers/auth/AuthProvider";
 
 const generalInfoSchema = z.object({
   license_method: z.string().min(1, "Vui lòng chọn hình thức cấp quyền"),
@@ -28,7 +32,6 @@ const generalInfoSchema = z.object({
 
 type GeneralInfoForm = z.infer<typeof generalInfoSchema>;
 
-
 const steps = [
   { key: "general", title: "Bước 1: Thông tin chung" },
   { key: "partners", title: "Bước 2: Chọn IP & Đối tác" },
@@ -36,12 +39,16 @@ const steps = [
   { key: "attachments", title: "Bước 4: Đính kèm hồ sơ" },
 ];
 
-export default function LicenseCreatePage() {
+export default function LicenseEditPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const licenseId = params?.id as string;
   const { me } = useMe();
+  const { authContext } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const {
     control,
@@ -49,6 +56,7 @@ export default function LicenseCreatePage() {
     formState: { errors, isSubmitting },
     watch,
     setValue,
+    reset,
   } = useForm<GeneralInfoForm>({
     resolver: zodResolver(generalInfoSchema),
     defaultValues: {
@@ -58,6 +66,17 @@ export default function LicenseCreatePage() {
       sign_date: "",
       status: "DRAFT",
     },
+  });
+
+  // Lấy dữ liệu license từ API
+  const {
+    data: licenseData,
+    isLoading: isLoadingLicense,
+    error: licenseError,
+  } = useQuery({
+    queryFn: async () => await licenseService.getById(licenseId),
+    queryKey: ["license", licenseId],
+    enabled: !!licenseId && !!authContext?.token,
   });
 
   const selectedLicenseMethod = watch("license_method");
@@ -77,36 +96,20 @@ export default function LicenseCreatePage() {
     setCurrentStep(step);
     try {
       if (typeof window === "undefined") {
-        router.push("/contracts/licenses/create");
+        router.push(`/contracts/licenses/${licenseId}/edit`);
         return;
       }
-      const params = new URLSearchParams(window.location.search);
-      params.set("step", String(step));
-      const query = params.toString();
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set("step", String(step));
+      const query = urlParams.toString();
       router.push(
-        `/contracts/licenses/create${query ? `?${query}` : ""}`,
+        `/contracts/licenses/${licenseId}/edit${query ? `?${query}` : ""}`,
         { scroll: false },
       );
     } catch (error) {
       console.error("Không thể cập nhật bước trên URL", error);
     }
   };
-
-  useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const stored = localStorage.getItem("license_general_info");
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as Partial<GeneralInfoForm>;
-      setValue("license_method", parsed.license_method || "");
-      setValue("license_type", parsed.license_type || "");
-      setValue("doc_number", parsed.doc_number || "");
-      setValue("sign_date", parsed.sign_date || "");
-      setValue("status", parsed.status || "DRAFT");
-    } catch (error) {
-      console.error("Load draft error", error);
-    }
-  }, [setValue]);
 
   // Đồng bộ bước hiện tại với query param step trên URL
   useEffect(() => {
@@ -119,6 +122,98 @@ export default function LicenseCreatePage() {
       setCurrentStep(1);
     }
   }, [searchParams]);
+
+  // Load dữ liệu từ API vào form khi có dữ liệu
+  useEffect(() => {
+    if (licenseData && !isDataLoaded) {
+      try {
+        // Map dữ liệu từ API vào form general info
+        const generalInfo = (licenseData as any).general_info || licenseData;
+        
+        reset({
+          license_method: generalInfo.license_method || "",
+          license_type: generalInfo.license_type || "",
+          doc_number: generalInfo.doc_number || "",
+          sign_date: generalInfo.sign_date || "",
+          status: generalInfo.status || "DRAFT",
+        });
+
+        // Load dữ liệu vào localStorage cho các step khác
+        if (typeof window !== "undefined") {
+          // Step 1: General info
+          localStorage.setItem(
+            "license_general_info",
+            JSON.stringify({
+              license_method: generalInfo.license_method,
+              license_type: generalInfo.license_type,
+              doc_number: generalInfo.doc_number,
+              sign_date: generalInfo.sign_date,
+              status: generalInfo.status,
+            })
+          );
+
+          // Step 2: Partners
+          const partners = (licenseData as any).partners || {};
+          if (partners.licensor_id || partners.licensee_id) {
+            localStorage.setItem(
+              "license_partners_info",
+              JSON.stringify({
+                licensor_organization_id: partners.licensor_id || partners.licensor_organization_id || "",
+                licensee_organization_id: partners.licensee_id || partners.licensee_organization_id || "",
+                enable_third_party: partners.enable_third_party || false,
+                third_party_name: partners.third_party_name || "",
+                third_party_site: partners.third_party_site || "",
+                ip_type: partners.ip_type || "trademark",
+                ip_items: partners.ip_items || [],
+              })
+            );
+          }
+
+          // Step 3: Terms
+          const terms = (licenseData as any).terms || {};
+          if (terms.term_type) {
+            localStorage.setItem(
+              "license_terms_info",
+              JSON.stringify({
+                term_type: terms.term_type,
+                start_date: terms.start_date,
+                end_date: terms.end_date,
+                geographical_area: terms.geographical_area,
+                scope_of_rights: terms.scope_of_rights,
+                purpose: terms.purpose,
+                auto_renew: terms.is_auto_renew || terms.auto_renew || false,
+                renewal_period: terms.renewal_period,
+                renewal_unit: terms.renewal_unit,
+                fee_type: terms.fee_type,
+                fee_percentage: terms.fee_percentage,
+                currency: terms.currency,
+                payment_period: terms.payment_period,
+                payment_method: terms.payment_method,
+                due_date: terms.due_date,
+              })
+            );
+          }
+
+          // Step 4: Attachments
+          const attachments = (licenseData as any).attachments || {};
+          if (attachments.notes || attachments.files) {
+            localStorage.setItem(
+              "license_attachments_info",
+              JSON.stringify({
+                notes: attachments.notes || "",
+                files: attachments.files || [],
+              })
+            );
+          }
+        }
+
+        setIsDataLoaded(true);
+      } catch (error) {
+        console.error("Lỗi khi load dữ liệu license vào form", error);
+        toast.error("Không thể tải dữ liệu license");
+      }
+    }
+  }, [licenseData, isDataLoaded, reset]);
 
   const persistDraft = (values: GeneralInfoForm) => {
     try {
@@ -152,6 +247,39 @@ export default function LicenseCreatePage() {
     toast.success("Đã lưu Thông tin chung, chuyển sang bước tiếp theo");
     goToStep(2);
   });
+
+  // Hiển thị loading khi đang tải dữ liệu
+  if (isLoadingLicense) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+          <p className="text-sm text-muted-foreground">Đang tải dữ liệu license...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Hiển thị lỗi nếu không tải được dữ liệu
+  if (licenseError || !licenseData) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center space-y-4">
+          <p className="text-lg font-semibold text-red-600">
+            Không thể tải dữ liệu license
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {licenseError instanceof Error
+              ? licenseError.message
+              : "Vui lòng thử lại sau"}
+          </p>
+          <Button onClick={() => router.push("/contracts/licenses")}>
+            Về danh sách
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-[280px_1fr] gap-6 h-full">
@@ -200,24 +328,24 @@ export default function LicenseCreatePage() {
         <div>
           <h3 className="text-xl font-semibold">
             {currentStep === 1
-              ? "Thông tin chung"
+              ? "Chỉnh sửa thông tin chung"
               : currentStep === 2
-                ? "Chọn IP & Đối tác"
+                ? "Chỉnh sửa IP & Đối tác"
                 : currentStep === 3
-                  ? "Bước 3/4: Điều khoản"
+                  ? "Chỉnh sửa điều khoản"
                   : currentStep === 4
-                    ? "Bước 4/4: Đính kèm hồ sơ"
+                    ? "Chỉnh sửa đính kèm hồ sơ"
                     : "Các bước tiếp theo"}
           </h3>
           <p className="text-sm text-muted-foreground">
             {currentStep === 1
-              ? "Nhập thông tin cơ bản của hợp đồng/ công văn"
+              ? "Cập nhật thông tin cơ bản của hợp đồng/ công văn"
               : currentStep === 2
-                ? "Khai báo các bên tham gia hợp đồng"
+                ? "Cập nhật các bên tham gia hợp đồng"
                 : currentStep === 3
-                  ? "Cấu hình các điều khoản và phí cấp quyền"
+                  ? "Cập nhật các điều khoản và phí cấp quyền"
                   : currentStep === 4
-                    ? "Đính kèm các tài liệu và ghi chú bổ sung"
+                    ? "Cập nhật các tài liệu và ghi chú bổ sung"
                     : "Tiếp tục cấu hình chi tiết cho hợp đồng"}
           </p>
         </div>
@@ -269,7 +397,7 @@ export default function LicenseCreatePage() {
                 Tiếp tục điền thông tin các bước sau trong các lần cập nhật tới.
               </p>
               <div className="flex items-center justify-center gap-3">
-                <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                <Button variant="outline" onClick={() => goToStep(1)}>
                   Quay lại bước 1
                 </Button>
                 <Button onClick={() => router.push("/contracts/licenses")}>

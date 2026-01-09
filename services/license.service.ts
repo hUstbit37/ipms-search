@@ -81,5 +81,15 @@ export const licenseService = {
       }
     );
   },
+  // Xóa license theo ID trực tiếp gọi BE
+  deleteById: async (id: number | string) => {
+    return await apiClient<{ message?: string }>(
+      {
+        url: `/v1/licenses/${id}`,
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  },
 };
 

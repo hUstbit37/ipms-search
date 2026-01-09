@@ -30,8 +30,12 @@ import ProductListDialog from "./ProductListDialog";
 import { MoreVertical, Eye, List, Trash2 } from "lucide-react";
 
 const partnersSchema = z.object({
-  licensor_id: z.string().min(1, "Vui lòng chọn bên cấp quyền"),
-  licensee_id: z.string().min(1, "Vui lòng chọn bên nhận cấp quyền"),
+  licensor_organization_id: z
+    .string()
+    .min(1, "Vui lòng chọn bên cấp quyền"),
+  licensee_organization_id: z
+    .string()
+    .min(1, "Vui lòng chọn bên nhận cấp quyền"),
   enable_third_party: z.boolean().default(false),
   third_party_name: z.string().optional(),
   third_party_site: z.string().optional(),
@@ -114,8 +118,8 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
   } = useForm<PartnersStepFormValues>({
     resolver: zodResolver(partnersSchema) as Resolver<PartnersStepFormValues>,
     defaultValues: {
-      licensor_id: "",
-      licensee_id: "",
+      licensor_organization_id: "",
+      licensee_organization_id: "",
       enable_third_party: false,
       third_party_name: "",
       third_party_site: "",
@@ -134,8 +138,18 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
       const stored = localStorage.getItem("license_partners_info");
       if (!stored) return;
       const parsed = JSON.parse(stored) as PartnersStepFormValues;
-      setValue("licensor_id", parsed.licensor_id || "");
-      setValue("licensee_id", parsed.licensee_id || "");
+      setValue(
+        "licensor_organization_id",
+        (parsed as any).licensor_organization_id ||
+          (parsed as any).licensor_id ||
+          "",
+      );
+      setValue(
+        "licensee_organization_id",
+        (parsed as any).licensee_organization_id ||
+          (parsed as any).licensee_id ||
+          "",
+      );
       setValue("enable_third_party", parsed.enable_third_party || false);
       setValue("third_party_name", parsed.third_party_name || "");
       setValue("third_party_site", parsed.third_party_site || "");
@@ -228,22 +242,26 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
           </label>
           <Controller
             control={control}
-            name="licensor_id"
+            name="licensor_organization_id"
             render={() => (
               <BaseSelect
                 options={companyOptions}
                 isLoading={isLoadingCompanies}
                 value={
                   companyOptions.find(
-                    (opt) => opt.value === watch("licensor_id")
+                    (opt) =>
+                      opt.value === watch("licensor_organization_id"),
                   ) || null
                 }
                 onChange={(option) => {
                   const selected = option as SelectOption | null;
-                  setValue("licensor_id", (selected?.value as string) || "");
+                  setValue(
+                    "licensor_organization_id",
+                    (selected?.value as string) || "",
+                  );
                 }}
                 placeholder="Chọn bên cấp quyền"
-                error={errors.licensor_id?.message}
+                error={errors.licensor_organization_id?.message}
               />
             )}
           />
@@ -255,22 +273,26 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
           </label>
           <Controller
             control={control}
-            name="licensee_id"
+            name="licensee_organization_id"
             render={() => (
               <BaseSelect
                 options={companyOptions}
                 isLoading={isLoadingCompanies}
                 value={
                   companyOptions.find(
-                    (opt) => opt.value === watch("licensee_id")
+                    (opt) =>
+                      opt.value === watch("licensee_organization_id"),
                   ) || null
                 }
                 onChange={(option) => {
                   const selected = option as SelectOption | null;
-                  setValue("licensee_id", (selected?.value as string) || "");
+                  setValue(
+                    "licensee_organization_id",
+                    (selected?.value as string) || "",
+                  );
                 }}
                 placeholder="Chọn bên nhận cấp quyền"
-                error={errors.licensee_id?.message}
+                error={errors.licensee_organization_id?.message}
               />
             )}
           />
