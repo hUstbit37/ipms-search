@@ -52,3 +52,4 @@ k8s/
 package.json
 yarn.lock
 docs/
+.cursor/
