@@ -7,11 +7,10 @@ import { ResponseError } from "@/types/api";
 // FE sẽ gọi vào /api/v1/licenses/:id, route này proxy sang BE /v1/licenses/:id
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
-  const {
-    params: { id },
-  } = context;
+  const params = await context.params;
+  const { id } = params;
 
   // Lấy token từ cookie hoặc từ header (ưu tiên header)
   const tokenFromCookie = req.cookies.get("token");
@@ -64,11 +63,10 @@ export async function GET(
 // FE gọi PUT /api/v1/licenses/:id với payload tổng hợp (có thể kèm trường step để BE biết đang cập nhật phần nào)
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
-  const {
-    params: { id },
-  } = context;
+  const params = await context.params;
+  const { id } = params;
 
   // Lấy token từ cookie hoặc từ header (ưu tiên header)
   const tokenFromCookie = req.cookies.get("token");
@@ -114,11 +112,10 @@ export async function PUT(
 // FE gọi DELETE /api/v1/licenses/:id, route này proxy sang BE /v1/licenses/:id
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
-  const {
-    params: { id },
-  } = context;
+  const params = await context.params;
+  const { id } = params;
 
 
   // Lấy token từ cookie hoặc từ header (ưu tiên header)
