@@ -7,6 +7,7 @@ import { z } from "zod";
 import { toast } from "react-toastify";
 
 import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,6 +29,7 @@ import IpSearchModal, {
 } from "@/components/contracts/licenses/IpSearchModal";
 import ProductListDialog from "./ProductListDialog";
 import { MoreVertical, Eye, List, Trash2 } from "lucide-react";
+import { licenseService } from "@/services/license.service";
 
 const partnersSchema = z.object({
   licensor_organization_id: z
@@ -71,13 +73,15 @@ const partnersSchema = z.object({
 type PartnersStepFormValues = z.infer<typeof partnersSchema>;
 
 type PartnersStepFormProps = {
+  licenseId?: string | number | null;
   onBack: () => void;
   onNext: () => void;
 };
 
 // Form chọn các bên tham gia và danh mục IP áp dụng cho hợp đồng cấp quyền
-export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormProps) {
+export default function PartnersStepForm({ licenseId, onBack, onNext }: PartnersStepFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const { companies, isLoading: isLoadingCompanies } = useAllCompanies();
   const [isIpModalOpen, setIsIpModalOpen] = useState(false);
@@ -132,63 +136,126 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
   const currentIpType = watch("ip_type");
   const selectedIps = watch("ip_items") as SelectedIpItem[];
 
-  useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const stored = localStorage.getItem("license_partners_info");
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as PartnersStepFormValues;
-      setValue(
-        "licensor_organization_id",
-        (parsed as any).licensor_organization_id ||
-          (parsed as any).licensor_id ||
-          "",
-      );
-      setValue(
-        "licensee_organization_id",
-        (parsed as any).licensee_organization_id ||
-          (parsed as any).licensee_id ||
-          "",
-      );
-      setValue("enable_third_party", parsed.enable_third_party || false);
-      setValue("third_party_name", parsed.third_party_name || "");
-      setValue("third_party_site", parsed.third_party_site || "");
-      if (parsed.ip_type) {
-        setValue("ip_type", parsed.ip_type);
-      }
-      if (parsed.ip_items) {
-        setValue("ip_items", parsed.ip_items as SelectedIpItem[]);
-      }
-    } catch (error) {
-      console.error("Load partners draft error", error);
-    }
-  }, [setValue]);
+  // Query để fetch license detail từ cache
+  const { data: licenseData } = useQuery({
+    queryKey: ["license", licenseId],
+    queryFn: async () => {
+      if (!licenseId) return null;
+      return await licenseService.getById(String(licenseId));
+    },
+    enabled: !!licenseId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const persistDraft = (values: PartnersStepFormValues) => {
-    try {
-      if (typeof window === "undefined") return;
-      localStorage.setItem("license_partners_info", JSON.stringify(values));
-    } catch (error) {
-      console.error("Persist partners draft error", error);
+  // Load dữ liệu vào form khi có licenseData
+  useEffect(() => {
+    if (licenseData) {
+      // Load dữ liệu từ response - có thể là flat structure hoặc nested trong partners
+      const partners = (licenseData as any).partners || licenseData;
+      
+      if (partners.licensor_organization_id || partners.licensor_id) {
+        setValue("licensor_organization_id", String(
+          partners.licensor_organization_id || partners.licensor_id || ""
+        ));
+      }
+      if (partners.licensee_organization_id || partners.licensee_id) {
+        setValue("licensee_organization_id", String(
+          partners.licensee_organization_id || partners.licensee_id || ""
+        ));
+      }
+      
+      // Load dữ liệu bên thứ 3
+      if (partners.enable_third_party !== undefined) {
+        setValue("enable_third_party", partners.enable_third_party || false);
+      }
+      if (partners.third_party_name) {
+        setValue("third_party_name", partners.third_party_name);
+      }
+      if (partners.third_party_site) {
+        setValue("third_party_site", partners.third_party_site);
+      }
+      
+      // Load ip_type và ip_items
+      if (partners.ip_type) {
+        setValue("ip_type", partners.ip_type);
+      }
+      if (partners.ip_items && Array.isArray(partners.ip_items)) {
+        setValue("ip_items", partners.ip_items);
+      }
     }
-  };
+  }, [licenseData, setValue]);
+
+  // Mutation để update step 2
+  const updateStep2Mutation = useMutation({
+    mutationFn: async (values: PartnersStepFormValues) => {
+      if (!licenseId) throw new Error("Không có licenseId");
+      return await licenseService.update(licenseId, {
+        licensor_organization_id: values.licensor_organization_id,
+        licensee_organization_id: values.licensee_organization_id,
+        enable_third_party: values.enable_third_party,
+        third_party_name: values.third_party_name || undefined,
+        third_party_site: values.third_party_site || undefined,
+        ip_type: values.ip_type,
+        ip_items: values.ip_items.map((ip) => ({
+          id: ip.id,
+          ip_type: ip.ip_type,
+          name: ip.name || null,
+          application_number: ip.application_number || null,
+          certificate_number: ip.certificate_number || null,
+          products: ip.products || [],
+        })),
+        step: 2,
+      });
+    },
+    onSuccess: (data, variables) => {
+      // Update cache với dữ liệu mới
+      queryClient.setQueryData(["license", licenseId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          licensor_organization_id: Number(variables.licensor_organization_id),
+          licensee_organization_id: Number(variables.licensee_organization_id),
+          // Các trường khác có thể được update từ response
+        };
+      });
+    },
+  });
 
   const handleSaveDraft = handleSubmit(async (values: PartnersStepFormValues) => {
     setIsSavingDraft(true);
     try {
-      persistDraft(values);
-      toast.success("Đã lưu nháp thông tin IP & Đối tác");
-    } catch {
-      toast.error("Không thể lưu nháp, vui lòng thử lại");
+      if (licenseId) {
+        await updateStep2Mutation.mutateAsync(values);
+        toast.success("Đã lưu nháp thông tin IP & Đối tác");
+      } else {
+        toast.success("Đã lưu nháp thông tin IP & Đối tác");
+      }
+    } catch (error: any) {
+      console.error("Lỗi khi lưu nháp step 2:", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể lưu nháp, vui lòng thử lại"
+      );
     } finally {
       setIsSavingDraft(false);
     }
   });
 
-  const handleNext = handleSubmit((values: PartnersStepFormValues) => {
-    persistDraft(values);
-    toast.success("Đã lưu thông tin IP & Đối tác");
-    onNext();
+  const handleNext = handleSubmit(async (values: PartnersStepFormValues) => {
+    if (!licenseId) {
+      toast.error("Không tìm thấy ID license, vui lòng quay lại bước 1");
+      return;
+    }
+
+    try {
+      await updateStep2Mutation.mutateAsync(values);
+      toast.success("Đã lưu thông tin IP & Đối tác");
+      onNext();
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật step 2:", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể lưu thông tin, vui lòng thử lại"
+      );
+    }
   });
 
   // Xử lý xem chi tiết IP - redirect sang trang mới
@@ -491,13 +558,13 @@ export default function PartnersStepForm({ onBack, onNext }: PartnersStepFormPro
         <Button
           type="button"
           variant="secondary"
-          disabled={isSavingDraft}
+          disabled={isSavingDraft || updateStep2Mutation.isPending}
           onClick={handleSaveDraft}
         >
-          {isSavingDraft ? "Đang lưu..." : "Lưu nháp"}
+          {isSavingDraft || updateStep2Mutation.isPending ? "Đang lưu..." : "Lưu nháp"}
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Đang xử lý..." : "Tiếp tục"}
+        <Button type="submit" disabled={isSubmitting || updateStep2Mutation.isPending}>
+          {isSubmitting || updateStep2Mutation.isPending ? "Đang xử lý..." : "Lưu & Tiếp tục"}
         </Button>
       </div>
 

@@ -31,6 +31,7 @@ export interface PatentParams {
   ipc_list?: string;
   summary?: string;
   owner_id?: string;
+  hasCertificate?: boolean;
 }
 
 export interface PatentResponse {

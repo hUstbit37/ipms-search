@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DateRangePicker } from "@/components/common/date/date-range-picker";
+import BaseSelect, { SelectOption } from "@/components/common/select/base-select";
 
 interface AdvancedFilters {
   ownerCountry: string;
@@ -33,6 +34,7 @@ interface AdvancedFilters {
   status: string;
   certificateStatus: string;
   recordType: string;
+  hasCertificate: string; //trạng thái cấp bằng (Có/Chưa)
 }
 
 interface AdvancedSearchModalProps {
@@ -419,6 +421,38 @@ export default function AdvancedSearchModal({
                       designName: e.target.value,
                     })
                   }
+                />
+              </div>
+              <div className="w-[32%]">
+                <BaseSelect
+                  label="Trạng thái cấp bằng"
+                  placeholder="Chọn trạng thái..."
+                  size="sm"
+                  options={[
+                    { value: "", label: "Tất cả" },
+                    { value: "true", label: "Có" },
+                    { value: "false", label: "Chưa" },
+                  ]}
+                  value={
+                    advancedFilters.hasCertificate
+                      ? {
+                          value: advancedFilters.hasCertificate,
+                          label:
+                            advancedFilters.hasCertificate === "true"
+                              ? "Có"
+                              : advancedFilters.hasCertificate === "false"
+                              ? "Chưa"
+                              : "Tất cả",
+                        }
+                      : { value: "", label: "Tất cả" }
+                  }
+                  onChange={(selectedOption) => {
+                    const value = selectedOption ? (selectedOption as SelectOption).value.toString() : "";
+                    onFiltersChange({
+                      ...advancedFilters,
+                      hasCertificate: value,
+                    });
+                  }}
                 />
               </div>
               {/* <div className="w-[32%]">

@@ -74,6 +74,7 @@ const initialAdvancedSearchState = {
   status: "",
   certificateStatus: "",
   recordType: "",
+  hasCertificate: "",
 }
 
 export default function TrademarksSearchPage() {
@@ -201,6 +202,7 @@ export default function TrademarksSearchPage() {
       basicApplicationNumber: advancedFilters?.basicApplicationNumber || undefined,
       priority_number: advancedFilters?.priorityNumber || undefined,
       name: advancedFilters?.tradeName || undefined,
+      hasCertificate: advancedFilters?.hasCertificate === "true" ? true : advancedFilters?.hasCertificate === "false" ? false : undefined,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -297,6 +299,10 @@ export default function TrademarksSearchPage() {
       newActiveFilters["Màu sắc"] = advancedFilters.colorClaim;
     }
 
+    if (advancedFilters.hasCertificate) {
+      newActiveFilters["Trạng thái cấp bằng"] = advancedFilters.hasCertificate === "true" ? "Có" : advancedFilters.hasCertificate === "false" ? "Chưa" : "";
+    }
+
     setActiveFilters(newActiveFilters);
     setShowAdvancedFilter(false);
     await queryClient.invalidateQueries({
@@ -334,6 +340,7 @@ export default function TrademarksSearchPage() {
       status: "",
       certificateStatus: "",
       recordType: "",
+      hasCertificate: "",
     });
     setActiveFilters({});
     setSearchParams(initialSearchState)
@@ -418,6 +425,9 @@ export default function TrademarksSearchPage() {
       case "Loại bản ghi":
         newAdvancedFilters.recordType = "";
         break;
+      case "Trạng thái cấp bằng":
+        newAdvancedFilters.hasCertificate = "";
+        break;
     }
 
     setAdvancedFilters(newAdvancedFilters);
@@ -446,6 +456,7 @@ export default function TrademarksSearchPage() {
       basicApplicationNumber: newAdvancedFilters?.basicApplicationNumber,
       priority_number: newAdvancedFilters?.priorityNumber,
       name: newAdvancedFilters?.tradeName,
+      hasCertificate: newAdvancedFilters?.hasCertificate === "true" ? true : newAdvancedFilters?.hasCertificate === "false" ? false : undefined,
     };
 
     setSearchParams(newSearchParams);
