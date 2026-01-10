@@ -68,6 +68,14 @@ export default function LicensesPage() {
     return found?.label;
   };
 
+  // Helper function để lấy tên công ty từ organization_id
+  const getCompanyName = (organizationId: number | null | undefined): string => {
+    if (!organizationId) return "-";
+    const company = companies.find((c) => c.id === organizationId);
+    if (!company) return "-";
+    return `${company.short_name} - ${company.name}`;
+  };
+
   const labelLang = {
     license_method: "Hình thức cấp quyền",
     license_type: "Loại license",
@@ -452,7 +460,7 @@ export default function LicensesPage() {
 
         {/* Table */}
         <div className="rounded-lg border">
-          <Table>
+          <Table className="text-sm">
             <TableHeader className="bg-gray-100 dark:bg-zinc-800">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-12">
@@ -528,8 +536,8 @@ export default function LicensesPage() {
                     </TableCell>
                     <TableCell>{getLicenseMethodLabel(item.license_method)}</TableCell>
                     <TableCell>{getLicenseTypeLabel(item.license_type)}</TableCell>
-                    <TableCell>{item.licensor_site_code || "-"}</TableCell>
-                    <TableCell>{item.licensee_site_code || "-"}</TableCell>
+                    <TableCell>{getCompanyName(item.licensor_organization_id)}</TableCell>
+                    <TableCell>{getCompanyName(item.licensee_organization_id)}</TableCell>
                     <TableCell>
                       <Badge
                         className={getStatusBadgeVariant(item.status)}
