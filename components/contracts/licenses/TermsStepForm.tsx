@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BaseSelect, { type SelectOption } from "@/components/common/select/base-select";
 import { DatePickerSingle } from "@/components/common/date/date-picker-single";
+import { licenseService } from "@/services/license.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Constants for dropdown options
 const TERM_TYPE_OPTIONS: SelectOption[] = [
@@ -80,6 +82,7 @@ const termsSchema = z.object({
 type TermsStepFormValues = z.infer<typeof termsSchema>;
 
 type TermsStepFormProps = {
+  licenseId?: string | number | null;
   onBack: () => void;
   onNext: () => void;
 };
@@ -114,7 +117,8 @@ function Switch({
   );
 }
 
-export default function TermsStepForm({ onBack, onNext }: TermsStepFormProps) {
+export default function TermsStepForm({ licenseId, onBack, onNext }: TermsStepFormProps) {
+  const queryClient = useQueryClient();
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
   const {
@@ -155,49 +159,111 @@ export default function TermsStepForm({ onBack, onNext }: TermsStepFormProps) {
   const renewalPeriod = watch("renewal_period");
   const selectedRenewalUnit = watch("renewal_unit");
 
-  useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const stored = localStorage.getItem("license_terms_info");
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as TermsStepFormValues;
-      Object.keys(parsed).forEach((key) => {
-        const value = parsed[key as keyof TermsStepFormValues];
-        if (value !== undefined && value !== null) {
-          setValue(key as keyof TermsStepFormValues, value as any);
-        }
-      });
-    } catch (error) {
-      console.error("Load draft error", error);
-    }
-  }, [setValue]);
+  // Query để fetch license detail từ cache
+  const { data: licenseData } = useQuery({
+    queryKey: ["license", licenseId],
+    queryFn: async () => {
+      if (!licenseId) return null;
+      return await licenseService.getById(String(licenseId));
+    },
+    enabled: !!licenseId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const persistDraft = (values: TermsStepFormValues) => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("license_terms_info", JSON.stringify(values));
-      }
-    } catch (error) {
-      console.error("Persist draft error", error);
+  // Load dữ liệu vào form khi có licenseData
+  useEffect(() => {
+    if (licenseData) {
+      if (licenseData.start_date) setValue("start_date", licenseData.start_date);
+      if (licenseData.end_date) setValue("end_date", licenseData.end_date);
+      if (licenseData.is_auto_renew !== undefined) setValue("auto_renew", licenseData.is_auto_renew);
+      if (licenseData.renewal_period) setValue("renewal_period", licenseData.renewal_period);
+      if (licenseData.renewal_unit) setValue("renewal_unit", licenseData.renewal_unit);
+      // Các trường khác cần được map từ response structure nếu có
     }
-  };
+  }, [licenseData, setValue]);
+
+  // Mutation để update step 3
+  const updateStep3Mutation = useMutation({
+    mutationFn: async (values: TermsStepFormValues) => {
+      if (!licenseId) throw new Error("Không có licenseId");
+      const payload: any = {
+        term_type: values.term_type,
+        start_date: values.start_date || undefined,
+        end_date: values.end_date || undefined,
+        geographical_area: values.geographical_area,
+        scope_of_rights: values.scope_of_rights,
+        purpose: values.purpose || undefined,
+        auto_renew: values.auto_renew,
+        renewal_unit: values.renewal_unit || undefined,
+        fee_type: values.fee_type,
+        fee_percentage: values.fee_percentage || undefined,
+        currency: values.currency || undefined,
+        payment_period: values.payment_period || undefined,
+        payment_method: values.payment_method || undefined,
+        due_date: values.due_date || undefined,
+        step: 3,
+      };
+
+      // Chỉ thêm renewal_period nếu có giá trị
+      if (values.renewal_period !== undefined && values.renewal_period !== null) {
+        payload.renewal_period = values.renewal_period;
+      }
+
+      return await licenseService.update(licenseId, payload);
+    },
+    onSuccess: (data, variables) => {
+      // Update cache với dữ liệu mới
+      queryClient.setQueryData(["license", licenseId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          start_date: variables.start_date || null,
+          end_date: variables.end_date || null,
+          is_auto_renew: variables.auto_renew,
+          renewal_period: variables.renewal_period || null,
+          renewal_unit: variables.renewal_unit || null,
+          // Các trường khác có thể được update từ response
+        };
+      });
+    },
+  });
 
   const handleSaveDraft = handleSubmit(async (values) => {
     setIsSavingDraft(true);
+    console.log(values);
     try {
-      persistDraft(values);
-      toast.success("Đã lưu nháp điều khoản");
-    } catch {
-      toast.error("Không thể lưu nháp, vui lòng thử lại");
+      if (licenseId) {
+        await updateStep3Mutation.mutateAsync(values);
+        toast.success("Đã lưu nháp điều khoản");
+      } else {
+        toast.success("Đã lưu nháp điều khoản");
+      }
+    } catch (error: any) {
+      console.error("Lỗi khi lưu nháp step 3:", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể lưu nháp, vui lòng thử lại"
+      );
     } finally {
       setIsSavingDraft(false);
     }
   });
 
-  const handleNext = handleSubmit((values) => {
-    persistDraft(values);
-    toast.success("Đã lưu Điều khoản, chuyển sang bước tiếp theo");
-    onNext();
+  const handleNext = handleSubmit(async (values) => {
+    if (!licenseId) {
+      toast.error("Không tìm thấy ID license, vui lòng quay lại bước 1");
+      return;
+    }
+    console.log(values);
+    try {
+      await updateStep3Mutation.mutateAsync(values);
+      toast.success("Đã lưu Điều khoản, chuyển sang bước tiếp theo");
+      onNext();
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật step 3:", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể lưu thông tin, vui lòng thử lại"
+      );
+    }
   });
 
   return (
@@ -636,13 +702,13 @@ export default function TermsStepForm({ onBack, onNext }: TermsStepFormProps) {
         <Button
           type="button"
           variant="secondary"
-          disabled={isSavingDraft}
+          disabled={isSavingDraft || updateStep3Mutation.isPending}
           onClick={handleSaveDraft}
         >
-          {isSavingDraft ? "Đang lưu..." : "Lưu nháp"}
+          {isSavingDraft || updateStep3Mutation.isPending ? "Đang lưu..." : "Lưu nháp"}
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Đang xử lý..." : "Tiếp tục"}
+        <Button type="submit" disabled={isSubmitting || updateStep3Mutation.isPending}>
+          {isSubmitting || updateStep3Mutation.isPending ? "Đang xử lý..." : "Tiếp tục"}
         </Button>
       </div>
     </form>

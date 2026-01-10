@@ -58,6 +58,75 @@ export interface LicenseResponse {
   }>;
 }
 
+// Interface cho request body step 1 (create)
+export interface CreateLicenseRequest {
+  license_method: string;
+  doc_number: string;
+  license_type: string;
+  status: string;
+  sign_date?: string;
+  step: number;
+}
+
+// Interface cho request body step 1 (update)
+export interface UpdateLicenseStep1Request {
+  license_method?: string;
+  doc_number?: string;
+  license_type?: string;
+  status?: string;
+  sign_date?: string;
+  step: number;
+}
+
+// Interface cho request body step 2
+export interface UpdateLicenseStep2Request {
+  licensor_organization_id: string;
+  licensee_organization_id: string;
+  enable_third_party?: boolean;
+  third_party_name?: string;
+  third_party_site?: string;
+  ip_type: string;
+  ip_items: Array<{
+    id: number;
+    ip_type: string;
+    name?: string | null;
+    application_number?: string | null;
+    certificate_number?: string | null;
+    products: Array<{
+      goods_name?: string | null;
+      group?: string | null;
+    }>;
+  }>;
+  step: number;
+}
+
+// Interface cho request body step 3
+export interface UpdateLicenseStep3Request {
+  term_type: string;
+  start_date?: string;
+  end_date?: string;
+  geographical_area: string;
+  scope_of_rights: string;
+  purpose?: string;
+  auto_renew?: boolean;
+  renewal_period?: number;
+  renewal_unit?: string;
+  fee_type: string;
+  fee_percentage?: string;
+  currency?: string;
+  payment_period?: string;
+  payment_method?: string;
+  due_date?: string;
+  step: number;
+}
+
+// Interface cho request body step 4
+export interface UpdateLicenseStep4Request {
+  files?: File[];
+  notes?: string;
+  step: number;
+}
+
 export const licenseService = {
   search: async (params: LicenseParams, signal?: AbortSignal) => {
     return await apiClient<PaginationResponse<LicenseResponse>>(
@@ -81,6 +150,71 @@ export const licenseService = {
       }
     );
   },
+
+  // Tạo mới license - Step 1
+  create: async (data: CreateLicenseRequest) => {
+    return await apiClient<{ id: string | number; [key: string]: any }>(
+      {
+        url: "/v1/licenses",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data,
+      }
+    );
+  },
+
+  // Cập nhật license - Step 1, 2, 3, 4
+  update: async (id: string | number, data: UpdateLicenseStep1Request | UpdateLicenseStep2Request | UpdateLicenseStep3Request | UpdateLicenseStep4Request) => {
+    // Nếu là step 4 và có files, dùng FormData
+    if (data.step === 4 && 'files' in data && data.files && data.files.length > 0) {
+      const formData = new FormData();
+      data.files.forEach((file) => {
+        formData.append('files', file);
+      });
+      if (data.notes) {
+        formData.append('notes', data.notes);
+      }
+      formData.append('step', String(data.step));
+      
+      return await apiClient<{ id: string | number; [key: string]: any }>(
+        {
+          url: `/v1/licenses/${id}`,
+          method: "PUT",
+          headers: { "Content-Type": "multipart/form-data" },
+          data: formData,
+        }
+      );
+    }
+    
+    // Step 2, 3 hoặc step 4 không có files - dùng JSON
+    // Với step 4 không có files, chỉ gửi notes và step
+    if (data.step === 4 && 'files' in data) {
+      const step4Data: { notes?: string; step: number; files?: never[] } = {
+        notes: data.notes,
+        step: data.step,
+        files: [],
+      };
+      return await apiClient<{ id: string | number; [key: string]: any }>(
+        {
+          url: `/v1/licenses/${id}`,
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          data: step4Data,
+        }
+      );
+    }
+    
+    // Step 2, 3 - dùng JSON
+    return await apiClient<{ id: string | number; [key: string]: any }>(
+      {
+        url: `/v1/licenses/${id}`,
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        data,
+      }
+    );
+  },
+
   // Xóa license theo ID trực tiếp gọi BE
   deleteById: async (id: number | string) => {
     return await apiClient<{ message?: string }>(

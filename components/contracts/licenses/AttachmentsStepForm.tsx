@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { useMe } from "@/providers/auth/MeProvider";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { licenseService } from "@/services/license.service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const attachmentsSchema = z.object({
   files: z.array(z.instanceof(File)).default([]),
@@ -28,15 +30,18 @@ type AttachedFile = {
 };
 
 type AttachmentsStepFormProps = {
+  licenseId?: string | number | null;
   onBack: () => void;
   onCreate: () => void;
 };
 
 export default function AttachmentsStepForm({
+  licenseId,
   onBack,
   onCreate,
 }: AttachmentsStepFormProps) {
   const { me } = useMe();
+  const queryClient = useQueryClient();
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(true);
@@ -59,67 +64,83 @@ export default function AttachmentsStepForm({
 
   const notes = watch("notes");
 
-  useEffect(() => {
-    try {
-      if (typeof window === "undefined") return;
-      const stored = localStorage.getItem("license_attachments_info");
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as {
-        files?: AttachedFile[];
-        notes?: string;
-      };
-      if (parsed.files) {
-        // Note: Files cannot be restored from localStorage, so we skip file restoration
-        // In a real app, you'd need to store file metadata and re-upload
-      }
-      if (parsed.notes) {
-        setValue("notes", parsed.notes);
-      }
-    } catch (error) {
-      console.error("Load draft error", error);
-    }
-  }, [setValue]);
+  // Query để fetch license detail từ cache
+  const { data: licenseData } = useQuery({
+    queryKey: ["license", licenseId],
+    queryFn: async () => {
+      if (!licenseId) return null;
+      return await licenseService.getById(String(licenseId));
+    },
+    enabled: !!licenseId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const persistDraft = (values: AttachmentsStepFormValues) => {
-    try {
-      if (typeof window !== "undefined") {
-        const fileMetadata = attachedFiles.map((f) => ({
-          id: f.id,
-          name: f.file.name,
-          type: f.file.type,
-          size: f.file.size,
-          creator: f.creator,
-          createdAt: f.createdAt.toISOString(),
-        }));
-        localStorage.setItem(
-          "license_attachments_info",
-          JSON.stringify({
-            files: fileMetadata,
-            notes: values.notes,
-          })
-        );
-      }
-    } catch (error) {
-      console.error("Persist draft error", error);
+  // Load dữ liệu vào form khi có licenseData
+  useEffect(() => {
+    if (licenseData && licenseData.notes) {
+      setValue("notes", licenseData.notes);
     }
-  };
+    // Note: Files không thể load từ cache vì là File objects
+  }, [licenseData, setValue]);
+
+  // Mutation để update step 4
+  const updateStep4Mutation = useMutation({
+    mutationFn: async (values: AttachmentsStepFormValues) => {
+      if (!licenseId) throw new Error("Không có licenseId");
+      return await licenseService.update(licenseId, {
+        files: attachedFiles.map((f) => f.file),
+        notes: values.notes || undefined,
+        step: 4,
+      });
+    },
+    onSuccess: (data, variables) => {
+      // Update cache với dữ liệu mới
+      queryClient.setQueryData(["license", licenseId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          notes: variables.notes || null,
+          // Files không thể cache vì là File objects
+        };
+      });
+    },
+  });
 
   const handleSaveDraft = handleSubmit(async (values) => {
     setIsSavingDraft(true);
     try {
-      persistDraft(values);
-      toast.success("Đã lưu nháp đính kèm hồ sơ");
-    } catch {
-      toast.error("Không thể lưu nháp, vui lòng thử lại");
+      if (licenseId) {
+        await updateStep4Mutation.mutateAsync(values);
+        toast.success("Đã lưu nháp đính kèm hồ sơ");
+      } else {
+        toast.success("Đã lưu nháp đính kèm hồ sơ");
+      }
+    } catch (error: any) {
+      console.error("Lỗi khi lưu nháp step 4:", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể lưu nháp, vui lòng thử lại"
+      );
     } finally {
       setIsSavingDraft(false);
     }
   });
 
   const handleCreate = handleSubmit(async (values) => {
-    persistDraft(values);
-    toast.success("Đã tạo mới license");
-    onCreate();
+    if (!licenseId) {
+      toast.error("Không tìm thấy ID license, vui lòng quay lại bước 1");
+      return;
+    }
+    console.log(values);
+    try {
+      await updateStep4Mutation.mutateAsync(values);
+      toast.success("Đã tạo mới license");
+      onCreate();
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật step 4:", error);
+      toast.error(
+        error?.response?.data?.message || "Không thể tạo license, vui lòng thử lại"
+      );
+    }
   });
 
   const handleFileSelect = (files: FileList | null) => {
@@ -355,13 +376,13 @@ export default function AttachmentsStepForm({
         <Button
           type="button"
           variant="secondary"
-          disabled={isSavingDraft}
+          disabled={isSavingDraft || updateStep4Mutation.isPending}
           onClick={handleSaveDraft}
         >
-          {isSavingDraft ? "Đang lưu..." : "Lưu nháp"}
+          {isSavingDraft || updateStep4Mutation.isPending ? "Đang lưu..." : "Lưu nháp"}
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Đang xử lý..." : "Tạo mới"}
+        <Button type="submit" disabled={isSubmitting || updateStep4Mutation.isPending}>
+          {isSubmitting || updateStep4Mutation.isPending ? "Đang xử lý..." : "Tạo mới"}
         </Button>
       </div>
     </form>
