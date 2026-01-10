@@ -29,6 +29,7 @@ export interface IndustrialDesignParams {
   page_size: number;
   sort_by?: string;
   sort_order?: string;
+  hasCertificate?: boolean;
 }
 
 type IndustrialDesignParty = {

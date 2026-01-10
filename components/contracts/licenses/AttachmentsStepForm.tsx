@@ -382,7 +382,7 @@ export default function AttachmentsStepForm({
           {isSavingDraft || updateStep4Mutation.isPending ? "Đang lưu..." : "Lưu nháp"}
         </Button>
         <Button type="submit" disabled={isSubmitting || updateStep4Mutation.isPending}>
-          {isSubmitting || updateStep4Mutation.isPending ? "Đang xử lý..." : "Tạo mới"}
+          {isSubmitting || updateStep4Mutation.isPending ? "Đang xử lý..." : "Lưu"}
         </Button>
       </div>
     </form>

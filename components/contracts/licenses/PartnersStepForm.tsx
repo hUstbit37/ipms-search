@@ -150,14 +150,38 @@ export default function PartnersStepForm({ licenseId, onBack, onNext }: Partners
   // Load dữ liệu vào form khi có licenseData
   useEffect(() => {
     if (licenseData) {
-      if (licenseData.licensor_organization_id) {
-        setValue("licensor_organization_id", String(licenseData.licensor_organization_id));
+      // Load dữ liệu từ response - có thể là flat structure hoặc nested trong partners
+      const partners = (licenseData as any).partners || licenseData;
+      
+      if (partners.licensor_organization_id || partners.licensor_id) {
+        setValue("licensor_organization_id", String(
+          partners.licensor_organization_id || partners.licensor_id || ""
+        ));
       }
-      if (licenseData.licensee_organization_id) {
-        setValue("licensee_organization_id", String(licenseData.licensee_organization_id));
+      if (partners.licensee_organization_id || partners.licensee_id) {
+        setValue("licensee_organization_id", String(
+          partners.licensee_organization_id || partners.licensee_id || ""
+        ));
       }
-      // Các trường khác của step 2 có thể được load từ licenseData nếu có
-      // Note: ip_items và các trường khác cần được map từ response structure
+      
+      // Load dữ liệu bên thứ 3
+      if (partners.enable_third_party !== undefined) {
+        setValue("enable_third_party", partners.enable_third_party || false);
+      }
+      if (partners.third_party_name) {
+        setValue("third_party_name", partners.third_party_name);
+      }
+      if (partners.third_party_site) {
+        setValue("third_party_site", partners.third_party_site);
+      }
+      
+      // Load ip_type và ip_items
+      if (partners.ip_type) {
+        setValue("ip_type", partners.ip_type);
+      }
+      if (partners.ip_items && Array.isArray(partners.ip_items)) {
+        setValue("ip_items", partners.ip_items);
+      }
     }
   }, [licenseData, setValue]);
 
@@ -540,7 +564,7 @@ export default function PartnersStepForm({ licenseId, onBack, onNext }: Partners
           {isSavingDraft || updateStep2Mutation.isPending ? "Đang lưu..." : "Lưu nháp"}
         </Button>
         <Button type="submit" disabled={isSubmitting || updateStep2Mutation.isPending}>
-          {isSubmitting || updateStep2Mutation.isPending ? "Đang xử lý..." : "Tiếp tục"}
+          {isSubmitting || updateStep2Mutation.isPending ? "Đang xử lý..." : "Lưu & Tiếp tục"}
         </Button>
       </div>
 

@@ -708,7 +708,7 @@ export default function TermsStepForm({ licenseId, onBack, onNext }: TermsStepFo
           {isSavingDraft || updateStep3Mutation.isPending ? "Đang lưu..." : "Lưu nháp"}
         </Button>
         <Button type="submit" disabled={isSubmitting || updateStep3Mutation.isPending}>
-          {isSubmitting || updateStep3Mutation.isPending ? "Đang xử lý..." : "Tiếp tục"}
+          {isSubmitting || updateStep3Mutation.isPending ? "Đang xử lý..." : "Lưu & Tiếp tục"}
         </Button>
       </div>
     </form>

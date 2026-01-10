@@ -176,6 +176,7 @@ export default function IpSearchModal({
           search: keyword,
           page: 1,
           page_size: 50,
+          hasCertificate: true,
         });
         setIpResults(res.items || []);
       } else if (ipType === IP_TYPES.INDUSTRIAL_DESIGN) {
@@ -183,6 +184,7 @@ export default function IpSearchModal({
           search: keyword,
           page: 1,
           page_size: 50,
+          hasCertificate: true,
         });
         setIpResults(res.items || []);
       } else {

@@ -197,7 +197,7 @@ export default function GeneralInfoStepForm({
           {isSavingDraft ? "Đang lưu..." : "Lưu nháp"}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Đang xử lý..." : "Tiếp tục"}
+          {isSubmitting ? "Đang xử lý..." : "Lưu & Tiếp tục"}
         </Button>
       </div>
     </form>

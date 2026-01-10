@@ -40,6 +40,7 @@ export interface TrademarkParams {
   agency_id?: string;
   owner_name?: string;
   agency_name?: string;
+  hasCertificate?: boolean;
 }
 
 type TrademarkParty = {

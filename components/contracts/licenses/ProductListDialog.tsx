@@ -113,7 +113,7 @@ export default function ProductListDialog({
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            IP: {ip.id}_Danh Sách Sản Phẩm Cần License
+            IP: {ip.id}_Danh Sách Sản Phẩm
           </DialogTitle>
         </DialogHeader>
 
