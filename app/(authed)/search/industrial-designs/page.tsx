@@ -67,6 +67,7 @@ const initialAdvancedSearch = {
   status: "",
   certificateStatus: "",
   recordType: "",
+  hasCertificate: "",
 }
 
 const queryKey = "industrial-designs"
@@ -267,6 +268,7 @@ export default function IndustrialDesignsSearchPage() {
       representative: advancedFilters?.representative || undefined,
       name: advancedFilters?.designName || undefined,
       basicApplicationNumber: advancedFilters?.basicApplicationNumber || undefined,
+      hasCertificate: advancedFilters?.hasCertificate === "true" ? true : advancedFilters?.hasCertificate === "false" ? false : undefined,
     })
     setSearchQuery("")
     const newActiveFilters: Record<string, string> = {};
@@ -357,6 +359,10 @@ export default function IndustrialDesignsSearchPage() {
 
     if (advancedFilters.recordType) {
       newActiveFilters["Loại bản ghi"] = advancedFilters.recordType;
+    }
+
+    if (advancedFilters.hasCertificate) {
+      newActiveFilters["Trạng thái cấp bằng"] = advancedFilters.hasCertificate === "true" ? "Có" : advancedFilters.hasCertificate === "false" ? "Chưa" : "";
     }
 
     setActiveFilters(newActiveFilters);

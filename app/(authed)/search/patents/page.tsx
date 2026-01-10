@@ -54,6 +54,7 @@ const initialAdvancedSearch = {
   priorityCountry: "",
   countryCode: "",
   status: "",
+  hasCertificate: "",
 }
 
 export default function PatentsSearchPage() {
@@ -255,6 +256,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       applicant: advancedFilters?.applicant || undefined,
       representative: advancedFilters?.representative || undefined,
       name: advancedFilters?.name || undefined,
+      hasCertificate: advancedFilters?.hasCertificate === "true" ? true : advancedFilters?.hasCertificate === "false" ? false : undefined,
     })
     setSearchQuery("")
 
@@ -320,6 +322,10 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       newActiveFilters["Trạng thái"] = advancedFilters.status;
     }
 
+    if (advancedFilters.hasCertificate) {
+      newActiveFilters["Trạng thái cấp bằng"] = advancedFilters.hasCertificate === "true" ? "Có" : advancedFilters.hasCertificate === "false" ? "Chưa" : "";
+    }
+
     setActiveFilters(newActiveFilters);
     setShowAdvancedFilter(false);
     await queryClient.invalidateQueries({
@@ -348,6 +354,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       priorityCountry: "",
       countryCode: "",
       status: "",
+      hasCertificate: "",
     });
     setActiveFilters({});
     setSearchParams(initialSearchState)
@@ -412,6 +419,9 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       case "Trạng thái":
         newAdvancedFilters.status = "";
         break;
+      case "Trạng thái cấp bằng":
+        newAdvancedFilters.hasCertificate = "";
+        break;
     }
 
     setAdvancedFilters(newAdvancedFilters);
@@ -436,6 +446,7 @@ const isPatentsPending = isPatentsLoading || isPatentsFetching;
       applicant: newAdvancedFilters.applicant || undefined,
       representative: newAdvancedFilters.representative || undefined,
       name: newAdvancedFilters.name || undefined,
+      hasCertificate: newAdvancedFilters.hasCertificate === "true" ? true : newAdvancedFilters.hasCertificate === "false" ? false : undefined,
     };
 
     setSearchParams(newSearchParams);
